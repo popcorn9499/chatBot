@@ -1,0 +1,52 @@
+{
+    "IRCToDiscordFormatting": "{1} : {2}",
+    "channelName": "serverchat",
+    "discordToIRCFormating": "{0} : {1}",
+    "discordToken": "Token",
+    "ircChannel": "#popicraft",
+    "ircNickname": "DiscordBot",
+    "ircPassword": "",
+    "ircPort": "6667",
+    "ircServerIP": "irc.popicraft.net",
+    "pageToken": "",
+    "serverName": "Popicraft Minecraft",
+    "Bot": {
+        "Discord": {
+            "Token": "Token",
+            "Servers" : {
+                "Popicraft Minecraft": {
+                    "test": {
+                        "formatting": "{0} {1}",
+                        "Send": true,
+                        "sendTo": {
+                            "test2": {
+                                "Site": "Discord",
+                                "Server": "Popicraft Minecraft",
+                                "Channel": "test2",
+                                "Formatting": "{0} {1}"
+                            },
+                            "serverchat": {
+                                "Site": "Discord",
+                                "Server": "Popicraft Minecraft",
+                                "Channel": "serverchat"
+                            }
+                        }
+                        
+                    },
+                    "test2": {
+                        "formatting": "{0} {1}",
+                        "Send": true,
+                        "sendTo": {
+                            "test": {
+                                "Site": "Discord",
+                                "Server": "Popicraft Minecraft",
+                                "Channel": "test",
+                                "Formatting": "{0} {1}"
+                            }
+                        }
+                    }
+                }       
+            }
+        }
+    }
+}
