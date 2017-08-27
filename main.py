@@ -283,14 +283,15 @@ class MyClient(pydle.Client):
     def on_connect(self):
         super().on_connect()
         # Can't greet many people without joining a channel.
-        
-        self.join(config["ircChannel"])
+        for key, val in config["Bot"]["IRC"]["Channel"].items():
+            self.join(key)
         
 
     def on_join(self, channel, user):
         super().on_join(channel, user)
         
     def on_disconnect(self,expected): #this event detects disconnects
+        global config
         #this will stop the irc event loop from running in the event that something goes wrong and the connection fails
         print(expected) #prints a debug of if the client disconnected
         retry =  0 #sets the 
@@ -298,7 +299,7 @@ class MyClient(pydle.Client):
         while retry <= 50: #forces a reconnect if something goes wrong
             self._reset_connection_attributes() #resets connection info
             print("retrying connection") 
-            self.connect(config["ircServerIP"],config["ircPort"]) #starts the connection
+            self.connect(config["Bot"]["IRC"]["IP"],config["Bot"]["IRC"]["Port"]) #starts the connection
             time.sleep(15) #waits so the client can finish connecting and things can actually be processes
             print(self.connected) #status connected or not
             if self.connected: #if connected to irc server leave this loop and be done.
@@ -326,11 +327,12 @@ def ircSendMSG(user,target,msg): #sends a message to the irc
 #this starts everything for the irc client 
 ##possibly could of put all this in a class and been done with it?
 def ircStart():
-    global ircClient
+    global ircClient, config
     print(ircClient)
+    
     #while True:#this infinite loop should force the irc thread back when the irc client disconnects and closes
-    ircClient = MyClient(config["ircNickname"])
-    ircClient.connect(config["ircServerIP"],config["ircPort"],password=config["ircPassword"]) ##add a option for /pass user:pass this is how znc lets u login
+    ircClient = MyClient(config["Bot"]["IRC"]["Nickname"])
+    ircClient.connect(config["Bot"]["IRC"]["IP"],config["Bot"]["IRC"]["Port"],password=config["Bot"]["IRC"]["Password"]) ##add a option for /pass user:pass this is how znc lets u login
     print(ircClient)
     ircClient.handle_forever()
     print("irc died")
@@ -419,6 +421,8 @@ chatControlThread.start()
 
 ircCheckThread = threading.Thread(target=ircCheck)#starts my irc check thread which should print false if the irc thread dies.
 ircCheckThread.start()
+
+
 
 discordThread = threading.Thread(target=client.run(config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
 discordThread.start() #starts the discord bot

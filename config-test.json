@@ -53,7 +53,8 @@
                     }
                 }       
             }
-        },
+        }
+    },
         "IRC": {
             "IP": "irc.popicraft.net",
             "Port": "6667",
@@ -64,15 +65,14 @@
                     "Send": true,
                     "sendTo": {
                         "test": {
-                                "Site": "Discord",
-                                "Server": "Popicraft Minecraft",
-                                "Channel": "test",
-                                "Formatting": "{1} {2}"
-                            }
+                            "Site": "Discord",
+                            "Server": "Popicraft Minecraft",
+                            "Channel": "test",
+                            "Formatting": "{1} {2}"
                         }
                     }
                 }
             }
-        }
+        }    
     }
 }
