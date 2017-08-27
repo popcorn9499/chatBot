@@ -52,6 +52,21 @@ discordMSG = []
 
 customStart = ""
 
+##Youtube api stuff
+#youtube stuff imported
+import httplib2
+import os
+import sys
+import re
+
+from apiclient.discovery import build
+from apiclient.errors import HttpError
+from oauth2client.client import flow_from_clientsecrets
+from oauth2client.file import Storage
+from oauth2client.tools import argparser, run_flow
+import time
+
+
 
 ##broken
 #seems to not like my code in the discordCheckMsg function
@@ -359,8 +374,158 @@ def ircCheck():
                 processedMSG[j]["sent"] = True#promptly after sets that to the delete code
             j = j + 1
         
-            
+#youtube
+        
+botName = "none"
+
+botUserID = "empty"
+
+youtube = ""
+
+firstRun = "off"
+
+#used as global varibles and were defined before we start using them to avoid problems down the road
+channelToUse = ""
+
+
+# The CLIENT_SECRETS_FILE variable specifies the name of a file that contains
+# the OAuth 2.0 information for this application, including its client_id and
+# client_secret. You can acquire an OAuth 2.0 client ID and client secret from
+# the {{ Google Cloud Console }} at
+# {{ https://cloud.google.com/console }}.
+# Please ensure that you have enabled the YouTube Data API for your project.
+# For more information about using OAuth2 to access the YouTube Data API, see:
+#   https://developers.google.com/youtube/v3/guides/authentication
+# For more information about the client_secrets.json file format, see:
+#   https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
+CLIENT_SECRETS_FILE = "client_secrets.json"
+
+# This OAuth 2.0 access scope allows for full read/write access to the
+# authenticated user's account.
+YOUTUBE_READ_WRITE_SCOPE = "https://www.googleapis.com/auth/youtube"
+YOUTUBE_API_SERVICE_NAME = "youtube"
+YOUTUBE_API_VERSION = "v3"
+
+# This variable defines a message to display if the CLIENT_SECRETS_FILE is
+# missing.
+MISSING_CLIENT_SECRETS_MESSAGE = """
+WARNING: Please configure OAuth 2.0
+
+To make this sample run you will need to populate the client_secrets.json file
+found at:
+
+   %s
+
+with information from the {{ Cloud Console }}
+{{ https://cloud.google.com/console }}
+
+For more information about the client_secrets.json file format, please visit:
+https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
+""" % os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                   CLIENT_SECRETS_FILE))
+
+def get_authenticated_service(args):
+  flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE,
+    scope=YOUTUBE_READ_WRITE_SCOPE,
+    message=MISSING_CLIENT_SECRETS_MESSAGE)
+
+  storage = Storage("%s-oauth2.json" % sys.argv[0])
+  credentials = storage.get()
+
+  if credentials is None or credentials.invalid:
+    credentials = run_flow(flow, storage, args)
+
+  return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
+    http=credentials.authorize(httplib2.Http()))
+
+# Retrieve a list of the liveStream resources associated with the currently
+# authenticated user's channel.
+
+def getLiveId(youtube): #this gets the live chat id
+    global liveChatId,botUserID #pulls in the bots livechatid and botuserid for further saving and modifying
+  
+    list_streams_request = youtube.liveBroadcasts().list( #checks for the live chat id through this
+        part="snippet", #this is what we look through to get the live chat id
+        broadcastStatus="all", #we need both of these to get the live chat id
+        broadcastType="all"
+    ).execute() #executes it so its not just some object
+    liveChatId = list_streams_request["items"][0]["snippet"]["liveChatId"]#sifts through the output to get the live chat id and saves it
+    botUserID = list_streams_request["items"][1]["snippet"]["channelId"] #saves the bots channel user id that we will use as a identifier
+    print("liveID {0}".format(liveChatId)) #print the live chat id
+  
+ 
+  
+
+def listChat():
+    global pageToken #pulls in the page token
+    global liveChatId #pulls in the liveChatID
+    global botUserID #pulls in the bots channel ID
+    global config
+    global youtube
+    global mainMsg
+    list_chatmessages = youtube.liveChatMessages().list( #lists the chat messages
+        part="id,snippet,authorDetails", #gets the author details needed and the snippet all of which giving me the message and username
+        liveChatId=liveChatId,
+        maxResults=500,
+        pageToken=config["Bot"]["Youtube"]["pageToken"] #gives the previous token so it loads a new section of the chat
+    ).execute() #executes it so its not just some object
+
+    config["Bot"]["Youtube"]["pageToken"] = list_chatmessages["nextPageToken"] #page token for next use
     
+    msgCheckRegex = re.compile(r'[*:]') #setup for if we happen to need this it should never change either way
+    for temp in list_chatmessages["items"]: #goes through all the stuff in the list messages list
+        message = temp["snippet"]["displayMessage"] #gets the display message
+        username = temp["authorDetails"]["displayName"] #gets the users name
+        userID = temp["authorDetails"]["channelId"]
+        if message != "" and username != "": #this makes sure that the message and username slot arent empty before putting this to the discord chat        
+            if userID != botUserID:
+                print("{0} {1}".format(username,message))
+                msgStats = {"sentFrom":"Youtube","Bot":"Youtube","Server": None,"Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"msg":message,"sent":False}
+                mainMsg.append(msgStats)
+            elif userID == botUserID: #if the userId is the bots then check the message to see if the bot sent it.
+                msgCheckComplete = msgCheckRegex.search(message) #checks the message against the previously created regex for ":"
+                if msgCheckComplete != ":": #if its this then go and send the message as normal
+                    print("{0} {1}".format(username,message))
+                    msgStats = {"sentFrom":"Youtube","Bot":"Youtube","Server": None,"Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"msg":message,"sent":False}
+                    mainMsg.append(msgStats)
+                
+        
+def sendLiveChat(msg): #sends messages to youtube live chat
+    list_chatmessages_inset = youtube.liveChatMessages().insert(
+        part = "snippet",
+        body = dict (
+            snippet = dict(
+                liveChatId = liveChatId,
+                type = "textMessageEvent",
+                textMessageDetails = dict(
+                    messageText = msg
+                )
+            )
+        )
+    )  
+    list_chatmessages_inset.execute()
+    #print(list_chatmessages_inset.execute()) #debug for sending live chat messages
+  
+
+
+if __name__ == "__main__":
+    args = argparser.parse_args()
+        
+    youtube = get_authenticated_service(args) #authenticates the api and saves it to youtube
+    getLiveId(youtube)        
+    
+    
+def youtubeChatControl():
+    global processedMSG
+    while True:    
+        listChat()
+        j = 0
+        for msg in processedMSG: #this cycles through the array for messages unsent to irc and sends them
+            if msg["sent"] == False and msg["sendTo"]["Bot"] == "Youtube":
+                sendLiveChat(msg["msgFormated"])#sends the message to the irc from whatever
+                processedMSG[j]["sent"] = True
+            j = j + 1
+        time.sleep(2) 
 
 class mainBot():
     def main(self):
@@ -375,7 +540,6 @@ class mainBot():
         for msg in mainMsg: #this cycles through the array for messages unsent to discord and sends them
             #print("looping the msgs")
             if msg["sent"] == False:
-                print(config["IRCToDiscordFormatting"])
                 #msgStats = {"sentFrom":msg["sentFrom"],"Bot":"Discord","Server": msg["Server"] ,"Channel":msg["Channel"],"ChannelTo": "serverchat", "author":msg["author"],"msg":msg["msg"],"msgFormated":{"test":config["IRCToDiscordFormatting"].format(msg["Channel"],msg["author"],msg["msg"])},"sent":{"test":False}}
                 try: #this is here to ensure the thread doesnt crash from looking for something that doesnt exist
                     if msg["Bot"] == "Discord":
@@ -386,14 +550,22 @@ class mainBot():
                             elif val["Site"] == "IRC":
                                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
                                 processedMSG.append(msgStats)
+                            elif val["Site"] == "Youtube":
+                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
+                                processedMSG.append(msgStats)
+                                
                     elif msg["Bot"] == "IRC":
-                        
+                        for key, val in config["Bot"][msg["Bot"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
+                            processedMSG.append(msgStats)     
+                    elif msg["Bot"] == "Youtube":
                         for key, val in config["Bot"][msg["Bot"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
                             print("test")
                             print(msg)
                             msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
-                            processedMSG.append(msgStats)        
-                except KeyError:
+                            processedMSG.append(msgStats)
+                except KeyError as error:
+                    print(error)
                     print("nothing there")
                 mainMsg[j]["sent"] = True
             j = j +1
@@ -422,7 +594,8 @@ chatControlThread.start()
 ircCheckThread = threading.Thread(target=ircCheck)#starts my irc check thread which should print false if the irc thread dies.
 ircCheckThread.start()
 
-
+youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
+youtubeChatThread.start()
 
 discordThread = threading.Thread(target=client.run(config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
 discordThread.start() #starts the discord bot

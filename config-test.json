@@ -35,26 +35,29 @@
                                 "Site": "IRC",
                                 "Channel": "#popicraft",
                                 "Formatting": "{1} {2}"
-                            
-                        }
-                        
-                    },
-                    "test2": {
-                        "formatting": "{0} {1}",
-                        "Send": true,
-                        "sendTo": {
-                            "test": {
-                                "Site": "Discord",
-                                "Server": "Popicraft Minecraft",
-                                "Channel": "test",
-                                "Formatting": "{0} {1}"
+                            },
+                            "Youtube": {
+                                "Site": "Youtube",
+                                "Channel": "Youtube",
+                                "Formatting": "{1} {2}"
+                            }
+                        },
+                        "test2": {
+                            "formatting": "{0} {1}",
+                            "Send": true,
+                            "sendTo": {
+                                "test": {
+                                    "Site": "Discord",
+                                    "Server": "Popicraft Minecraft",
+                                    "Channel": "test",
+                                    "Formatting": "{0} {1}"
+                                }
                             }
                         }
-                    }
-                }       
+                    }       
+                }
             }
-        }
-    },
+        },
         "IRC": {
             "IP": "irc.popicraft.net",
             "Port": "6667",
@@ -73,6 +76,23 @@
                     }
                 }
             }
-        }    
+        },
+        "Youtube": {
+            "Site": "YoutubeLiveChat",    
+            "pageToken": "GPW6youK5dUCIMa2n_ak5dUC",
+            "ChannelName": "Youtube",
+            "Channel": {
+                "Youtube": {
+                    "sendTo": {
+                        "test": {
+                            "Site": "Discord",
+                            "Server": "Popicraft Minecraft",
+                            "Channel": "test",
+                            "Formatting": "{1} {2}"
+                        }
+                    }           
+                }
+            }
+        }
     }
 }
