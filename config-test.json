@@ -23,13 +23,19 @@
                                 "Site": "Discord",
                                 "Server": "Popicraft Minecraft",
                                 "Channel": "test2",
-                                "Formatting": "{0} {1}"
+                                "Formatting": "{1} {2}"
                             },
                             "serverchat": {
                                 "Site": "Discord",
                                 "Server": "Popicraft Minecraft",
-                                "Channel": "serverchat"
-                            }
+                                "Channel": "serverchat",
+                                "Formatting": "{1} {2}"
+                            },
+                            "#popicraft": {
+                                "Site": "IRC",
+                                "Channel": "#popicraft",
+                                "Formatting": "{1} {2}"
+                            
                         }
                         
                     },
@@ -46,6 +52,26 @@
                         }
                     }
                 }       
+            }
+        },
+        "IRC": {
+            "IP": "irc.popicraft.net",
+            "Port": "6667",
+            "Nickname": "DiscordBot",
+            "Password": "",
+            "Channel": {
+                "#popicraft": {
+                    "Send": true,
+                    "sendTo": {
+                        "test": {
+                                "Site": "Discord",
+                                "Server": "Popicraft Minecraft",
+                                "Channel": "test",
+                                "Formatting": "{1} {2}"
+                            }
+                        }
+                    }
+                }
             }
         }
     }

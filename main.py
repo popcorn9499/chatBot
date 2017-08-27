@@ -45,7 +45,7 @@ import time
 #irc stuff
 import pydle
 
-
+ircClient = 0
 discordMSG = []
 
 #irc
@@ -275,6 +275,89 @@ if firstRun == "on":
     config = {"channelName": "", "pageToken": "", "serverName": "", "discordToken": "","discordToIRCFormating": "", "IRCToDiscordFormatting":""}
     getToken()
 
+
+##this is the event loop for the irc client
+class MyClient(pydle.Client):
+    """ This is a simple bot that will greet people as they join the channel. """
+
+    def on_connect(self):
+        super().on_connect()
+        # Can't greet many people without joining a channel.
+        
+        self.join(config["ircChannel"])
+        
+
+    def on_join(self, channel, user):
+        super().on_join(channel, user)
+        
+    def on_disconnect(self,expected): #this event detects disconnects
+        #this will stop the irc event loop from running in the event that something goes wrong and the connection fails
+        print(expected) #prints a debug of if the client disconnected
+        retry =  0 #sets the 
+        time.sleep(15) #waits a few seconds till the first retry
+        while retry <= 50: #forces a reconnect if something goes wrong
+            self._reset_connection_attributes() #resets connection info
+            print("retrying connection") 
+            self.connect(config["ircServerIP"],config["ircPort"]) #starts the connection
+            time.sleep(15) #waits so the client can finish connecting and things can actually be processes
+            print(self.connected) #status connected or not
+            if self.connected: #if connected to irc server leave this loop and be done.
+                retry = 59
+            else:
+                self.connection.stop() #alternative if it failes and go through the previous method that worked partially.
+            retry = retry + 1 #keeps going up till the number or retries is hit
+
+        
+    def on_channel_message(self,target,by,message):
+        global mainMsg
+        #self.connection.stop() #this stops the event loop when the client gives up just need to figure out how to determine that
+        super().on_channel_message(target,by,message) 
+        print(target + ":" + by +  ":" + message )
+        msgStats = {"sentFrom":"IRC","Bot":"IRC","Server": None,"Channel": target, "author": by,"msg":message,"sent":False}
+        mainMsg.append(msgStats)
+        #msg = config["IRCToDiscordFormatting"].format(target,by,message) #this reformats the irc chat for discord
+        #discordMSG.append(msg)#this adds the new message to the end of the array/list
+
+
+def ircSendMSG(user,target,msg): #sends a message to the irc
+    global config
+    #ircClient.message(target,config["discordToIRCFormating"].format(user,msg))#sends the message to the irc from whatever
+        
+#this starts everything for the irc client 
+##possibly could of put all this in a class and been done with it?
+def ircStart():
+    global ircClient
+    print(ircClient)
+    #while True:#this infinite loop should force the irc thread back when the irc client disconnects and closes
+    ircClient = MyClient(config["ircNickname"])
+    ircClient.connect(config["ircServerIP"],config["ircPort"],password=config["ircPassword"]) ##add a option for /pass user:pass this is how znc lets u login
+    print(ircClient)
+    ircClient.handle_forever()
+    print("irc died")
+
+def ircCheck():
+    global processedMSG,config
+    ircThread = threading.Thread(target=ircStart) #creates the thread for the irc client
+    ircThread.start() #starts the irc bot
+    while True:
+        time.sleep(1)
+        state = ircThread.isAlive()
+        if state == False:
+            print("damn it")
+            ircThread = threading.Thread(target=ircStart) #creates the thread for the irc client
+
+            ircThread.start() #starts the irc bot   
+        #irc msg handler
+        j = 0
+        for msg in processedMSG: #this cycles through the array for messages unsent to irc and sends them
+            if msg["sent"] == False and msg["sendTo"]["Bot"] == "IRC": 
+                #await discordSendMsg(msg) #sends message
+                #await client.send_message(discordInfo[msg["sendTo"]["Server"]][msg["sendTo"]["Channel"]], msg["msgFormated"]) #sends the message to the channel specified in the beginning
+                ircClient.message(msg["sendTo"]["Channel"],msg["msgFormated"])#sends the message to the irc from whatever
+                processedMSG[j]["sent"] = True#promptly after sets that to the delete code
+            j = j + 1
+        
+            
     
 
 class mainBot():
@@ -293,13 +376,26 @@ class mainBot():
                 print(config["IRCToDiscordFormatting"])
                 #msgStats = {"sentFrom":msg["sentFrom"],"Bot":"Discord","Server": msg["Server"] ,"Channel":msg["Channel"],"ChannelTo": "serverchat", "author":msg["author"],"msg":msg["msg"],"msgFormated":{"test":config["IRCToDiscordFormatting"].format(msg["Channel"],msg["author"],msg["msg"])},"sent":{"test":False}}
                 try: #this is here to ensure the thread doesnt crash from looking for something that doesnt exist
-                    for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
-                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
-                        processedMSG.append(msgStats)
+                    if msg["Bot"] == "Discord":
+                        for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
+                            if val["Site"] == "Discord":
+                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
+                                processedMSG.append(msgStats)
+                            elif val["Site"] == "IRC":
+                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
+                                processedMSG.append(msgStats)
+                    elif msg["Bot"] == "IRC":
+                        
+                        for key, val in config["Bot"][msg["Bot"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
+                            print("test")
+                            print(msg)
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
+                            processedMSG.append(msgStats)        
                 except KeyError:
                     print("nothing there")
                 mainMsg[j]["sent"] = True
             j = j +1
+        time.sleep(1)
     
     #def sendToCheck(self,msg):
         
@@ -320,6 +416,9 @@ class mainBot():
 print("test")
 chatControlThread = threading.Thread(target=mainBot().main)
 chatControlThread.start()
+
+ircCheckThread = threading.Thread(target=ircCheck)#starts my irc check thread which should print false if the irc thread dies.
+ircCheckThread.start()
 
 discordThread = threading.Thread(target=client.run(config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
 discordThread.start() #starts the discord bot
