@@ -331,8 +331,6 @@ class MyClient(pydle.Client):
         print(target + ":" + by +  ":" + message )
         msgStats = {"sentFrom":"IRC","Bot":"IRC","Server": None,"Channel": target, "author": by,"msg":message,"sent":False}
         mainMsg.append(msgStats)
-        #msg = config["IRCToDiscordFormatting"].format(target,by,message) #this reformats the irc chat for discord
-        #discordMSG.append(msg)#this adds the new message to the end of the array/list
 
 
 def ircSendMSG(user,target,msg): #sends a message to the irc
@@ -367,9 +365,8 @@ def ircCheck():
         #irc msg handler
         j = 0
         for msg in processedMSG: #this cycles through the array for messages unsent to irc and sends them
-            if msg["sent"] == False and msg["sendTo"]["Bot"] == "IRC": 
-                #await discordSendMsg(msg) #sends message
-                #await client.send_message(discordInfo[msg["sendTo"]["Server"]][msg["sendTo"]["Channel"]], msg["msgFormated"]) #sends the message to the channel specified in the beginning
+            #print(msg["sendTo"])
+            if msg["sent"] == False and msg["sendTo"]["Bot"] == "IRC":
                 ircClient.message(msg["sendTo"]["Channel"],msg["msgFormated"])#sends the message to the irc from whatever
                 processedMSG[j]["sent"] = True#promptly after sets that to the delete code
             j = j + 1
@@ -528,10 +525,17 @@ def youtubeChatControl():
         time.sleep(2) 
 
 class mainBot():
+    global config
     def main(self):
         print("bot loaded")
+        cycle = 0
         while True:
             self.checkMSG()
+            if cycle == 120: 
+                fileSave("config-test.json",config)
+                cycle = 0
+            cycle = cycle + 1
+            time.sleep(1)
             
 
     def checkMSG(self):
@@ -544,32 +548,33 @@ class mainBot():
                 try: #this is here to ensure the thread doesnt crash from looking for something that doesnt exist
                     if msg["Bot"] == "Discord":
                         for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
-                            if val["Site"] == "Discord":
-                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
-                                processedMSG.append(msgStats)
-                            elif val["Site"] == "IRC":
-                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
-                                processedMSG.append(msgStats)
-                            elif val["Site"] == "Youtube":
-                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
-                                processedMSG.append(msgStats)
+                            if val["Enabled"] == True:
+                                if val["Site"] == "Discord":
+                                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
+                                    processedMSG.append(msgStats)
+                                elif val["Site"] == "IRC":
+                                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
+                                    processedMSG.append(msgStats)
+                                elif val["Site"] == "Youtube":
+                                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
+                                    processedMSG.append(msgStats)
                                 
                     elif msg["Bot"] == "IRC":
                         for key, val in config["Bot"][msg["Bot"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
-                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
-                            processedMSG.append(msgStats)     
+                            if val["Enabled"] == True:
+                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
+                                processedMSG.append(msgStats)     
                     elif msg["Bot"] == "Youtube":
                         for key, val in config["Bot"][msg["Bot"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
-                            print("test")
-                            print(msg)
-                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
-                            processedMSG.append(msgStats)
+                            if val["Enabled"] == True:
+                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
+                                processedMSG.append(msgStats)
                 except KeyError as error:
                     print(error)
                     print("nothing there")
                 mainMsg[j]["sent"] = True
             j = j +1
-        time.sleep(1)
+        
     
     #def sendToCheck(self,msg):
         
@@ -592,11 +597,25 @@ chatControlThread = threading.Thread(target=mainBot().main)
 chatControlThread.start()
 
 ircCheckThread = threading.Thread(target=ircCheck)#starts my irc check thread which should print false if the irc thread dies.
-ircCheckThread.start()
+if config["Bot"]["IRC"]["Enabled"] == True:
+    ircCheckThread.start()
+    print("IRC Loaded")
+else:
+    print("IRC not loaded")
 
 youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
-youtubeChatThread.start()
+if config["Bot"]["Youtube"]["Enabled"] == True:
+    youtubeChatThread.start()
+    print("Youtube Loaded")
+else:
+    print("Youtube not loaded")
 
 discordThread = threading.Thread(target=client.run(config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
-discordThread.start() #starts the discord bot
+if config["Bot"]["Discord"]["Enabled"] == True:
+    print("Discord Loaded")
+    discordThread.start()
+else:
+    print("Discord not loaded")
+
+
 
