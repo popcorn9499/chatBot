@@ -23,7 +23,7 @@
                             },
                             "serverchat": {
                                 "Channel": "serverchat",
-                                "Enabled": false,
+                                "Enabled": true,
                                 "Formatting": "{1} {2}",
                                 "Server": "Popicraft Minecraft",
                                 "Site": "Discord"
@@ -52,7 +52,7 @@
                     }
                 }
             },
-            "Token": "Token"
+            "Token": ""
         },
         "IRC": {
             "Channel": {
@@ -108,13 +108,13 @@
             "ChannelName": "Youtube",
             "Enabled": true,
             "Site": "YoutubeLiveChat",
-            "pageToken": "pageToken"
+            "pageToken": ""
         }
     },
     "IRCToDiscordFormatting": "{1} : {2}",
     "channelName": "serverchat",
     "discordToIRCFormating": "{0} : {1}",
-    "discordToken": "Token",
+    "discordToken": "",
     "ircChannel": "#popicraft",
     "ircNickname": "DiscordBot",
     "ircPassword": "",

@@ -546,25 +546,26 @@ class mainBot():
             if msg["sent"] == False:
                 #msgStats = {"sentFrom":msg["sentFrom"],"Bot":"Discord","Server": msg["Server"] ,"Channel":msg["Channel"],"ChannelTo": "serverchat", "author":msg["author"],"msg":msg["msg"],"msgFormated":{"test":config["IRCToDiscordFormatting"].format(msg["Channel"],msg["author"],msg["msg"])},"sent":{"test":False}}
                 try: #this is here to ensure the thread doesnt crash from looking for something that doesnt exist
-                    if msg["Bot"] == "Discord":
+                    if msg["Bot"] == "Discord": #checks for which bot the message came from so it can do the correct looking at it
                         for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
-                            if val["Enabled"] == True:
-                                if val["Site"] == "Discord":
+                            if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]][msg["Channel"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
+                                if val["Site"] == "Discord":#more sorting for the discord side
                                     msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
                                     processedMSG.append(msgStats)
                                 elif val["Site"] == "IRC":
+                                    
                                     msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
                                     processedMSG.append(msgStats)
                                 elif val["Site"] == "Youtube":
                                     msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
                                     processedMSG.append(msgStats)
-                                
+    
                     elif msg["Bot"] == "IRC":
                         for key, val in config["Bot"][msg["Bot"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
-                            if val["Enabled"] == True:
+                            if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Channel"][msg["Channel"]] == True:#this code checks to see if the message should be disabled and not sent onward
                                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
                                 processedMSG.append(msgStats)     
-                    elif msg["Bot"] == "Youtube":
+                    elif msg["Bot"] == "Youtube" and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Channel"][msg["Channel"]] == True:#this code checks to see if the message should be disabled and not sent onward
                         for key, val in config["Bot"][msg["Bot"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
                             if val["Enabled"] == True:
                                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
@@ -574,14 +575,6 @@ class mainBot():
                     print("nothing there")
                 mainMsg[j]["sent"] = True
             j = j +1
-        
-    
-    #def sendToCheck(self,msg):
-        
-        
-    
-
-    
     
     
 #this starts everything for the irc client 
