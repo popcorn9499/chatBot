@@ -4,7 +4,7 @@ import threading
 
 import json
 
-import os
+import sys, os
 #discord stuff imported
 import discord #gets the discord and asyncio librarys
 import asyncio
@@ -31,16 +31,8 @@ haltDeleteMSG = 0
 
 
 
-#used for the main program
-import threading
 
-import json
 
-import os
-#discord stuff imported
-import discord #gets the discord and asyncio librarys
-import asyncio
-import time
 
 #irc stuff
 import pydle
@@ -55,8 +47,7 @@ customStart = ""
 ##Youtube api stuff
 #youtube stuff imported
 import httplib2
-import os
-import sys
+
 import re
 
 from apiclient.discovery import build
@@ -543,17 +534,19 @@ class mainBot():
         j = 0
         for msg in mainMsg: #this cycles through the array for messages unsent to discord and sends them
             #print("looping the msgs")
+            commandCheck(msg,j)
             if msg["sent"] == False:
                 #msgStats = {"sentFrom":msg["sentFrom"],"Bot":"Discord","Server": msg["Server"] ,"Channel":msg["Channel"],"ChannelTo": "serverchat", "author":msg["author"],"msg":msg["msg"],"msgFormated":{"test":config["IRCToDiscordFormatting"].format(msg["Channel"],msg["author"],msg["msg"])},"sent":{"test":False}}
                 try: #this is here to ensure the thread doesnt crash from looking for something that doesnt exist
                     if msg["Bot"] == "Discord": #checks for which bot the message came from so it can do the correct looking at it
                         for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
+                            print(val)
+                            print(config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"])
                             if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]][msg["Channel"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
                                 if val["Site"] == "Discord":#more sorting for the discord side
                                     msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
                                     processedMSG.append(msgStats)
-                                elif val["Site"] == "IRC":
-                                    
+                                elif val["Site"] == "IRC": 
                                     msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
                                     processedMSG.append(msgStats)
                                 elif val["Site"] == "Youtube":
@@ -571,10 +564,21 @@ class mainBot():
                                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
                                 processedMSG.append(msgStats)
                 except KeyError as error:
-                    print(error)
-                    print("nothing there")
+                    print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
                 mainMsg[j]["sent"] = True
             j = j +1
+
+def commandCheck(msg,j):
+    realCommand = False
+    if msg["msg"].startswith("!") == True and msg["sent"] == False:
+        tempMsg = msg["msg"].split()
+        if tempMsg[0] == "!temp":
+            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
+            processedMSG.append(msgStats)
+            realCommand = True
+        if realCommand == True:
+            mainMsg[j]["sent"] = True
+        
     
     
 #this starts everything for the irc client 

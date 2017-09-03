@@ -86,7 +86,7 @@
         "Youtube": {
             "Channel": {
                 "Youtube": {
-                    "Enabled": true,
+                    "Enabled": false,
                     "sendTo": {
                         "#popicraft": {
                             "Channel": "#popicraft",
