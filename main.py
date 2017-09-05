@@ -21,6 +21,7 @@ youtube = ""
 
 firstRun = "on"
 discordInfo = {}
+discordRoles = {}
 #used as global varibles and were defined before we start using them to avoid problems down the road
 channelToUse = ""
 
@@ -166,19 +167,26 @@ async def discordCheckMsg(): #checks for a discord message
 
 @client.event
 async def on_ready(): #when the discord api has logged in and is ready then this even is fired
-    global ircClient, discord
+    global ircClient, discord,discordRoles 
     firstRun = "off"
     if firstRun == "off":
+        #print(discord.Server)
         #these 2 variables are used to keep track of what channel is thre real channel to use when sending messages to discord
         global config , botName, discordMSG,discordInfo, haltDiscordMSG,haltDeleteMSG
         global channelToUse #this is where we save the channel information (i think its a class)
-        global channelUsed #this is the channel name we are looking for
+        global  channelUsed #this is the channel name we are looking for
         #this is just to show what the name of the bot is and the id
         print('Logged in as') ##these things could be changed a little bit here
         print(client.user.name+ "#" + client.user.discriminator)
         botName = client.user.name+ "#" + client.user.discriminator #gets and saves the bots name and discord tag
         print(client.user.id)
+        rolesList = {}
         for server in client.servers: #this portion gets all the info for all the channels and servers the bot is in
+            for roles in server.roles:
+                print( "[" + server.name + "]"+ roles.name + ":" + str(roles.position))
+                rolesList.update({str(roles.name):int(roles.position)})
+            discordRoles.update({str(server.name):rolesList})
+            print(discordRoles)
             discordInfo.update({str(server): {"asdasdhskajhdkjashdlk":"channel info"}})#maybe set a check for that channel
             for channel in server.channels:
                 disc = {str(channel.name): channel}
@@ -201,7 +209,12 @@ async def on_message(message): #waits for the discord message event and pulls it
             print("{0} : {1}".format(message.author,message.content)) #prints this to the screen
             #await client.send_message(message.channel, 'Hello.')          
             #ircSendMSG(message.author,config["ircChannel"],message.content)
-            msgStats = {"sentFrom":"Discord","Bot":"Discord","Server": str(message.server.name),"Channel":str(message.channel.name), "author":message.author.name,"msg":message.content,"sent":False}
+            roleList = {}
+            for roles in message.author.roles:
+                print(roles.name + ":" + str(roles.position))
+                roleList.update({str(roles.name):int(roles.position)})
+            print(roleList)
+            msgStats = {"sentFrom":"Discord","Bot":"Discord","Server": str(message.server.name),"Channel":str(message.channel.name), "author":message.author.name,"authorsRole":roleList,"msg":message.content,"sent":False}
             mainMsg.append(msgStats)
 
             
@@ -466,6 +479,8 @@ def listChat():
         username = temp["authorDetails"]["displayName"] #gets the users name
         userID = temp["authorDetails"]["channelId"]
         if message != "" and username != "": #this makes sure that the message and username slot arent empty before putting this to the discord chat        
+            print(temp)
+            fileSave("youtubeMsgJson.json", temp)
             if userID != botUserID:
                 print("{0} {1}".format(username,message))
                 msgStats = {"sentFrom":"Youtube","Bot":"Youtube","Server": None,"Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"msg":message,"sent":False}
@@ -516,10 +531,11 @@ def youtubeChatControl():
         time.sleep(2) 
 
 class mainBot():
-    global config
+    global config , discord
     def main(self):
         print("bot loaded")
         cycle = 0
+        time.sleep(20)
         while True:
             self.checkMSG()
             if cycle == 120: 
@@ -569,18 +585,35 @@ class mainBot():
             j = j +1
 
 def commandCheck(msg,j):
+    global discordRoles
     realCommand = False
     if msg["msg"].startswith("!") == True and msg["sent"] == False:
         tempMsg = msg["msg"].split()
-        if tempMsg[0] == "!temp":
-            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
-            processedMSG.append(msgStats)
-            realCommand = True
+        if msg["Bot"] == "Discord":
+            roleNum = 0
+            for key,val in msg["authorsRole"].items():
+                if val > roleNum:
+                    roleNum = val
+                
+            if tempMsg[0] == "!temp" and discordRoles[msg["Server"]]["Mod"] <= roleNum:
+                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
+                processedMSG.append(msgStats)
+                realCommand = True
+        elif msg["Bot"] == "IRC":
+            if tempMsg[0] == "!temp":
+                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
+                processedMSG.append(msgStats)
+                realCommand = True
+        elif msg["Bot"] == "Youtube":
+            if tempMsg[0] == "!temp":
+                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
+                processedMSG.append(msgStats)
+                realCommand = True
+
         if realCommand == True:
             mainMsg[j]["sent"] = True
-        
-    
-    
+
+            
 #this starts everything for the irc client 
 ##main loop for the code
 
