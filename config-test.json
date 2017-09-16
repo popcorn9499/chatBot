@@ -4,14 +4,24 @@
             "Enabled": true,
             "Servers": {
                 "Popicraft Minecraft": {
-                    "test": {
+                    "Enabled": true,
+                    "Commands": {
+                        "setRole": {
+                            "roleToBe": "Mod",
+                            "rankRequired": "Owner",
+                            "msgResponse": "You got upgraded to Mod",
+                            "commandName": "!role up"
+                        }
+                        
+                    },
+                    "serverchat": {
                         "Enabled": true,
                         "Send": true,
                         "formatting": "{0} {1}",
                         "sendTo": {
                             "#popicraft": {
                                 "Channel": "#popicraft",
-                                "Enabled": false,
+                                "Enabled": true,
                                 "Formatting": "{1} {2}",
                                 "Site": "IRC"
                             },
@@ -21,16 +31,9 @@
                                 "Formatting": "{1} {2}",
                                 "Site": "Youtube"
                             },
-                            "serverchat": {
-                                "Channel": "serverchat",
-                                "Enabled": true,
-                                "Formatting": "{1} {2}",
-                                "Server": "Popicraft Minecraft",
-                                "Site": "Discord"
-                            },
-                            "test2": {
+                            "test": {
                                 "Channel": "test2",
-                                "Enabled": false,
+                                "Enabled": true,
                                 "Formatting": "{1} {2}",
                                 "Server": "Popicraft Minecraft",
                                 "Site": "Discord"
@@ -86,7 +89,7 @@
         "Youtube": {
             "Channel": {
                 "Youtube": {
-                    "Enabled": false,
+                    "Enabled": true,
                     "sendTo": {
                         "#popicraft": {
                             "Channel": "#popicraft",
@@ -108,7 +111,7 @@
             "ChannelName": "Youtube",
             "Enabled": true,
             "Site": "YoutubeLiveChat",
-            "pageToken": ""
+            "pageToken": "
         }
     },
     "IRCToDiscordFormatting": "{1} : {2}",
