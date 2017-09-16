@@ -6,11 +6,17 @@
                 "Popicraft Minecraft": {
                     "Enabled": true,
                     "Commands": {
-                        "setRole": {
-                            "roleToBe": "Mod",
+                        "!roleUp": {
+                            "commandType": "setRole",
+                            "rankToBe": "Mod",
                             "rankRequired": "Owner",
-                            "msgResponse": "You got upgraded to Mod",
-                            "commandName": "!role up"
+                            "msgResponse": "You got upgraded to Mod"
+                        },
+                        "!fileReadTest": {
+                            "commandType": "readFile",
+                            "rankToBe": "Mod",
+                            "rankRequired": "Owner",
+                            "msgResponse": "You got upgraded to Mod"
                         }
                         
                     },
@@ -21,7 +27,7 @@
                         "sendTo": {
                             "#popicraft": {
                                 "Channel": "#popicraft",
-                                "Enabled": true,
+                                "Enabled": false,
                                 "Formatting": "{1} {2}",
                                 "Site": "IRC"
                             },
@@ -89,7 +95,7 @@
         "Youtube": {
             "Channel": {
                 "Youtube": {
-                    "Enabled": true,
+                    "Enabled": false,
                     "sendTo": {
                         "#popicraft": {
                             "Channel": "#popicraft",
@@ -111,7 +117,7 @@
             "ChannelName": "Youtube",
             "Enabled": true,
             "Site": "YoutubeLiveChat",
-            "pageToken": "
+            "pageToken": ""
         }
     },
     "IRCToDiscordFormatting": "{1} : {2}",

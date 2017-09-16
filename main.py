@@ -559,7 +559,7 @@ def youtubeChatControl():
                 sendLiveChat(msg["msgFormated"])#sends the message to the irc from whatever
                 processedMSG[j]["sent"] = True
             j = j + 1
-        time.sleep(2) 
+        time.sleep(0.2) 
 
 class mainBot():
     global config , discord
@@ -618,6 +618,8 @@ class mainBot():
 def commandCheck(msg,j):
     global discordRoles
     realCommand = False
+    commandStats = ""
+    msgStats = ""
     if msg["msg"].startswith("!") == True and msg["sent"] == False:
         tempMsg = msg["msg"].split()
         if msg["Bot"] == "Discord": #this checks which bot this came from
@@ -627,15 +629,25 @@ def commandCheck(msg,j):
                     roleNum = val
             for key,val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Commands"].items(): 
                 print("{0} : {1}".format(key,val))
-                if key == "setRole":
+                if val["commandType"] == "setRole":
+                    if tempMsg[0] == key and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
+                        print("passed the right command and the correct role")
+                        commandStats = {"sentFrom":msg["sentFrom"],"Command":"setRole","args": [val["rankToBe"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
+                        if "msgResponse" != "":
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"],"sent": False}
+                            print("msg")
+                elif val["commandType"] == "sendMessage":
                     print("placeholder")
-                elif key == "sendMessage":
+                elif val["commandType"] == "setFile":
                     print("placeholder")
-                elif key == "setFile":
+                elif val["commandType"] == "incrementFile":
                     print("placeholder")
-                elif key == "incrementFile":
-                    print("placeholder")
-                elif
+                elif val["commandType"] == "readFile":
+                    f = open('workfile', 'r')
+                    #print(type(f.read()))
+                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "```{0}```".format(f.read()),"sent": False}
+
+                    
             
             if tempMsg[0] == "!temp" and discordRoles[msg["Server"]]["Mod"]["Number"] <= roleNum:
                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
@@ -656,7 +668,15 @@ def commandCheck(msg,j):
         if realCommand == True:
             mainMsg[j]["sent"] = True
 
-            
+        
+        if commandStats != "":
+            processedCommand.append(commandStats)
+           
+        if msgStats != "":
+            processedMSG.append(msgStats)
+
+ 
+        
 #this starts everything for the irc client 
 ##main loop for the code
 
