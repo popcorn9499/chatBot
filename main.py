@@ -103,6 +103,9 @@ haltDiscordMSG = 0
 haltDeleteMSG = 0
 
 mainMsg = []
+tempRole = 0
+discordMembers = {}
+processedCommand = []
 processedMSG = []
 ##jadens shift code
 #delete code is: 98reghwkjfgh8932guicdsb98r3280yioufsdgcgbf98
@@ -151,7 +154,7 @@ client = discord.Client() #sets this to just client for reasons cuz y not? (didn
 
 
 async def discordSendMsg(msg): #this is for sending messages to discord
-    global config, discordInfo
+    global config, discordInfo,discordRoles
     await client.send_message(discordInfo[msg["Server"]][msg["ChannelTo"]], msg["msgFormated"]["Discord"]) #sends the message to the channel specified in the beginning
     
 async def discordCheckMsg(): #checks for a discord message
@@ -164,10 +167,28 @@ async def discordCheckMsg(): #checks for a discord message
             processedMSG[j]["sent"] = True#promptly after sets that to the delete code
         j = j + 1
         
+        
+async def discordCheckCommand(): #checks for a discord message
+    global processedCommand, haltDiscordMSG, haltDeleteMSG, config,discord,discordMembers
+    j = 0
+    for command in processedCommand: #this cycles through the array for messages unsent to discord and sends them
+        if command["sent"] == False: 
+            if command["Command"] == "setRole":
+                await client.add_roles(command["authorData"], discordRoles["Popicraft Minecraft"]["Mod"]["Data"])
+            elif command["Command"] == "removeRole":
+                print("placeholder")
+            elif  command["Command"] == "sendMessage":
+                print("placeholder")
+            
+            
+                
+            #await client.send_message(discordInfo[msg["sendTo"]["Server"]][msg["sendTo"]["Channel"]], msg["msgFormated"]) #sends the message to the channel specified in the beginning
+            processedCommand[j]["sent"] = True#promptly after sets that to the delete code
+        j = j + 1
 
 @client.event
 async def on_ready(): #when the discord api has logged in and is ready then this even is fired
-    global ircClient, discord,discordRoles 
+    global ircClient, discord,discordRoles,tempRole,discordMembers
     firstRun = "off"
     if firstRun == "off":
         #print(discord.Server)
@@ -181,10 +202,17 @@ async def on_ready(): #when the discord api has logged in and is ready then this
         botName = client.user.name+ "#" + client.user.discriminator #gets and saves the bots name and discord tag
         print(client.user.id)
         rolesList = {}
+        membersList = {}
         for server in client.servers: #this portion gets all the info for all the channels and servers the bot is in
+            for members in server.members:
+                membersList.update({str(members): members})
+            discordMembers.update({str(server.name):membersList})
+            print(discordMembers) 
             for roles in server.roles:
                 print( "[" + server.name + "]"+ roles.name + ":" + str(roles.position))
-                rolesList.update({str(roles.name):int(roles.position)})
+                rolesList.update({str(roles.name):{"Number":int(roles.position),"Data": roles}})
+                if roles.name == "Mod":
+                    tempRole = roles
             discordRoles.update({str(server.name):rolesList})
             print(discordRoles)
             discordInfo.update({str(server): {"asdasdhskajhdkjashdlk":"channel info"}})#maybe set a check for that channel
@@ -195,6 +223,7 @@ async def on_ready(): #when the discord api has logged in and is ready then this
             if haltDiscordMSG == 0:
                 haltDeleteMSG = 1
                 await discordCheckMsg()
+                await discordCheckCommand()
                 await asyncio.sleep(1)
             
     else:
@@ -203,7 +232,7 @@ async def on_ready(): #when the discord api has logged in and is ready then this
             
 @client.event
 async def on_message(message): #waits for the discord message event and pulls it somewhere
-    global mainMsg
+    global mainMsg,discord,tempRole,discordRoles
     if firstRun == "off":
         if str(message.author) != botName: #this checks to see if it is using the correct discord channel to make sure its the right channel. also checks to make sure the botname isnt our discord bot name
             print("{0} : {1}".format(message.author,message.content)) #prints this to the screen
@@ -214,7 +243,9 @@ async def on_message(message): #waits for the discord message event and pulls it
                 print(roles.name + ":" + str(roles.position))
                 roleList.update({str(roles.name):int(roles.position)})
             print(roleList)
-            msgStats = {"sentFrom":"Discord","Bot":"Discord","Server": str(message.server.name),"Channel":str(message.channel.name), "author":message.author.name,"authorsRole":roleList,"msg":message.content,"sent":False}
+            print(tempRole)
+            #await client.add_roles(message.author, discordRoles["Popicraft Minecraft"]["Mod"]["Data"])
+            msgStats = {"sentFrom":"Discord","Bot":"Discord","Server": str(message.server.name),"Channel":str(message.channel.name), "author":message.author.name,"authorData":message.author,"authorsRole":roleList,"msg":message.content,"sent":False}
             mainMsg.append(msgStats)
 
             
@@ -589,15 +620,27 @@ def commandCheck(msg,j):
     realCommand = False
     if msg["msg"].startswith("!") == True and msg["sent"] == False:
         tempMsg = msg["msg"].split()
-        if msg["Bot"] == "Discord":
+        if msg["Bot"] == "Discord": #this checks which bot this came from
             roleNum = 0
             for key,val in msg["authorsRole"].items():
                 if val > roleNum:
                     roleNum = val
-                
-            if tempMsg[0] == "!temp" and discordRoles[msg["Server"]]["Mod"] <= roleNum:
+            for key,val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Commands"].items(): 
+                print("{0} : {1}".format(key,val))
+                if key == "setRole":
+                    print("placeholder")
+                elif key == "sendMessage":
+                    print("placeholder")
+                elif key == "setFile":
+                    print("placeholder")
+                elif key == "incrementFile":
+                    print("placeholder")
+                elif
+            
+            if tempMsg[0] == "!temp" and discordRoles[msg["Server"]]["Mod"]["Number"] <= roleNum:
                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
-                processedMSG.append(msgStats)
+                commandStats = {"sentFrom":msg["sentFrom"],"Command":"setRole","args": ["Mod"],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
+                processedCommand.append(commandStats)
                 realCommand = True
         elif msg["Bot"] == "IRC":
             if tempMsg[0] == "!temp":
