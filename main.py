@@ -176,9 +176,11 @@ async def discordCheckCommand(): #checks for a discord message
             if command["Command"] == "setRole":
                 await client.add_roles(command["authorData"], discordRoles["Popicraft Minecraft"]["Mod"]["Data"])
             elif command["Command"] == "removeRole":
-                print("placeholder")
+                print("removing")
+                await client.remove_roles(command["authorData"], discordRoles["Popicraft Minecraft"]["Mod"]["Data"])
             elif  command["Command"] == "sendMessage":
                 print("placeholder")
+            
             
             
                 
@@ -628,57 +630,62 @@ def commandCheck(msg,j):
                 if val > roleNum:
                     roleNum = val
             print(tempMsg)
-            for key,val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Commands"].items(): 
-                print("{0} : {1}".format(key,val))
+            for val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Commands"][tempMsg[0]]: 
+                    
                 if val["commandType"] == "setRole":
-                    if tempMsg[0] == key and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
+                    if  discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
                         print("passed the right command and the correct role")
                         commandStats = {"sentFrom":msg["sentFrom"],"Command":"setRole","args": [val["rankToBe"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
-                        if "msgResponse" != "":
-                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"],"sent": False}
-                            print("msg")
+                elif val["commandType"] == "removeRole":
+                    if discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
+                        print("passed the right command and the correct role")
+                        commandStats = {"sentFrom":msg["sentFrom"],"Command":"removeRole","args": [val["rankToBe"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
+
                 elif val["commandType"] == "sendMessage":
-                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "```{0}```".format(f.read()),"sent": False}
+                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"],"sent": False}
                 elif val["commandType"] == "setFile":
                     print("placeholder")
                 elif val["commandType"] == "incrementFile":
-                    if tempMsg[0] == key:
-                        f = open(val["file"], 'r+')
-                        file = []
-                        print("incrementFile")
-                        for line in f:
-                            file.append(line)
-                        print(type(file[4]))
-                        incrementBy = val["incrementBy"].format(int(file[4])).split()
-                        if incrementBy[1] == "+":
-                            x = int(incrementBy[0]) + int(incrementBy[2])
-                        elif incrementBy[1] == "-":
-                            x = int(incrementBy[0]) - int(incrementBy[2])
-                        elif incrementBy[1] == "*":
-                            x = int(incrementBy[0]) * int(incrementBy[2])
-                        elif incrementBy[1] == "/":
-                            x = int(incrementBy[0]) / int(incrementBy[2])
-                        elif incrementBy[1] == "//":
-                            x = int(incrementBy[0]) // int(incrementBy[2])
-                        elif incrementBy[1] == "**":
-                            x = int(incrementBy[0]) ** int(incrementBy[2])
-                        print(x)
-            
-                        file[4] = str(x)
-                        test=""
-                        for x in file:
-                            test = test + x
-                        f.close()
-                        f = open(val["file"], 'w')                        
-                        f.write(test)
+                    f = open(val["file"], 'r+')
+                    file = []
+                    print("incrementFile")
+                    for line in f:
+                        file.append(line)
+                    print(type(file[4]))
+                    incrementBy = val["incrementBy"].format(int(file[4])).split()
+                    if incrementBy[1] == "+":
+                        x = int(incrementBy[0]) + int(incrementBy[2])
+                    elif incrementBy[1] == "-":
+                        x = int(incrementBy[0]) - int(incrementBy[2])
+                    elif incrementBy[1] == "*":
+                        x = int(incrementBy[0]) * int(incrementBy[2])
+                    elif incrementBy[1] == "/":
+                        x = int(incrementBy[0]) / int(incrementBy[2])
+                    elif incrementBy[1] == "//":
+                        x = int(incrementBy[0]) // int(incrementBy[2])
+                    elif incrementBy[1] == "**":
+                        x = int(incrementBy[0]) ** int(incrementBy[2])
+                    print(x)
+        
+                    file[4] = str(x)
+                    test=""
+                    for x in file:
+                        test = test + x
+                    f.close()
+                    f = open(val["file"], 'w')                        
+                    f.write(test)
                 elif val["commandType"] == "readFile":
-                    print(tempMsg[0] + key)
-                    if tempMsg[0] == key:
-                        f = open(val["file"], 'r')
-                        print("readFile")
-                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(f.read()),"sent": False}
-
-                    
+                    f = open(val["file"], 'r')
+                    print("readFile")
+                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(f.read()),"sent": False}
+                if commandStats != "":
+                    processedCommand.append(commandStats)
+                    commandStats = ""
+                   
+                if msgStats != "":
+                    processedMSG.append(msgStats)
+                    msgStats = ""
+                                
             
             if tempMsg[0] == "!temp" and discordRoles[msg["Server"]]["Mod"]["Number"] <= roleNum:
                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}

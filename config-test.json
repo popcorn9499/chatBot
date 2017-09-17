@@ -6,27 +6,56 @@
                 "Popicraft Minecraft": {
                     "Enabled": true,
                     "Commands": {
-                        "!roleUp": {
-                            "commandType": "setRole",
-                            "rankToBe": "Mod",
-                            "rankRequired": "Owner",
-                            "msgResponse": "You got upgraded to Mod"
-                        },
-                        "!fileReadTest": {
-                            "commandType": "readFile",
-                            "file": "workfile",
-                            "rankRequired": "Owner",
-                            "msgResponse": "```{0}```"
-                        },
-                        "!fileIncrement": {
-                            "commandType": "incrementFile",
-                            "file": "workfile",
-                            "rankRequired": "Owner",
-                            "msgResponse": "```{0}```",
-                            "incrementBy": "{0} ** 2",
-                            "lineToIncrement": 4
-                            
-                        }
+                        "!roleUp": [
+                            {
+                                "commandType": "setRole",
+                                "rankToBe": "Mod",
+                                "rankRequired": "Owner"
+                            },{
+                                "commandType": "sendMessage",
+                                "rankRequired": "Owner",
+                                "msgResponse": "You got upgraded to Mod"
+                            },{
+                                "commandType": "readFile",
+                                "file": "workfile",
+                                "rankRequired": "Owner",
+                                "msgResponse": "```{0}```"
+                            }
+                        ],
+                        "!roleDown": [
+                            {
+                                "commandType": "removeRole",
+                                "rankToBe": "Mod",
+                                "rankRequired": "Owner"
+                            },{
+                                "commandType": "sendMessage",
+                                "rankRequired": "Owner",
+                                "msgResponse": "You got demoted from Mod"
+                            },{
+                                "commandType": "readFile",
+                                "file": "workfile",
+                                "rankRequired": "Owner",
+                                "msgResponse": "```{0}```"
+                            }
+                        ],
+                        "!fileReadTest": [
+                            {
+                                "commandType": "readFile",
+                                "file": "workfile",
+                                "rankRequired": "Owner",
+                                "msgResponse": "```{0}```"
+                            }
+                        ],
+                        "!fileIncrement": [
+                            {
+                                "commandType": "incrementFile",
+                                "file": "workfile",
+                                "rankRequired": "Owner",
+                                "msgResponse": "```{0}```",
+                                "incrementBy": "{0} ** 2",
+                                "lineToIncrement": 4
+                            }
+                        ]
                         
                     },
                     "serverchat": {
