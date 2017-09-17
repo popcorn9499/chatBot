@@ -14,9 +14,18 @@
                         },
                         "!fileReadTest": {
                             "commandType": "readFile",
-                            "rankToBe": "Mod",
+                            "file": "workfile",
                             "rankRequired": "Owner",
-                            "msgResponse": "You got upgraded to Mod"
+                            "msgResponse": "```{0}```"
+                        },
+                        "!fileIncrement": {
+                            "commandType": "incrementFile",
+                            "file": "workfile",
+                            "rankRequired": "Owner",
+                            "msgResponse": "```{0}```",
+                            "incrementBy": "{0} ** 2",
+                            "lineToIncrement": 4
+                            
                         }
                         
                     },

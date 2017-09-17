@@ -627,6 +627,7 @@ def commandCheck(msg,j):
             for key,val in msg["authorsRole"].items():
                 if val > roleNum:
                     roleNum = val
+            print(tempMsg)
             for key,val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Commands"].items(): 
                 print("{0} : {1}".format(key,val))
                 if val["commandType"] == "setRole":
@@ -637,15 +638,45 @@ def commandCheck(msg,j):
                             msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"],"sent": False}
                             print("msg")
                 elif val["commandType"] == "sendMessage":
-                    print("placeholder")
+                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "```{0}```".format(f.read()),"sent": False}
                 elif val["commandType"] == "setFile":
                     print("placeholder")
                 elif val["commandType"] == "incrementFile":
-                    print("placeholder")
+                    if tempMsg[0] == key:
+                        f = open(val["file"], 'r+')
+                        file = []
+                        print("incrementFile")
+                        for line in f:
+                            file.append(line)
+                        print(type(file[4]))
+                        incrementBy = val["incrementBy"].format(int(file[4])).split()
+                        if incrementBy[1] == "+":
+                            x = int(incrementBy[0]) + int(incrementBy[2])
+                        elif incrementBy[1] == "-":
+                            x = int(incrementBy[0]) - int(incrementBy[2])
+                        elif incrementBy[1] == "*":
+                            x = int(incrementBy[0]) * int(incrementBy[2])
+                        elif incrementBy[1] == "/":
+                            x = int(incrementBy[0]) / int(incrementBy[2])
+                        elif incrementBy[1] == "//":
+                            x = int(incrementBy[0]) // int(incrementBy[2])
+                        elif incrementBy[1] == "**":
+                            x = int(incrementBy[0]) ** int(incrementBy[2])
+                        print(x)
+            
+                        file[4] = str(x)
+                        test=""
+                        for x in file:
+                            test = test + x
+                        f.close()
+                        f = open(val["file"], 'w')                        
+                        f.write(test)
                 elif val["commandType"] == "readFile":
-                    f = open('workfile', 'r')
-                    #print(type(f.read()))
-                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "```{0}```".format(f.read()),"sent": False}
+                    print(tempMsg[0] + key)
+                    if tempMsg[0] == key:
+                        f = open(val["file"], 'r')
+                        print("readFile")
+                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(f.read()),"sent": False}
 
                     
             
