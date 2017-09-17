@@ -180,6 +180,9 @@ async def discordCheckCommand(): #checks for a discord message
                 await client.remove_roles(command["authorData"], discordRoles["Popicraft Minecraft"][command["args"][0]]["Data"])
             elif  command["Command"] == "sendMessage":
                 print("placeholder")
+            elif command["Command"] == "deleteMessage":
+                print("deleting message")
+                await client.delete_message(command["args"][0])
             
             
             
@@ -234,7 +237,7 @@ async def on_ready(): #when the discord api has logged in and is ready then this
             
 @client.event
 async def on_message(message): #waits for the discord message event and pulls it somewhere
-    global mainMsg,discord,tempRole,discordRoles
+    global mainMsg,discord,tempRole,discordRoles,processedCommand
     if firstRun == "off":
         if str(message.author) != botName: #this checks to see if it is using the correct discord channel to make sure its the right channel. also checks to make sure the botname isnt our discord bot name
             print("{0} : {1}".format(message.author,message.content)) #prints this to the screen
@@ -246,8 +249,10 @@ async def on_message(message): #waits for the discord message event and pulls it
                 roleList.update({str(roles.name):int(roles.position)})
             print(roleList)
             print(tempRole)
+            #commandStats = {"Command":"deleteMessage","args": [message],"sent": False}
+            #processedCommand.append(commandStats)
             #await client.add_roles(message.author, discordRoles["Popicraft Minecraft"]["Mod"]["Data"])
-            msgStats = {"sentFrom":"Discord","Bot":"Discord","Server": str(message.server.name),"Channel":str(message.channel.name), "author":message.author.name,"authorData":message.author,"authorsRole":roleList,"msg":message.content,"sent":False}
+            msgStats = {"sentFrom":"Discord","msgData": message,"Bot":"Discord","Server": str(message.server.name),"Channel":str(message.channel.name), "author":message.author.name,"authorData":message.author,"authorsRole":roleList,"msg":message.content,"sent":False}
             mainMsg.append(msgStats)
 
             
@@ -579,28 +584,33 @@ class mainBot():
             
 
     def checkMSG(self):
-        global processedMSG,mainMsg
+        global processedMSG,mainMsg,processedCommand
         j = 0
         for msg in mainMsg: #this cycles through the array for messages unsent to discord and sends them
             #print("looping the msgs")
-            commandCheck(msg,j)
             if msg["sent"] == False:
+                self.commandCheck(msg,j)
+                
                 #msgStats = {"sentFrom":msg["sentFrom"],"Bot":"Discord","Server": msg["Server"] ,"Channel":msg["Channel"],"ChannelTo": "serverchat", "author":msg["author"],"msg":msg["msg"],"msgFormated":{"test":config["IRCToDiscordFormatting"].format(msg["Channel"],msg["author"],msg["msg"])},"sent":{"test":False}}
                 try: #this is here to ensure the thread doesnt crash from looking for something that doesnt exist
                     if msg["Bot"] == "Discord": #checks for which bot the message came from so it can do the correct looking at it
-                        for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
-                            print(val)
-                            print(config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"])
-                            if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]][msg["Channel"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
-                                if val["Site"] == "Discord":#more sorting for the discord side
-                                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
-                                    processedMSG.append(msgStats)
-                                elif val["Site"] == "IRC": 
-                                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
-                                    processedMSG.append(msgStats)
-                                elif val["Site"] == "Youtube":
-                                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
-                                    processedMSG.append(msgStats)
+                        
+                        
+                        if self.blacklistWorkCheck(msg,j) == False:
+                           
+                            for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
+                                print(val)
+                                print(config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"])
+                                if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]][msg["Channel"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
+                                    if val["Site"] == "Discord":#more sorting for the discord side
+                                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
+                                        processedMSG.append(msgStats)
+                                    elif val["Site"] == "IRC": 
+                                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
+                                        processedMSG.append(msgStats)
+                                    elif val["Site"] == "Youtube":
+                                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"],"Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"]),"sent": False}
+                                        processedMSG.append(msgStats)
     
                     elif msg["Bot"] == "IRC":
                         for key, val in config["Bot"][msg["Bot"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
@@ -617,101 +627,117 @@ class mainBot():
                 mainMsg[j]["sent"] = True
             j = j +1
 
-def commandCheck(msg,j):
-    global discordRoles
-    realCommand = False
-    commandStats = ""
-    msgStats = ""
-    if msg["msg"].startswith("!") == True and msg["sent"] == False:
-        tempMsg = msg["msg"].split()
-        if msg["Bot"] == "Discord": #this checks which bot this came from
-            roleNum = 0
-            for key,val in msg["authorsRole"].items():
-                if val > roleNum:
-                    roleNum = val
-            print(tempMsg)
-            for val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Commands"][tempMsg[0]]: 
-                    
-                if val["commandType"] == "setRole":
-                    if  discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
-                        print("passed the right command and the correct role")
-                        commandStats = {"sentFrom":msg["sentFrom"],"Command":"setRole","args": [val["rankToBe"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
-                elif val["commandType"] == "removeRole":
-                    if discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
-                        print("passed the right command and the correct role")
-                        commandStats = {"sentFrom":msg["sentFrom"],"Command":"removeRole","args": [val["rankToBe"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
-
-                elif val["commandType"] == "sendMessage":
-                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"],"sent": False}
-                elif val["commandType"] == "setFile":
-                    print("placeholder")
-                elif val["commandType"] == "incrementFile":
-                    f = open(val["file"], 'r+')
-                    file = []
-                    print("incrementFile")
-                    for line in f:
-                        file.append(line)
-                    print(type(file[4]))
-                    incrementBy = val["incrementBy"].format(int(file[4])).split()
-                    if incrementBy[1] == "+":
-                        x = int(incrementBy[0]) + int(incrementBy[2])
-                    elif incrementBy[1] == "-":
-                        x = int(incrementBy[0]) - int(incrementBy[2])
-                    elif incrementBy[1] == "*":
-                        x = int(incrementBy[0]) * int(incrementBy[2])
-                    elif incrementBy[1] == "/":
-                        x = int(incrementBy[0]) / int(incrementBy[2])
-                    elif incrementBy[1] == "//":
-                        x = int(incrementBy[0]) // int(incrementBy[2])
-                    elif incrementBy[1] == "**":
-                        x = int(incrementBy[0]) ** int(incrementBy[2])
-                    print(x)
-        
-                    file[4] = str(x)
-                    test=""
-                    for x in file:
-                        test = test + x
-                    f.close()
-                    f = open(val["file"], 'w')                        
-                    f.write(test)
-                elif val["commandType"] == "readFile":
-                    f = open(val["file"], 'r')
-                    print("readFile")
-                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(f.read()),"sent": False}
-                if commandStats != "":
+    def blacklistWorkCheck(self,msg,j):
+        found = False
+        for val in config["wordBlacklist"]:
+            for split in msg["msg"].split():
+                if split == val and found == False:
+                    commandStats = {"sentFrom":msg["sentFrom"],"Command":"deleteMessage","args": [msg["msgData"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
                     processedCommand.append(commandStats)
-                    commandStats = ""
-                   
-                if msgStats != "":
-                    processedMSG.append(msgStats)
-                    msgStats = ""
-                                
+                    found = True
+                    mainMsg[j]["sent"] = True
+                    
+
+    def commandCheck(self,msg,j):
+        global discordRoles
+        realCommand = False
+        commandStats = ""
+        msgStats = ""
+        if msg["msg"].startswith("!") == True and msg["sent"] == False:
+            tempMsg = msg["msg"].split()
+            if msg["Bot"] == "Discord": #this checks which bot this came from
+                roleNum = 0
+                for key,val in msg["authorsRole"].items():
+                    if val > roleNum:
+                        roleNum = val
+                print(tempMsg)
+                if msg["msg"] == "!testing123":
+                    print("sending delete message")
+                    commandStats = {"sentFrom":msg["sentFrom"],"Command":"deleteMessage","args": [msg["msgData"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
+                    processedCommand.append(commandStats)
+
+                for val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Commands"][tempMsg[0]]: 
+                        
+                    if val["commandType"] == "setRole":
+                        if  discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
+                            print("passed the right command and the correct role")
+                            commandStats = {"sentFrom":msg["sentFrom"],"Command":"setRole","args": [val["rankToBe"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
+                    elif val["commandType"] == "removeRole":
+                        if discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
+                            print("passed the right command and the correct role")
+                            commandStats = {"sentFrom":msg["sentFrom"],"Command":"removeRole","args": [val["rankToBe"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
+
+                    elif val["commandType"] == "sendMessage":
+                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"],"sent": False}
+                    elif val["commandType"] == "setFile":
+                        print("placeholder")
+                    elif val["commandType"] == "incrementFile":
+                        f = open(val["file"], 'r+')
+                        file = []
+                        print("incrementFile")
+                        for line in f:
+                            file.append(line)
+                        print(type(file[4]))
+                        incrementBy = val["incrementBy"].format(int(file[4])).split()
+                        if incrementBy[1] == "+":
+                            x = int(incrementBy[0]) + int(incrementBy[2])
+                        elif incrementBy[1] == "-":
+                            x = int(incrementBy[0]) - int(incrementBy[2])
+                        elif incrementBy[1] == "*":
+                            x = int(incrementBy[0]) * int(incrementBy[2])
+                        elif incrementBy[1] == "/":
+                            x = int(incrementBy[0]) / int(incrementBy[2])
+                        elif incrementBy[1] == "//":
+                            x = int(incrementBy[0]) // int(incrementBy[2])
+                        elif incrementBy[1] == "**":
+                            x = int(incrementBy[0]) ** int(incrementBy[2])
+                        print(x)
             
-            if tempMsg[0] == "!temp" and discordRoles[msg["Server"]]["Mod"]["Number"] <= roleNum:
-                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
-                commandStats = {"sentFrom":msg["sentFrom"],"Command":"setRole","args": ["Mod"],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
+                        file[4] = str(x)
+                        test=""
+                        for x in file:
+                            test = test + x
+                        f.close()
+                        f = open(val["file"], 'w')                        
+                        f.write(test)
+                    elif val["commandType"] == "readFile":
+                        f = open(val["file"], 'r')
+                        print("readFile")
+                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(f.read()),"sent": False}
+                    if commandStats != "":
+                        processedCommand.append(commandStats)
+                        commandStats = ""
+                       
+                    if msgStats != "":
+                        processedMSG.append(msgStats)
+                        msgStats = ""
+                                    
+                
+                if tempMsg[0] == "!temp" and discordRoles[msg["Server"]]["Mod"]["Number"] <= roleNum:
+                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
+                    commandStats = {"sentFrom":msg["sentFrom"],"Command":"setRole","args": ["Mod"],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
+                    processedCommand.append(commandStats)
+                    realCommand = True
+            elif msg["Bot"] == "IRC":
+                if tempMsg[0] == "!temp":
+                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
+                    processedMSG.append(msgStats)
+                    realCommand = True
+            elif msg["Bot"] == "Youtube":
+                if tempMsg[0] == "!temp":
+                    msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
+                    processedMSG.append(msgStats)
+                    realCommand = True
+
+            if realCommand == True:
+                mainMsg[j]["sent"] = True
+
+            
+            if commandStats != "":
                 processedCommand.append(commandStats)
-                realCommand = True
-        elif msg["Bot"] == "IRC":
-            if tempMsg[0] == "!temp":
-                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
+               
+            if msgStats != "":
                 processedMSG.append(msgStats)
-                realCommand = True
-        elif msg["Bot"] == "Youtube":
-            if tempMsg[0] == "!temp":
-                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
-                processedMSG.append(msgStats)
-                realCommand = True
-
-        if realCommand == True:
-            mainMsg[j]["sent"] = True
-
-        
-        if commandStats != "":
-            processedCommand.append(commandStats)
-           
-        if msgStats != "":
-            processedMSG.append(msgStats)
 
  
         

@@ -158,6 +158,10 @@
             "pageToken": ""
         }
     },
+    "wordBlacklist": [
+        "testing123",
+        "hi"
+    ],
     "IRCToDiscordFormatting": "{1} : {2}",
     "channelName": "serverchat",
     "discordToIRCFormating": "{0} : {1}",
