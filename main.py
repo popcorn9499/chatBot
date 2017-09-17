@@ -174,10 +174,10 @@ async def discordCheckCommand(): #checks for a discord message
     for command in processedCommand: #this cycles through the array for messages unsent to discord and sends them
         if command["sent"] == False: 
             if command["Command"] == "setRole":
-                await client.add_roles(command["authorData"], discordRoles["Popicraft Minecraft"]["Mod"]["Data"])
+                await client.add_roles(command["authorData"], discordRoles["Popicraft Minecraft"][command["args"][0]]["Data"])
             elif command["Command"] == "removeRole":
                 print("removing")
-                await client.remove_roles(command["authorData"], discordRoles["Popicraft Minecraft"]["Mod"]["Data"])
+                await client.remove_roles(command["authorData"], discordRoles["Popicraft Minecraft"][command["args"][0]]["Data"])
             elif  command["Command"] == "sendMessage":
                 print("placeholder")
             
