@@ -133,7 +133,7 @@
         "Youtube": {
             "Channel": {
                 "Youtube": {
-                    "Enabled": false,
+                    "Enabled": true,
                     "sendTo": {
                         "#popicraft": {
                             "Channel": "#popicraft",
@@ -165,7 +165,7 @@
     "IRCToDiscordFormatting": "{1} : {2}",
     "channelName": "serverchat",
     "discordToIRCFormating": "{0} : {1}",
-    "discordToken": "",
+    "discordToken": ",
     "ircChannel": "#popicraft",
     "ircNickname": "DiscordBot",
     "ircPassword": "",
