@@ -491,6 +491,7 @@ def getLiveId(youtube): #this gets the live chat id
     liveChatId = list_streams_request["items"][0]["snippet"]["liveChatId"]#sifts through the output to get the live chat id and saves it
     botUserID = list_streams_request["items"][1]["snippet"]["channelId"] #saves the bots channel user id that we will use as a identifier
     print("liveID {0}".format(liveChatId)) #print the live chat id
+    #print("BotID" + str(botUserID))
   
  
   
@@ -501,6 +502,7 @@ def listChat():
     global config
     global youtube
     global mainMsg
+
     list_chatmessages = youtube.liveChatMessages().list( #lists the chat messages
         part="id,snippet,authorDetails", #gets the author details needed and the snippet all of which giving me the message and username
         liveChatId=liveChatId,
@@ -510,7 +512,8 @@ def listChat():
 
     config["Bot"]["Youtube"]["pageToken"] = list_chatmessages["nextPageToken"] #page token for next use
     
-    msgCheckRegex = re.compile(r'[*:]') #setup for if we happen to need this it should never change either way
+    msgCheckRegex = re.compile(r'(:)') #setup for if we happen to need this it should never change either way
+    
     for temp in list_chatmessages["items"]: #goes through all the stuff in the list messages list
         message = temp["snippet"]["displayMessage"] #gets the display message
         username = temp["authorDetails"]["displayName"] #gets the users name
@@ -518,17 +521,25 @@ def listChat():
         if message != "" and username != "": #this makes sure that the message and username slot arent empty before putting this to the discord chat        
             print(temp)
             fileSave("youtubeMsgJson.json", temp)
+            print(userID)
+            print(botUserID)
             if userID != botUserID:
                 print("{0} {1}".format(username,message))
                 msgStats = {"sentFrom":"Youtube","Bot":"Youtube","Server": None,"Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorRoles":None,"msg":message,"sent":False}
                 mainMsg.append(msgStats)
             elif userID == botUserID: #if the userId is the bots then check the message to see if the bot sent it.
-                msgCheckComplete = msgCheckRegex.search(message) #checks the message against the previously created regex for ":"
-                if msgCheckComplete != ":": #if its this then go and send the message as normal
-                    print("{0} {1}".format(username,message))
-                    msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorRoles":None,"msg":message,"sent":False}
-                    mainMsg.append(msgStats)
-        
+                try:
+                    msgCheckComplete = msgCheckRegex.search(message) #checks the message against the previously created regex for ":"
+                    if msgCheckComplete.group(1) != ":": #if its this then go and send the message as normal
+                        print("{0} {1}".format(username,message))
+                        msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorRoles":None,"msg":message,"sent":False}
+                        mainMsg.append(msgStats)
+                except AttributeError as error:
+                    y = 1
+                    # print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
+
+                
+                
 def sendLiveChat(msg): #sends messages to youtube live chat
     list_chatmessages_inset = youtube.liveChatMessages().insert(
         part = "snippet",
@@ -591,7 +602,7 @@ class mainBot():
                 
                 #msgStats = {"sentFrom":msg["sentFrom"],"Bot":"Discord","Server": msg["Server"] ,"Channel":msg["Channel"],"ChannelTo": "serverchat", "author":msg["author"],"msg":msg["msg"],"msgFormated":{"test":config["IRCToDiscordFormatting"].format(msg["Channel"],msg["author"],msg["msg"])},"sent":{"test":False}}
                 try: #this is here to ensure the thread doesnt crash from looking for something that doesnt exist
-                    if False == False:
+                    if self.blacklistWorkCheck(msg,j) == False:
                         print("working")
                         for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
                             if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
@@ -611,7 +622,10 @@ class mainBot():
                     commandStats = {"sentFrom":msg["sentFrom"],"Command":"deleteMessage","args": [msg["msgData"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False} #sends delete command
                     processedCommand.append(commandStats)
                     found = True #sets to true if found one blacklisted word
+                    print("blacklisted")
                     mainMsg[j]["sent"] = True #sets the message to true so it doesnt get cyclee through again
+                    return True
+        return False
                     
 
     def commandCheck(self,msg,j):
@@ -716,12 +730,18 @@ class mainBot():
 #this starts everything for the irc client 
 ##main loop for the code
 
+# message = "test :"
+
+# msgCheckRegex = re.compile(r'(:)')
+# msgCheckComplete = msgCheckRegex.search(message) #checks the message against the previously created regex for ":"
+# print(msgCheckComplete.group(1))
+
 
 #deleteThread = threading.Thread(target=deleteIrcToDiscordMsgThread) #this is broken and needs rewriting
 #deleteThread.start()
 
-#mainBot().main()
-print("test")
+# mainBot().main()
+# print("test")
 chatControlThread = threading.Thread(target=mainBot().main)
 chatControlThread.start()
 

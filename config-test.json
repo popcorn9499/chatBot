@@ -62,26 +62,26 @@
                         "test": {
                             "Enabled": true,
                             "Send": true,
-                            "formatting": "{0} {1}",
+                            "formatting": "{0} : {1}",
                             "sendTo": {
                                 "#popicraft": {
                                     "Channel": "#popicraft",
                                     "Enabled": true,
                                     "Server": "None",
-                                    "Formatting": "{1} {2}",
+                                    "Formatting": "{1} : {2}",
                                     "Site": "IRC"
                                 },
                                 "Youtube": {
                                     "Channel": "Youtube",
                                     "Enabled": true,
                                     "Server": "None",
-                                    "Formatting": "{1} {2}",
+                                    "Formatting": "{1} : {2}",
                                     "Site": "Youtube"
                                 },
                                 "test": {
                                     "Channel": "test2",
                                     "Enabled": true,
-                                    "Formatting": "{1} {2}",
+                                    "Formatting": "{1} : {2}",
                                     "Server": "Popicraft Minecraft",
                                     "Site": "Discord"
                                 }
@@ -93,7 +93,7 @@
                                     "test": {
                                         "Channel": "test",
                                         "Enabled": true,
-                                        "Formatting": "{0} {1}",
+                                        "Formatting": "{0} : {1}",
                                         "Server": "Popicraft Minecraft",
                                         "Site": "Discord"
                                     }
@@ -117,14 +117,14 @@
                                 "Youtube": {
                                     "Channel": "Youtube",
                                     "Enabled": true,
-                                    "Formatting": "{1} {2}",
+                                    "Formatting": "{1} : {2}",
                                     "Server": "None",
                                     "Site": "Youtube"
                                 },
                                 "test": {
                                     "Channel": "test",
                                     "Enabled": true,
-                                    "Formatting": "{1} {2}",
+                                    "Formatting": "{1} : {2}",
                                     "Server": "Popicraft Minecraft",
                                     "Site": "Discord"
                                 }
@@ -150,14 +150,14 @@
                                 "#popicraft": {
                                     "Channel": "#popicraft",
                                     "Enabled": true,
-                                    "Formatting": "{1} {2}",
+                                    "Formatting": "{1} : {2}",
                                     "Server": "None",
                                     "Site": "IRC"
                                 },
                                 "test": {
                                     "Channel": "test",
                                     "Enabled": true,
-                                    "Formatting": "{1} {2}",
+                                    "Formatting": "{1} : {2}",
                                     "Server": "Popicraft Minecraft",
                                     "Site": "Discord"
                                 }
