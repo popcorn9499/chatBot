@@ -502,7 +502,7 @@ def listChat():
     global config
     global youtube
     global mainMsg
-
+    
     list_chatmessages = youtube.liveChatMessages().list( #lists the chat messages
         part="id,snippet,authorDetails", #gets the author details needed and the snippet all of which giving me the message and username
         liveChatId=liveChatId,
@@ -538,8 +538,38 @@ def listChat():
                     y = 1
                     # print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
 
-                
-                
+def listLiveStreams():
+    global pageToken #pulls in the page token
+    global liveChatId #pulls in the liveChatID
+    global botUserID #pulls in the bots channel ID
+    global config
+    global youtube
+    global mainMsg            
+    x = list_streams_request = youtube.liveStreams().list(
+        part="id,snippet",
+        mine=True,
+        maxResults=50
+    ).execute()
+    fileSave("youtubeliveStreamsJson.json", x)
+    
+    
+def listLiveBroadcasts():
+    global pageToken #pulls in the page token
+    global liveChatId #pulls in the liveChatID
+    global botUserID #pulls in the bots channel ID
+    global config
+    global youtube
+    global mainMsg            
+    x = youtube.liveBroadcasts().list(
+    broadcastStatus="all",
+    part="id,snippet",
+    maxResults=50
+  ).execute()
+    fileSave("youtubeliveBroadcastsJson.json", x)    
+
+    
+
+    
 def sendLiveChat(msg): #sends messages to youtube live chat
     list_chatmessages_inset = youtube.liveChatMessages().insert(
         part = "snippet",
@@ -569,6 +599,8 @@ def youtubeChatControl():
     global processedMSG
     while True:    
         listChat()
+        listLiveStreams()
+        listLiveBroadcasts()
         j = 0
         for msg in processedMSG: #this cycles through the array for messages unsent to irc and sends them
             if msg["sent"] == False and msg["sendTo"]["Bot"] == "Youtube":
@@ -577,6 +609,123 @@ def youtubeChatControl():
             j = j + 1
         time.sleep(2) 
 
+class twitchBot():
+    
+    
+    
+    def getChannelID(self):
+        from urllib.parse import urlencode
+        from requests import Session
+        from requests.adapters import HTTPAdapter
+        from requests.exceptions import HTTPError, InvalidURL, ConnectionError
+        import json
+        
+        clientId=""  #Register a Twitch Developer application and put its client ID here
+        accessToken="" #Generate an OAuth token with channel_subscriptions scope and insert your token here
+         
+        channelName=""  #Put your channel name here
+        saveLocation = "/var/www/api/subscriberList.txt" #Put the location you'd like to save your list here
+        session=Session()
+        channelId=""
+         
+         
+        channelIdUrl="https://api.twitch.tv/kraken/users?login="+channelName
+         
+        retryAdapter = HTTPAdapter(max_retries=2)
+        session.mount('https://',retryAdapter)
+        session.mount('http://',retryAdapter)
+        #Find the Channel ID
+        response = session.get(channelIdUrl, headers={
+        'Client-ID': clientId,
+        'Accept': 'application/vnd.twitchtv.v5+json',
+        'Content-Type': 'application/json'
+        })
+        try:
+            result = json.loads(response.text)
+        except:
+            result = None
+         
+        if (result):
+            channelId = result["users"][0]["_id"]
+         
+        print(channelId)
+        self.setTitle(channelId,clientId,accessToken)
+        self.setGame(channelId,clientId,accessToken)
+        
+    def setTitle(self,channelId,clientId,accessToken):
+        #initiate the requests library
+        from urllib.parse import urlencode
+        from requests import Session
+        from requests.adapters import HTTPAdapter
+        from requests.exceptions import HTTPError, InvalidURL, ConnectionError
+        import json
+        
+        session=Session()
+        #channelId=""
+         
+         
+         
+        retryAdapter = HTTPAdapter(max_retries=2)
+        session.mount('https://',retryAdapter)
+        session.mount('http://',retryAdapter)
+        #Find the Channel ID
+        result = None
+        response = None
+        apiRequestUrl="https://api.twitch.tv/kraken/channels/"+channelId
+         
+        data = '{"channel": {"status": "Test"}}'
+         
+        #Do the API push data
+        response = session.put(apiRequestUrl, headers={
+        'Client-ID': clientId,
+        'Authorization': 'OAuth '+accessToken,
+        "Accept": "application/vnd.twitchtv.v5+json",
+        'Content-Type': 'application/json'
+        }, data=data) 
+        try:
+            result = json.loads(response.text)
+        except:
+            result = None
+        print(result) #prints it out
+        
+        
+    def setGame(self,channelId,clientId,accessToken):
+        from urllib.parse import urlencode
+        from requests import Session
+        from requests.adapters import HTTPAdapter
+        from requests.exceptions import HTTPError, InvalidURL, ConnectionError
+        import json
+        
+        session=Session()
+        #channelId=""
+         
+         
+         
+        retryAdapter = HTTPAdapter(max_retries=2)
+        session.mount('https://',retryAdapter)
+        session.mount('http://',retryAdapter)
+        #Find the Channel ID
+        result = None
+        response = None
+         
+        apiRequestUrl="https://api.twitch.tv/kraken/channels/"+channelId
+         
+        data = '{"channel": {"game": "Minecraft"}}'
+         
+        #Do the API Lookup
+        response = session.put(apiRequestUrl, headers={
+        'Client-ID': clientId,
+        'Authorization': 'OAuth '+accessToken,
+        "Accept": "application/vnd.twitchtv.v5+json",
+        'Content-Type': 'application/json'
+        }, data=data)
+        try:
+            result = json.loads(response.text)
+        except:
+            result = None
+        print(result) 
+        
+        
 class mainBot():
     global config , discord
     def main(self):
@@ -730,7 +879,7 @@ class mainBot():
         print("none")
         return False
 
- 
+
         
 #this starts everything for the irc client 
 ##main loop for the code
@@ -741,29 +890,32 @@ class mainBot():
 
 # mainBot().main()
 # print("test")
-chatControlThread = threading.Thread(target=mainBot().main)
-chatControlThread.start()
+# chatControlThread = threading.Thread(target=mainBot().main)
+# chatControlThread.start()
 
-ircCheckThread = threading.Thread(target=ircCheck)#starts my irc check thread which should print false if the irc thread dies.
-if config["Bot"]["IRC"]["Enabled"] == True:
-    ircCheckThread.start()
-    print("IRC Loaded")
-else:
-    print("IRC not loaded")
+# ircCheckThread = threading.Thread(target=ircCheck)#starts my irc check thread which should print false if the irc thread dies.
+# if config["Bot"]["IRC"]["Enabled"] == True:
+    # ircCheckThread.start()
+    # print("IRC Loaded")
+# else:
+    # print("IRC not loaded")
 
-youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
-if config["Bot"]["Youtube"]["Enabled"] == True:
-    youtubeChatThread.start()
-    print("Youtube Loaded")
-else:
-    print("Youtube not loaded")
+# youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
+# if config["Bot"]["Youtube"]["Enabled"] == True:
+    # youtubeChatThread.start()
+    # print("Youtube Loaded")
+# else:
+    # print("Youtube not loaded")
 
-discordThread = threading.Thread(target=client.run(config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
-if config["Bot"]["Discord"]["Enabled"] == True:
-    print("Discord Loaded")
-    discordThread.start()
-else:
-    print("Discord not loaded")
-
+# discordThread = threading.Thread(target=client.run(config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
+# if config["Bot"]["Discord"]["Enabled"] == True:
+    # print("Discord Loaded")
+    # discordThread.start()
+# else:
+    # print("Discord not loaded")
+    
+    
+twitchBot().getChannelID()
+print("ye")
 
 
