@@ -725,8 +725,49 @@ class twitchBot():
             result = json.loads(response.text)
         except:
             result = None
-        print(result) 
+        print(result)
+    
+    def getViewerCount(self):
+        from urllib.parse import urlencode
+        from requests import Session
+        from requests.adapters import HTTPAdapter
+        from requests.exceptions import HTTPError, InvalidURL, ConnectionError
+        import json
         
+        session=Session()
+        #channelId=""
+         
+        clientId, accessToken, channelId =  self.getChannelID() 
+         
+        retryAdapter = HTTPAdapter(max_retries=2)
+        session.mount('https://',retryAdapter)
+        session.mount('http://',retryAdapter)
+        #Find the Channel ID
+        result = None
+        response = None
+         
+        apiRequestUrl="https://api.twitch.tv/kraken/streams/"+channelId
+        
+        #Do the API Lookup
+        response = session.get(apiRequestUrl, headers={
+        'Client-ID': clientId,
+        'Authorization': 'OAuth '+accessToken,
+        "Accept": "application/vnd.twitchtv.v5+json",
+        'Content-Type': 'application/json'
+        })
+        try:
+            result = json.loads(response.text)
+        except:
+            result = None
+        if result["stream"] != None:
+            return result["stream"]["viewers"]
+        else:
+            return None
+    
+    
+    
+    
+
         
 class mainBot():
     global config , discord
@@ -842,16 +883,23 @@ class mainBot():
                         msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(f.read()),"sent": False}
                     elif val["commandType"] == "relayCommand": #will relay a command from said service (IRC,Youtube or discord)
                         print("placeholder")
-                    elif val["commandType"] == "twitchSetGame": #will relay a command from said service (IRC,Youtube or discord)
+                    elif val["commandType"] == "twitchSetGame" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
                         game = msg["msg"][len(tempMsg[0])+1:]
                         twitchBot().setGame(game)
                         msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"]),"sent": False}
                         print("placeholder")
-                    elif val["commandType"] == "twitchSetTitle": #will relay a command from said service (IRC,Youtube or discord)
+                    elif val["commandType"] == "twitchSetTitle" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
                         title = msg["msg"][len(tempMsg[0])+1:]
                         twitchBot().setGame(title)
                         msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"]),"sent": False}
                         print("placeholder")
+                    elif val["commandType"] == "twitchGetViewers" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
+                        viewers = twitchBot().getViewerCount()
+                        print(viewers)
+                        print(msgStats)
+                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],viewers),"sent": False}
+                        print("placeholder")    
+                        
                     print("done command check")
                     if commandStats != "":
                         processedCommand.append(commandStats)
@@ -907,19 +955,19 @@ print("test")
 chatControlThread = threading.Thread(target=mainBot().main)
 chatControlThread.start()
 
-ircCheckThread = threading.Thread(target=ircCheck)#starts my irc check thread which should print false if the irc thread dies.
-if config["Bot"]["IRC"]["Enabled"] == True:
-    ircCheckThread.start()
-    print("IRC Loaded")
-else:
-    print("IRC not loaded")
+# ircCheckThread = threading.Thread(target=ircCheck)#starts my irc check thread which should print false if the irc thread dies.
+# if config["Bot"]["IRC"]["Enabled"] == True:
+    # ircCheckThread.start()
+    # print("IRC Loaded")
+# else:
+    # print("IRC not loaded")
 
-youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
-if config["Bot"]["Youtube"]["Enabled"] == True:
-    youtubeChatThread.start()
-    print("Youtube Loaded")
-else:
-    print("Youtube not loaded")
+# youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
+# if config["Bot"]["Youtube"]["Enabled"] == True:
+    # youtubeChatThread.start()
+    # print("Youtube Loaded")
+# else:
+    # print("Youtube not loaded")
 
 discordThread = threading.Thread(target=client.run(config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
 if config["Bot"]["Discord"]["Enabled"] == True:
@@ -929,7 +977,7 @@ else:
     print("Discord not loaded")
     
     
-# twitchBot().getChannelID()
+# twitchBot().getViewerCount()
 # print("ye")
 
 

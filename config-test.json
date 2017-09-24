@@ -115,6 +115,13 @@
                                 "rankRequired": "Owner",
                                 "msgResponse": "{0} updated the stream title"
                             }
+                        ],
+                        "!twitchGetViews": [
+                            {
+                                "commandType": "twitchGetViewers",
+                                "rankRequired": "Owner",
+                                "msgResponse": "viewers {4}"
+                            }
                         ]
                     },
                     "Enabled": true
