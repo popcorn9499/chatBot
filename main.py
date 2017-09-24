@@ -831,86 +831,86 @@ class mainBot():
                     if val > roleNum:
                         roleNum = val
                 print(tempMsg)
-                # try:
-                print("before commands")
-                for val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Commands"][tempMsg[0]]: #loops through the commands
-                    print("in Commands")
-                    if val["commandType"] == "setRole": #sets a role to the user
-                        if  discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
-                            print("passed the right command and the correct role")
-                            commandStats = {"sentFrom":msg["sentFrom"],"Command":"setRole","args": [val["rankToBe"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
-                    elif val["commandType"] == "removeRole": #removes a role from the user
-                        if discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
-                            print("passed the right command and the correct role")
-                            commandStats = {"sentFrom":msg["sentFrom"],"Command":"removeRole","args": [val["rankToBe"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
+                try:
+                    print("before commands")
+                    for val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Commands"][tempMsg[0]]: #loops through the commands
+                        print("in Commands")
+                        if val["commandType"] == "setRole": #sets a role to the user
+                            if  discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
+                                print("passed the right command and the correct role")
+                                commandStats = {"sentFrom":msg["sentFrom"],"Command":"setRole","args": [val["rankToBe"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
+                        elif val["commandType"] == "removeRole": #removes a role from the user
+                            if discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
+                                print("passed the right command and the correct role")
+                                commandStats = {"sentFrom":msg["sentFrom"],"Command":"removeRole","args": [val["rankToBe"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
 
-                    elif val["commandType"] == "sendMessage": #sends a message to discord in the channel it was set to
-                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"]),"sent": False}
-                    elif val["commandType"] == "setFile":
-                        print("placeholder")
-                    elif val["commandType"] == "incrementFile": #increments a file by blank
-                        f = open(val["file"], 'r')#opens file
-                        file = []
-                        print("incrementFile")
-                        for line in f: #pulls the file line by line into a array
-                            file.append(line)
-                        incrementBy = val["incrementBy"].format(int(file[val["lineToIncrement"]])).split() #splits the formatted string
-                        if incrementBy[1] == "+": #checks to see which operation needs to be  done and applys it
-                            x = int(incrementBy[0]) + int(incrementBy[2])
-                        elif incrementBy[1] == "-":
-                            x = int(incrementBy[0]) - int(incrementBy[2])
-                        elif incrementBy[1] == "*":
-                            x = int(incrementBy[0]) * int(incrementBy[2])
-                        elif incrementBy[1] == "/":
-                            x = int(incrementBy[0]) / int(incrementBy[2])
-                        elif incrementBy[1] == "//":
-                            x = int(incrementBy[0]) // int(incrementBy[2])
-                        elif incrementBy[1] == "**":
-                            x = int(incrementBy[0]) ** int(incrementBy[2])
-                        print(x)
-            
-                        file[val["lineToIncrement"]] = str(x) #converts it back to string and saves it to the array on said line
-                        test=""
-                        for x in file: #puts it back into the file
-                            test = test + x
-                        f.close() #closes file
-                        f = open(val["file"], 'w') #writes it back to file                        
-                        f.write(test)
-                    elif val["commandType"] == "readFile": #reads a file and sends it to the service
-                        f = open(val["file"], 'r')#opens file
-                        print("readFile")
-                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(f.read()),"sent": False}
-                    elif val["commandType"] == "relayCommand": #will relay a command from said service (IRC,Youtube or discord)
-                        print("placeholder")
-                    elif val["commandType"] == "twitchSetGame" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
-                        game = msg["msg"][len(tempMsg[0])+1:]
-                        twitchBot().setGame(game)
-                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"]),"sent": False}
-                        print("placeholder")
-                    elif val["commandType"] == "twitchSetTitle" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
-                        title = msg["msg"][len(tempMsg[0])+1:]
-                        twitchBot().setGame(title)
-                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"]),"sent": False}
-                        print("placeholder")
-                    elif val["commandType"] == "twitchGetViewers" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
-                        viewers = twitchBot().getViewerCount()
-                        print(viewers)
-                        print(msgStats)
-                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],viewers),"sent": False}
-                        print("placeholder")    
-                        
-                    print("done command check")
-                    if commandStats != "":
-                        processedCommand.append(commandStats)
-                        commandStats = ""
-                        return True
-                    if msgStats != "":
-                        processedMSG.append(msgStats)
-                        msgStats = ""
-                        return True
+                        elif val["commandType"] == "sendMessage": #sends a message to discord in the channel it was set to
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"]),"sent": False}
+                        elif val["commandType"] == "setFile":
+                            print("placeholder")
+                        elif val["commandType"] == "incrementFile": #increments a file by blank
+                            f = open(val["file"], 'r')#opens file
+                            file = []
+                            print("incrementFile")
+                            for line in f: #pulls the file line by line into a array
+                                file.append(line)
+                            incrementBy = val["incrementBy"].format(int(file[val["lineToIncrement"]])).split() #splits the formatted string
+                            if incrementBy[1] == "+": #checks to see which operation needs to be  done and applys it
+                                x = int(incrementBy[0]) + int(incrementBy[2])
+                            elif incrementBy[1] == "-":
+                                x = int(incrementBy[0]) - int(incrementBy[2])
+                            elif incrementBy[1] == "*":
+                                x = int(incrementBy[0]) * int(incrementBy[2])
+                            elif incrementBy[1] == "/":
+                                x = int(incrementBy[0]) / int(incrementBy[2])
+                            elif incrementBy[1] == "//":
+                                x = int(incrementBy[0]) // int(incrementBy[2])
+                            elif incrementBy[1] == "**":
+                                x = int(incrementBy[0]) ** int(incrementBy[2])
+                            print(x)
+                
+                            file[val["lineToIncrement"]] = str(x) #converts it back to string and saves it to the array on said line
+                            test=""
+                            for x in file: #puts it back into the file
+                                test = test + x
+                            f.close() #closes file
+                            f = open(val["file"], 'w') #writes it back to file                        
+                            f.write(test)
+                        elif val["commandType"] == "readFile": #reads a file and sends it to the service
+                            f = open(val["file"], 'r')#opens file
+                            print("readFile")
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(f.read()),"sent": False}
+                        elif val["commandType"] == "relayCommand": #will relay a command from said service (IRC,Youtube or discord)
+                            print("placeholder")
+                        elif val["commandType"] == "twitchSetGame" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
+                            game = msg["msg"][len(tempMsg[0])+1:]
+                            twitchBot().setGame(game)
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"]),"sent": False}
+                            print("placeholder")
+                        elif val["commandType"] == "twitchSetTitle" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
+                            title = msg["msg"][len(tempMsg[0])+1:]
+                            twitchBot().setGame(title)
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"]),"sent": False}
+                            print("placeholder")
+                        elif val["commandType"] == "twitchGetViewers" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
+                            viewers = twitchBot().getViewerCount()
+                            print(viewers)
+                            print(msgStats)
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],viewers),"sent": False}
+                            print("placeholder")    
                             
-                # except KeyError as error:
-                        # print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
+                        print("done command check")
+                        if commandStats != "":
+                            processedCommand.append(commandStats)
+                            commandStats = ""
+                            return True
+                        if msgStats != "":
+                            processedMSG.append(msgStats)
+                            msgStats = ""
+                            return True
+                            
+                except KeyError as error:
+                        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
                 
                 if tempMsg[0] == "!temp" and discordRoles[msg["Server"]]["Mod"]["Number"] <= roleNum:
                     msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
