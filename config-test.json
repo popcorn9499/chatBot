@@ -4,83 +4,29 @@
             "Enabled": true,
             "Servers": {
                 "Popicraft Minecraft": {
-                    "Enabled": true,
-                    "Commands": {
-                        "!roleUp": [
-                            {
-                                "commandType": "setRole",
-                                "rankToBe": "Mod",
-                                "rankRequired": "Owner"
-                            },{
-                                "commandType": "sendMessage",
-                                "rankRequired": "Owner",
-                                "msgResponse": "You got upgraded to Mod"
-                            },{
-                                "commandType": "readFile",
-                                "file": "workfile",
-                                "rankRequired": "Owner",
-                                "msgResponse": "```{0}```"
-                            }
-                        ],
-                        "!roleDown": [
-                            {
-                                "commandType": "removeRole",
-                                "rankToBe": "Mod",
-                                "rankRequired": "Owner"
-                            },{
-                                "commandType": "sendMessage",
-                                "rankRequired": "Owner",
-                                "msgResponse": "You got demoted from Mod"
-                            },{
-                                "commandType": "readFile",
-                                "file": "workfile",
-                                "rankRequired": "Owner",
-                                "msgResponse": "```{0}```"
-                            }
-                        ],
-                        "!fileReadTest": [
-                            {
-                                "commandType": "readFile",
-                                "file": "workfile",
-                                "rankRequired": "Owner",
-                                "msgResponse": "```{0}```"
-                            }
-                        ],
-                        "!fileIncrement": [
-                            {
-                                "commandType": "incrementFile",
-                                "file": "workfile",
-                                "rankRequired": "Owner",
-                                "msgResponse": "```{0}```",
-                                "incrementBy": "{0} ** 2",
-                                "lineToIncrement": 4
-                            }
-                        ]
-                        
-                    },
                     "Channel": {
                         "test": {
                             "Enabled": true,
                             "Send": true,
-                            "formatting": "{0} : {1}",
+                            "formatting": "{0} {1}",
                             "sendTo": {
                                 "#popicraft": {
                                     "Channel": "#popicraft",
-                                    "Enabled": true,
-                                    "Server": "None",
+                                    "Enabled": false,
                                     "Formatting": "{1} : {2}",
+                                    "Server": "None",
                                     "Site": "IRC"
                                 },
                                 "Youtube": {
                                     "Channel": "Youtube",
                                     "Enabled": true,
-                                    "Server": "None",
                                     "Formatting": "{1} : {2}",
+                                    "Server": "None",
                                     "Site": "Youtube"
                                 },
                                 "test": {
                                     "Channel": "test2",
-                                    "Enabled": true,
+                                    "Enabled": false,
                                     "Formatting": "{1} : {2}",
                                     "Server": "Popicraft Minecraft",
                                     "Site": "Discord"
@@ -88,11 +34,11 @@
                             },
                             "test2": {
                                 "Send": true,
-                                "formatting": "{0} {1}",
+                                "formatting": "{0} : {1}",
                                 "sendTo": {
                                     "test": {
                                         "Channel": "test",
-                                        "Enabled": true,
+                                        "Enabled": false,
                                         "Formatting": "{0} : {1}",
                                         "Server": "Popicraft Minecraft",
                                         "Site": "Discord"
@@ -100,15 +46,90 @@
                                 }
                             }
                         }
-                    }
+                    },
+                    "Commands": {
+                        "!fileIncrement": [
+                            {
+                                "commandType": "incrementFile",
+                                "file": "workfile",
+                                "incrementBy": "{0} ** 2",
+                                "lineToIncrement": 4,
+                                "msgResponse": "```{0}```",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!fileReadTest": [
+                            {
+                                "commandType": "readFile",
+                                "file": "workfile",
+                                "msgResponse": "```{0}```",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!roleDown": [
+                            {
+                                "commandType": "removeRole",
+                                "rankRequired": "Owner",
+                                "rankToBe": "Mod"
+                            },
+                            {
+                                "commandType": "sendMessage",
+                                "msgResponse": "You got demoted from Mod",
+                                "rankRequired": "Owner"
+                            },
+                            {
+                                "commandType": "readFile",
+                                "file": "workfile",
+                                "msgResponse": "```{0}```",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!roleUp": [
+                            {
+                                "commandType": "setRole",
+                                "rankRequired": "Owner",
+                                "rankToBe": "Mod"
+                            },
+                            {
+                                "commandType": "sendMessage",
+                                "msgResponse": "You got upgraded to Mod",
+                                "rankRequired": "Owner"
+                            },
+                            {
+                                "commandType": "readFile",
+                                "file": "workfile",
+                                "msgResponse": "```{0}```",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!twitchSetGame": [
+                            {
+                                "commandType": "twitchSetGame",
+                                "rankRequired": "Owner",
+                                "msgResponse": "{0} updated the stream game title"
+                            }
+                        ],
+                        "!twitchSetTitle": [
+                            {
+                                "commandType": "twitchSetTitle",
+                                "rankRequired": "Owner",
+                                "msgResponse": "{0} updated the stream title"
+                            }
+                        ]
+                    },
+                    "Enabled": true
                 }
             },
             "Token": ""
         },
         "IRC": {
+            "Enabled": true,
+            "IP": "irc.popicraft.net",
+            "Nickname": "DiscordBot",
+            "Password": "",
+            "Port": "6667",
             "Servers": {
                 "None": {
-                    "Enabled": true,
                     "Channel": {
                         "#popicraft": {
                             "Enabled": true,
@@ -116,40 +137,37 @@
                             "sendTo": {
                                 "Youtube": {
                                     "Channel": "Youtube",
-                                    "Enabled": true,
+                                    "Enabled": false,
                                     "Formatting": "{1} : {2}",
                                     "Server": "None",
                                     "Site": "Youtube"
                                 },
                                 "test": {
                                     "Channel": "test",
-                                    "Enabled": true,
+                                    "Enabled": false,
                                     "Formatting": "{1} : {2}",
                                     "Server": "Popicraft Minecraft",
                                     "Site": "Discord"
                                 }
                             }
                         }
-                    }
+                    },
+                    "Enabled": true
                 }
-            },
-            "Enabled": true,
-            "IP": "irc.popicraft.net",
-            "Nickname": "DiscordBot",
-            "Password": "",
-            "Port": "6667"
+            }
         },
         "Youtube": {
+            "ChannelName": "Youtube",
+            "Enabled": true,
             "Servers": {
                 "None": {
-                    "Enabled": true,
                     "Channel": {
                         "Youtube": {
                             "Enabled": true,
                             "sendTo": {
                                 "#popicraft": {
                                     "Channel": "#popicraft",
-                                    "Enabled": true,
+                                    "Enabled": false,
                                     "Formatting": "{1} : {2}",
                                     "Server": "None",
                                     "Site": "IRC"
@@ -163,19 +181,14 @@
                                 }
                             }
                         }
-                    }
+                    },
+                    "Enabled": true
                 }
             },
-            "ChannelName": "Youtube",
-            "Enabled": true,
             "Site": "YoutubeLiveChat",
             "pageToken": ""
         }
     },
-    "wordBlacklist": [
-        "testing123",
-        "hi"
-    ],
     "IRCToDiscordFormatting": "{1} : {2}",
     "channelName": "serverchat",
     "discordToIRCFormating": "{0} : {1}",
@@ -186,5 +199,9 @@
     "ircPort": "6667",
     "ircServerIP": "irc.popicraft.net",
     "pageToken": "",
-    "serverName": "Popicraft Minecraft"
+    "serverName": "Popicraft Minecraft",
+    "wordBlacklist": [
+        "testing123",
+        "hi"
+    ]
 }
