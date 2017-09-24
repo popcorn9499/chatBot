@@ -620,11 +620,10 @@ class twitchBot():
         from requests.exceptions import HTTPError, InvalidURL, ConnectionError
         import json
         
-        clientId=""  #Register a Twitch Developer application and put its client ID here
-        accessToken="" #Generate an OAuth token with channel_subscriptions scope and insert your token here
+        clientId=config["Twitch"]["clientId"]  #Register a Twitch Developer application and put its client ID here
+        accessToken=config["Twitch"]["accessToken"] #Generate an OAuth token with channel_subscriptions scope and insert your token here
          
-        channelName=""  #Put your channel name here
-        saveLocation = "/var/www/api/subscriberList.txt" #Put the location you'd like to save your list here
+        channelName= config["Twitch"]["channelName"]  #Put your channel name here
         session=Session()
         channelId=""
          
@@ -955,19 +954,19 @@ print("test")
 chatControlThread = threading.Thread(target=mainBot().main)
 chatControlThread.start()
 
-# ircCheckThread = threading.Thread(target=ircCheck)#starts my irc check thread which should print false if the irc thread dies.
-# if config["Bot"]["IRC"]["Enabled"] == True:
-    # ircCheckThread.start()
-    # print("IRC Loaded")
-# else:
-    # print("IRC not loaded")
+ircCheckThread = threading.Thread(target=ircCheck)#starts my irc check thread which should print false if the irc thread dies.
+if config["Bot"]["IRC"]["Enabled"] == True:
+    ircCheckThread.start()
+    print("IRC Loaded")
+else:
+    print("IRC not loaded")
 
-# youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
-# if config["Bot"]["Youtube"]["Enabled"] == True:
-    # youtubeChatThread.start()
-    # print("Youtube Loaded")
-# else:
-    # print("Youtube not loaded")
+youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
+if config["Bot"]["Youtube"]["Enabled"] == True:
+    youtubeChatThread.start()
+    print("Youtube Loaded")
+else:
+    print("Youtube not loaded")
 
 discordThread = threading.Thread(target=client.run(config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
 if config["Bot"]["Discord"]["Enabled"] == True:

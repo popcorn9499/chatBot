@@ -196,6 +196,12 @@
             "pageToken": ""
         }
     },
+    "Twitch": {
+        "clientId": "",
+        "accessToken": "",
+        "channelName": ""
+    
+    },
     "IRCToDiscordFormatting": "{1} : {2}",
     "channelName": "serverchat",
     "discordToIRCFormating": "{0} : {1}",
