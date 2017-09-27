@@ -359,7 +359,28 @@
     },
     "userMuteList": {
         "popcorn9499#8130": {
-            "time": "Permenanent"
+            "time": "timer",
+            "timeStarted": {
+                "second": 18,
+                "minute": 50,
+                "hour": 16,
+                "day": 27 
+            },
+            "timeChecked": {
+                "second": 1,
+                "minute": 10,
+                "hour": 1,
+                "day": 1 
+            },
+            "timeElaplsed": {
+                "second": 1,
+                "minute": 10,
+                "hour": 1,
+                "day": 1 
+            },
+            "timeMutedFor": {
+                "minute": 1
+            }
         }
     
     },
