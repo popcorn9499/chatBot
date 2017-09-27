@@ -102,14 +102,14 @@
                                 "rankRequired": "Owner"
                             }
                         ],
-                        "!twitchSetGame": [
+                        "!SetGame": [
                             {
                                 "commandType": "twitchSetGame",
                                 "rankRequired": "Owner",
                                 "msgResponse": "{0} updated the stream game title"
                             }
                         ],
-                        "!twitchSetTitle": [
+                        "!SetTitle": [
                             {
                                 "commandType": "twitchSetTitle",
                                 "rankRequired": "Owner",
@@ -138,7 +138,7 @@
             "Servers": {
                 "None": {
                     "Channel": {
-                        "#popicraft": {
+                        "#test": {
                             "Enabled": true,
                             "Send": true,
                             "sendTo": {
@@ -158,6 +158,84 @@
                                 }
                             }
                         }
+                        
+                    },
+                    "Commands": {
+                        "!fileIncrement": [
+                            {
+                                "commandType": "incrementFile",
+                                "file": "workfile",
+                                "incrementBy": "{0} ** 2",
+                                "lineToIncrement": 4,
+                                "msgResponse": "```{0}```",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!fileReadTest": [
+                            {
+                                "commandType": "readFile",
+                                "file": "workfile",
+                                "msgResponse": "```{0}```",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!roleDown": [
+                            {
+                                "commandType": "removeRole",
+                                "rankRequired": "Owner",
+                                "rankToBe": "Mod"
+                            },
+                            {
+                                "commandType": "sendMessage",
+                                "msgResponse": "You got demoted from Mod",
+                                "rankRequired": "Owner"
+                            },
+                            {
+                                "commandType": "readFile",
+                                "file": "workfile",
+                                "msgResponse": "```{0}```",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!roleUp": [
+                            {
+                                "commandType": "setRole",
+                                "rankRequired": "Owner",
+                                "rankToBe": "Mod"
+                            },
+                            {
+                                "commandType": "sendMessage",
+                                "msgResponse": "You got upgraded to Mod",
+                                "rankRequired": "Owner"
+                            },
+                            {
+                                "commandType": "readFile",
+                                "file": "workfile",
+                                "msgResponse": "```{0}```",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!SetGame": [
+                            {
+                                "commandType": "twitchSetGame",
+                                "rankRequired": "Owner",
+                                "msgResponse": "{0} updated the stream game title"
+                            }
+                        ],
+                        "!SetTitle": [
+                            {
+                                "commandType": "twitchSetTitle",
+                                "rankRequired": "Owner",
+                                "msgResponse": "{0} updated the stream title"
+                            }
+                        ],
+                        "!twitchGetViews": [
+                            {
+                                "commandType": "twitchGetViewers",
+                                "rankRequired": "Owner",
+                                "msgResponse": "viewers {4}"
+                            }
+                        ]
                     },
                     "Enabled": true
                 }
@@ -189,6 +267,83 @@
                             }
                         }
                     },
+                    "Commands": {
+                        "!fileIncrement": [
+                            {
+                                "commandType": "incrementFile",
+                                "file": "workfile",
+                                "incrementBy": "{0} ** 2",
+                                "lineToIncrement": 4,
+                                "msgResponse": "```{0}```",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!fileReadTest": [
+                            {
+                                "commandType": "readFile",
+                                "file": "workfile",
+                                "msgResponse": "```{0}```",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!roleDown": [
+                            {
+                                "commandType": "removeRole",
+                                "rankRequired": "Owner",
+                                "rankToBe": "Mod"
+                            },
+                            {
+                                "commandType": "sendMessage",
+                                "msgResponse": "You got demoted from Mod",
+                                "rankRequired": "Owner"
+                            },
+                            {
+                                "commandType": "readFile",
+                                "file": "workfile",
+                                "msgResponse": "```{0}```",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!roleUp": [
+                            {
+                                "commandType": "setRole",
+                                "rankRequired": "Owner",
+                                "rankToBe": "Mod"
+                            },
+                            {
+                                "commandType": "sendMessage",
+                                "msgResponse": "You got upgraded to Mod",
+                                "rankRequired": "Owner"
+                            },
+                            {
+                                "commandType": "readFile",
+                                "file": "workfile",
+                                "msgResponse": "```{0}```",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!SetGame": [
+                            {
+                                "commandType": "twitchSetGame",
+                                "rankRequired": "Owner",
+                                "msgResponse": "{0} updated the stream game title"
+                            }
+                        ],
+                        "!SetTitle": [
+                            {
+                                "commandType": "twitchSetTitle",
+                                "rankRequired": "Owner",
+                                "msgResponse": "{0} updated the stream title"
+                            }
+                        ],
+                        "!twitchGetViews": [
+                            {
+                                "commandType": "twitchGetViewers",
+                                "rankRequired": "Normal",
+                                "msgResponse": "viewers {4}"
+                            }
+                        ]
+                    },
                     "Enabled": true
                 }
             },
@@ -200,6 +355,12 @@
         "clientId": "",
         "accessToken": "",
         "channelName": ""
+    
+    },
+    "userMuteList": {
+        "popcorn9499#8130": {
+            "time": "Permenanent"
+        }
     
     },
     "IRCToDiscordFormatting": "{1} : {2}",
