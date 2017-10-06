@@ -819,7 +819,8 @@ class mainBot():
             
     def authorMuteTimeCheck(self): #this checks to see if the mute time has been up for all the muted users
         for val, key in config["userMuteList"].copy().items(): #copys items to prevent it from editing a dictionary in use
-            print(val)
+            #print("{0} : {1}".format(val,key))
+            
             if key["time"] == "timer":
                 #gets the time checked
                 config["userMuteList"][val]["timeChecked"]["second"] = int(time.strftime("%S", time.gmtime()))
@@ -839,7 +840,7 @@ class mainBot():
                 second = (minute * 60) + config["userMuteList"][val]["timeElaplsed"]["second"]
                 
                 # calculates the time muted for to seconds
-                timeMutedFor = key["timeMutedFor"]["minute"] * 60
+                timeMutedFor = int(key["timeMutedFor"]["minute"]) * 60
                 #debug displaying
                 print(second - timeMutedFor)
                 print(" ")
@@ -964,7 +965,26 @@ class mainBot():
                         viewers = twitchBot().getViewerCount()
                         print("twitch viewers: " + str(viewers))
                         msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],viewers),"sent": False}
-                        print("placeholder")                                
+                        print("placeholder")
+                    elif val["commandType"] == "userMute" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
+                        #determining if a time was set for the mute length
+                        if tempMsg[1] != None and tempMsg[2] != None:
+                            #!mute popcorn 60
+                            startSecond = int(time.strftime("%S", time.gmtime()))
+                            startMinute = int(time.strftime("%M", time.gmtime()))
+                            startHour = int(time.strftime("%H", time.gmtime()))
+                            startDay = int(time.strftime("%d", time.gmtime()))
+                            muteAddtimeStarted = {"second":startSecond,"minute":startMinute,"hour": startHour, "day":startDay}
+                            muteAddtimeChecked = {"second":startSecond,"minute":startMinute,"hour": startHour, "day":startDay}
+                            mutedFor = {"minute": tempMsg[2]}
+                            muteAdd = {"time": "timer", "timeStarted": muteAddtimeStarted,"timeChecked": muteAddtimeChecked,"timeMutedFor": mutedFor,"timeElaplsed": muteAddtimeChecked}
+                            print(muteAdd)
+                            config["userMuteList"].update({tempMsg[1]:muteAdd})
+                            fileSave("config-test.json",config)
+                        elif tempMsg[1] != None:
+                            toAdd = {tempMsg[1]: {"time": "permanent"}}
+                            config["userMuteList"].update(toAdd)
+                        
                     print("done command check")
                     if commandStats != "":
                         processedCommand.append(commandStats)

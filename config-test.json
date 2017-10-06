@@ -48,6 +48,20 @@
                         }
                     },
                     "Commands": {
+                        "!SetGame": [
+                            {
+                                "commandType": "twitchSetGame",
+                                "msgResponse": "{0} updated the stream game title",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!SetTitle": [
+                            {
+                                "commandType": "twitchSetTitle",
+                                "msgResponse": "{0} updated the stream title",
+                                "rankRequired": "Owner"
+                            }
+                        ],
                         "!fileIncrement": [
                             {
                                 "commandType": "incrementFile",
@@ -102,25 +116,18 @@
                                 "rankRequired": "Owner"
                             }
                         ],
-                        "!SetGame": [
-                            {
-                                "commandType": "twitchSetGame",
-                                "rankRequired": "Owner",
-                                "msgResponse": "{0} updated the stream game title"
-                            }
-                        ],
-                        "!SetTitle": [
-                            {
-                                "commandType": "twitchSetTitle",
-                                "rankRequired": "Owner",
-                                "msgResponse": "{0} updated the stream title"
-                            }
-                        ],
                         "!twitchGetViews": [
                             {
                                 "commandType": "twitchGetViewers",
-                                "rankRequired": "Owner",
-                                "msgResponse": "viewers {4}"
+                                "msgResponse": "viewers {4}",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!mute": [
+                            {
+                                "commandType": "userMute",
+                                "msgResponse": "user muted {4}",
+                                "rankRequired": "Owner"
                             }
                         ]
                     },
@@ -158,9 +165,22 @@
                                 }
                             }
                         }
-                        
                     },
                     "Commands": {
+                        "!SetGame": [
+                            {
+                                "commandType": "twitchSetGame",
+                                "msgResponse": "{0} updated the stream game title",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!SetTitle": [
+                            {
+                                "commandType": "twitchSetTitle",
+                                "msgResponse": "{0} updated the stream title",
+                                "rankRequired": "Owner"
+                            }
+                        ],
                         "!fileIncrement": [
                             {
                                 "commandType": "incrementFile",
@@ -215,25 +235,11 @@
                                 "rankRequired": "Owner"
                             }
                         ],
-                        "!SetGame": [
-                            {
-                                "commandType": "twitchSetGame",
-                                "rankRequired": "Owner",
-                                "msgResponse": "{0} updated the stream game title"
-                            }
-                        ],
-                        "!SetTitle": [
-                            {
-                                "commandType": "twitchSetTitle",
-                                "rankRequired": "Owner",
-                                "msgResponse": "{0} updated the stream title"
-                            }
-                        ],
                         "!twitchGetViews": [
                             {
                                 "commandType": "twitchGetViewers",
-                                "rankRequired": "Owner",
-                                "msgResponse": "viewers {4}"
+                                "msgResponse": "viewers {4}",
+                                "rankRequired": "Owner"
                             }
                         ]
                     },
@@ -268,6 +274,20 @@
                         }
                     },
                     "Commands": {
+                        "!SetGame": [
+                            {
+                                "commandType": "twitchSetGame",
+                                "msgResponse": "{0} updated the stream game title",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!SetTitle": [
+                            {
+                                "commandType": "twitchSetTitle",
+                                "msgResponse": "{0} updated the stream title",
+                                "rankRequired": "Owner"
+                            }
+                        ],
                         "!fileIncrement": [
                             {
                                 "commandType": "incrementFile",
@@ -322,25 +342,11 @@
                                 "rankRequired": "Owner"
                             }
                         ],
-                        "!SetGame": [
-                            {
-                                "commandType": "twitchSetGame",
-                                "rankRequired": "Owner",
-                                "msgResponse": "{0} updated the stream game title"
-                            }
-                        ],
-                        "!SetTitle": [
-                            {
-                                "commandType": "twitchSetTitle",
-                                "rankRequired": "Owner",
-                                "msgResponse": "{0} updated the stream title"
-                            }
-                        ],
                         "!twitchGetViews": [
                             {
                                 "commandType": "twitchGetViewers",
-                                "rankRequired": "Normal",
-                                "msgResponse": "viewers {4}"
+                                "msgResponse": "viewers {4}",
+                                "rankRequired": "Normal"
                             }
                         ]
                     },
@@ -351,40 +357,13 @@
             "pageToken": ""
         }
     },
-    "Twitch": {
-        "clientId": "",
-        "accessToken": "",
-        "channelName": ""
-    
-    },
-    "userMuteList": {
-        "popcorn9499#8130": {
-            "time": "timer",
-            "timeStarted": {
-                "second": 18,
-                "minute": 50,
-                "hour": 16,
-                "day": 27 
-            },
-            "timeChecked": {
-                "second": 1,
-                "minute": 10,
-                "hour": 1,
-                "day": 1 
-            },
-            "timeElaplsed": {
-                "second": 1,
-                "minute": 10,
-                "hour": 1,
-                "day": 1 
-            },
-            "timeMutedFor": {
-                "minute": 1
-            }
-        }
-    
-    },
     "IRCToDiscordFormatting": "{1} : {2}",
+    "Twitch": {
+        "accessToken": "",
+        "channelName": "",
+        "clientId": ""
+    },
+    "userMuteList": {},
     "channelName": "serverchat",
     "discordToIRCFormating": "{0} : {1}",
     "discordToken": "",
@@ -395,6 +374,7 @@
     "ircServerIP": "irc.popicraft.net",
     "pageToken": "",
     "serverName": "Popicraft Minecraft",
+    "userMuteList": {},
     "wordBlacklist": [
         "testing123",
         "hi"
