@@ -80,6 +80,20 @@
                                 "rankRequired": "Owner"
                             }
                         ],
+                        "!mute": [
+                            {
+                                "commandType": "userMute",
+                                "msgResponse": "user muted {4}",
+                                "rankRequired": "Owner"
+                            }
+                        ],
+                        "!unmute": [
+                            {
+                                "commandType": "userUnmute",
+                                "msgResponse": "user unmuted {4}",
+                                "rankRequired": "Owner"
+                            }
+                        ],
                         "!roleDown": [
                             {
                                 "commandType": "removeRole",
@@ -120,13 +134,6 @@
                             {
                                 "commandType": "twitchGetViewers",
                                 "msgResponse": "viewers {4}",
-                                "rankRequired": "Owner"
-                            }
-                        ],
-                        "!mute": [
-                            {
-                                "commandType": "userMute",
-                                "msgResponse": "user muted {4}",
                                 "rankRequired": "Owner"
                             }
                         ]
@@ -363,7 +370,6 @@
         "channelName": "",
         "clientId": ""
     },
-    "userMuteList": {},
     "channelName": "serverchat",
     "discordToIRCFormating": "{0} : {1}",
     "discordToken": "",
@@ -374,7 +380,11 @@
     "ircServerIP": "irc.popicraft.net",
     "pageToken": "",
     "serverName": "Popicraft Minecraft",
-    "userMuteList": {},
+    "userMuteList": {
+        "popcorn9499#8130": {
+            "time": "permanent"
+        }
+    },
     "wordBlacklist": [
         "testing123",
         "hi"

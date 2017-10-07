@@ -985,6 +985,16 @@ class mainBot():
                             toAdd = {tempMsg[1]: {"time": "permanent"}}
                             config["userMuteList"].update(toAdd)
                             fileSave("config-test.json",config)
+                    elif val["commandType"] == "userUnmute" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
+                        # !unmute (username)
+                        try:
+                            print("unmuted")
+                            config["userMuteList"].pop(tempMsg[1])
+                            #print message
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],tempMsg[1]),"sent": False}
+                        except IndexError as error:
+                            print("user not valid")
+                            
                         
                     print("done command check")
                     if commandStats != "":
