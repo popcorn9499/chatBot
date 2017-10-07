@@ -968,22 +968,23 @@ class mainBot():
                         print("placeholder")
                     elif val["commandType"] == "userMute" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
                         #determining if a time was set for the mute length
-                        if tempMsg[1] != None and tempMsg[2] != None:
-                            #!mute popcorn 60
+                        try:
+                            #gets time to set the start time of the mute to later be stored
                             startSecond = int(time.strftime("%S", time.gmtime()))
                             startMinute = int(time.strftime("%M", time.gmtime()))
                             startHour = int(time.strftime("%H", time.gmtime()))
                             startDay = int(time.strftime("%d", time.gmtime()))
+                            #clears the lists of info needed
                             muteAddtimeStarted = {"second":startSecond,"minute":startMinute,"hour": startHour, "day":startDay}
-                            muteAddtimeChecked = {"second":startSecond,"minute":startMinute,"hour": startHour, "day":startDay}
                             mutedFor = {"minute": tempMsg[2]}
-                            muteAdd = {"time": "timer", "timeStarted": muteAddtimeStarted,"timeChecked": muteAddtimeChecked,"timeMutedFor": mutedFor,"timeElaplsed": muteAddtimeChecked}
-                            print(muteAdd)
+                            muteAdd = {"time": "timer", "timeStarted": muteAddtimeStarted,"timeChecked": muteAddtimeStarted,"timeMutedFor": mutedFor,"timeElaplsed": muteAddtimeChecked}
+                            #print(muteAdd)
                             config["userMuteList"].update({tempMsg[1]:muteAdd})
                             fileSave("config-test.json",config)
-                        elif tempMsg[1] != None:
+                        except IndexError as error: #if no mute length then the mute is permenant
                             toAdd = {tempMsg[1]: {"time": "permanent"}}
                             config["userMuteList"].update(toAdd)
+                            fileSave("config-test.json",config)
                         
                     print("done command check")
                     if commandStats != "":
