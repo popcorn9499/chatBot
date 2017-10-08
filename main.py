@@ -806,7 +806,15 @@ class mainBot():
                 #print(str(msg["authorData"]))
                 #try: #this is here to ensure the thread doesnt crash from looking for something that doesnt exist
                 if self.blacklistWorkCheck(msg,j) == False and self.commandCheck(msg,j) == False and self.authorMute(msg) == False:
-                    
+                    #all channels catch portion
+                    try:
+                        #"*" stands for all channels
+                        for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"]["*"]["sendTo"].items(): #cycles to figure out which channels to send the message to
+                            if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
+                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"])),"sent": False}
+                                processedMSG.append(msgStats)
+                    except KeyError as error:
+                        x = 1
                     try:#this is here to ensure the thread doesnt crash from looking for something that doesnt exist
                         for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
                             if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
@@ -977,25 +985,28 @@ class mainBot():
                             #clears the lists of info needed
                             muteAddtimeStarted = {"second":startSecond,"minute":startMinute,"hour": startHour, "day":startDay}
                             mutedFor = {"minute": tempMsg[2]}
-                            muteAdd = {"time": "timer", "timeStarted": muteAddtimeStarted,"timeChecked": muteAddtimeStarted,"timeMutedFor": mutedFor,"timeElaplsed": muteAddtimeChecked}
+                            muteAdd = {"time": "timer", "timeStarted": muteAddtimeStarted,"timeChecked": muteAddtimeStarted,"timeMutedFor": mutedFor,"timeElaplsed": muteAddtimeStarted}
                             #print(muteAdd)
                             config["userMuteList"].update({tempMsg[1]:muteAdd})
                             fileSave("config-test.json",config)
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],tempMsg[1],tempMsg[2]),"sent": False}
                         except IndexError as error: #if no mute length then the mute is permenant
                             toAdd = {tempMsg[1]: {"time": "permanent"}}
                             config["userMuteList"].update(toAdd)
                             fileSave("config-test.json",config)
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse1"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],tempMsg[1]),"sent": False}
                     elif val["commandType"] == "userUnmute" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
                         # !unmute (username)
                         try:
                             print("unmuted")
                             config["userMuteList"].pop(tempMsg[1])
                             #print message
+                            fileSave("config-test.json",config)
                             msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],tempMsg[1]),"sent": False}
                         except IndexError as error:
                             print("user not valid")
-                            
-                        
+                            fileSave("config-test.json",config)
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse1"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],tempMsg[1]),"sent": False}
                     print("done command check")
                     if commandStats != "":
                         processedCommand.append(commandStats)

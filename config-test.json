@@ -10,6 +10,7 @@
                             "Send": true,
                             "formatting": "{0} {1}",
                             "sendTo": {
+                                
                                 "#popicraft": {
                                     "Channel": "#popicraft",
                                     "Enabled": false,
@@ -19,7 +20,7 @@
                                 },
                                 "Youtube": {
                                     "Channel": "Youtube",
-                                    "Enabled": true,
+                                    "Enabled": false,
                                     "Formatting": "{1} : {2}",
                                     "Server": "None",
                                     "Site": "Youtube"
@@ -31,21 +32,35 @@
                                     "Server": "Popicraft Minecraft",
                                     "Site": "Discord"
                                 }
-                            },
-                            "test2": {
-                                "Send": true,
-                                "formatting": "{0} : {1}",
-                                "sendTo": {
-                                    "test": {
-                                        "Channel": "test",
-                                        "Enabled": false,
-                                        "Formatting": "{0} : {1}",
-                                        "Server": "Popicraft Minecraft",
-                                        "Site": "Discord"
-                                    }
+                            }
+                        },
+                        "test2": {
+                            "Send": true,
+                            "formatting": "{0} : {1}",
+                            "sendTo": {
+                                "test": {
+                                    "Channel": "test",
+                                    "Enabled": false,
+                                    "Formatting": "{0} : {1}",
+                                    "Server": "Popicraft Minecraft",
+                                    "Site": "Discord"
+                                }
+                            }
+                        },
+                        "*": {
+                            "Send": true,
+                            "formatting": "{0} : {1}",
+                            "sendTo": {
+                                "test2": {
+                                    "Channel": "test2",
+                                    "Enabled": true,
+                                    "Formatting": "[{0}]{1} : {2}",
+                                    "Server": "Popicraft Minecraft",
+                                    "Site": "Discord"
                                 }
                             }
                         }
+                    
                     },
                     "Commands": {
                         "!SetGame": [
@@ -83,7 +98,8 @@
                         "!mute": [
                             {
                                 "commandType": "userMute",
-                                "msgResponse": "user muted {4}",
+                                "msgResponse": "user muted {4} for {5} minutes",
+                                "msgResponse1": "user muted {4}",
                                 "rankRequired": "Owner"
                             }
                         ],
@@ -91,6 +107,7 @@
                             {
                                 "commandType": "userUnmute",
                                 "msgResponse": "user unmuted {4}",
+                                "msgResponse1": "{4} doesnt exist in the mute list",
                                 "rankRequired": "Owner"
                             }
                         ],
