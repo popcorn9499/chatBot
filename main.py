@@ -260,9 +260,9 @@ async def on_ready(): #when the discord api has logged in and is ready then this
     
 @client.event
 async def on_error(event):
-    print("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {2}".format(datetime.datetime.now(),event))
+    print("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1}".format(datetime.datetime.now(),event))
     f = open("error.log","r+")
-    f.write("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {2}".format(datetime.datetime.now(),event))
+    f.write("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1}".format(datetime.datetime.now(),event))
     f.close()
     
     
@@ -851,12 +851,8 @@ class mainBot():
                         #"*" stands for all channels
                         for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"]["*"]["sendTo"].items(): #cycles to figure out which channels to send the message to
                             if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
-                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"])),"sent": False}
+                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"])),"sent": False}
                                 processedMSG.append(msgStats)
-                                newMsg = val["Formatting"].format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"]))
-                                f = open("Log", "a")
-                                f.write("[{0}] {1} \n".format('{0:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()),newMsg))
-                                f.close()
                     except KeyError as error:
                         x = 1
                     try:#this is here to ensure the thread doesnt crash from looking for something that doesnt exist
