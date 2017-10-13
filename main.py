@@ -1,4 +1,6 @@
 
+
+import datetime
 #used for the main program
 import threading
 
@@ -234,7 +236,36 @@ async def on_ready(): #when the discord api has logged in and is ready then this
     else:
         await getFirstRunInfo()
                 
-            
+       
+#I need to get the person who deleted this message to make this useful            
+# @client.event
+# async def on_message_delete(message): #waits for the discord message event and pulls it somewhere
+    # global mainMsg,discord,tempRole,discordRoles,processedCommand
+    # if firstRun == "off":
+        # if str(message.author) != botName: #this checks to see if it is using the correct discord channel to make sure its the right channel. also checks to make sure the botname isnt our discord bot name
+            # print("[Deleted]{0} : {1}".format(message.author,message.content)) #prints this to the screen
+            # # await client.send_message(message.channel, 'Hello.')          
+            # # ircSendMSG(message.author,config["ircChannel"],message.content)
+            # roleList = {}
+            # for roles in message.author.roles:
+                # print(roles.name + ":" + str(roles.position))
+                # roleList.update({str(roles.name):int(roles.position)})
+            # print(roleList)
+            # print(tempRole)
+            # # commandStats = {"Command":"deleteMessage","args": [message],"sent": False}
+            # # processedCommand.append(commandStats)
+            # # await client.add_roles(message.author, discordRoles["Popicraft Minecraft"]["Mod"]["Data"])
+            # msgStats = {"sentFrom":"Discord","deleted": True,"msgData": message,"Bot":"Discord","Server": str(message.server.name),"Channel":str(message.channel.name), "author":message.author.name,"authorData":message.author,"authorsRole":roleList,"msg":message.content,"sent":False}
+            # mainMsg.append(msgStats)
+    
+@client.event
+async def on_error(event):
+    print("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {2}".format(datetime.datetime.now(),event))
+    f = open("error.log","r+")
+    f.write("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {2}".format(datetime.datetime.now(),event))
+    f.close()
+    
+    
 @client.event
 async def on_message(message): #waits for the discord message event and pulls it somewhere
     global mainMsg,discord,tempRole,discordRoles,processedCommand
@@ -806,6 +837,15 @@ class mainBot():
                 #print(str(msg["authorData"]))
                 #try: #this is here to ensure the thread doesnt crash from looking for something that doesnt exist
                 if self.blacklistWorkCheck(msg,j) == False and self.commandCheck(msg,j) == False and self.authorMute(msg) == False:
+                    #deleted code check
+                    try:
+                        if msg["deleted"] == True:
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot": msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "[Deleted] {1} : {2}".format(msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"])),"sent": False}
+                            processedMSG.append(msgStats)
+                    except KeyError as error:
+                        print("not deleted")
+                        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
+
                     #all channels catch portion
                     try:
                         #"*" stands for all channels
