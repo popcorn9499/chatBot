@@ -405,44 +405,153 @@ class MyClient(pydle.Client):
         msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": "None","Channel": target, "author": by,"authorData": None,"authorsRole": {"Normal": 0},"msg":message,"sent":False}
         mainMsg.append(msgStats)
 
-
-def ircSendMSG(user,target,msg): #sends a message to the irc
-    global config
-    #ircClient.message(target,config["discordToIRCFormating"].format(user,msg))#sends the message to the irc from whatever
+class irc():#alot of this code was given to me from a friend then i adapted to more of what i needed
+    def __init__(self):
+        self.messagepattern = re.compile(r"^:(.{1,50})!")
+    
+    async def irc_bot(self, loop,host): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.
+        #host = config["Bot"]["IRC"]["IP"]
         
+        self.reader, self.writer = await asyncio.open_connection(host, 6667, loop=loop)
+        channel, reader, writer = "test", self.reader, self.writer
+        await asyncio.sleep(3)
+        if config["Bot"]["IRC"]["Password"] != "":
+            writer.write(b'PASS ' + config["Bot"]["IRC"]["Password"].encode('utf-8') + b'\r\n')
+        
+        print('[Twitch] ', 'setting nick')
+        
+        writer.write(b'NICK ' + config["Bot"]["IRC"]["Nickname"].encode('utf-8') + b'\r\n')
+        print('[Twitch] ', 'setting user')
+        writer.write(b'USER ' + config["Bot"]["IRC"]["Nickname"].encode('utf-8') + b' B hi :' + config["Bot"]["IRC"]["Nickname"].encode('utf-8') + b'\r\n')
+        await asyncio.sleep(3)
+        for key, val in config["Bot"]["IRC"]["Servers"]["None"]["Channel"].items():
+            print(key)
+            writer.write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
+        await asyncio.sleep(3)
+        print("sending msg")
+        #writer.write(b'JOIN #' + "test".encode('utf-8')+ b'\r\n')
+        #writer.write("PRIVMSG #test :mods".encode('utf-8')+ b'\r\n')
+            
+    async def handleSendMsg(self,loop):
+        global processedMSG,config
+        #irc msg handler
+        print("looping")
+        while True:
+            j = 0
+            #print("lo")
+            for msg in processedMSG: #this cycles through the array for messages unsent to irc and sends them
+                #print(msg["sendTo"])
+                if msg["sent"] == False and msg["sendTo"]["Bot"] == "IRC":
+                    #print(msg["msgFormated"])
+                    #self.writer.write(b'PRIVMSG #test '+b' :' + msg["msgFormated"].encode("utf-8") + b'\r\n')
+                    await self.sendMSG(msg["sendTo"]["Channel"],msg["msgFormated"])
+                    #sends the message to the irc from whatever
+                    processedMSG[j]["sent"] = True#promptly after sets that to the delete code
+                j = j + 1
+            await asyncio.sleep(1)
+            
+            
+    async def handleMsg(self,loop):
+        info_pattern = re.compile(r'00[1234]|37[526]|CAP')
+        await asyncio.sleep(1)
+        while True:
+            try:
+                data = (await self.reader.readuntil(b'\n')).decode("utf-8")
+            except asyncio.streams.IncompleteReadError:
+                break
+            data = data.rstrip()
+            data = data.split()
+            print(data)
+            if data[0].startswith('@'):
+                data.pop(0)
+            if data == []:
+                pass
+            elif data[0] == 'PING':
+                self.writer.write(b'PONG %s\r\n' % data[1].encode("utf-8"))
+            # elif data[0] == ':user1.irc.popicraft.net' or data[0] ==':irc.popicraft.net' or info_pattern.match(data[1]):
+                # print('[Twitch] ', ' '.join(data))
+                # # generally not-as-important info
+            else:
+                print(data)
+                await self._decoded_send(data, loop)
+    
+    async def _decoded_send(self, data, loop):
+        """TODO: remove discord only features..."""
+        
+        if data[1] == 'PRIVMSG':
+            user = data[0].split('!')[0].lstrip(":")
+            m = re.search(self.messagepattern, data[0])
+            if m:
+                message = ' '.join(data[3:]).strip(':').lower().split()
+                print(data[2]+ ":" + user +': '+ ''.join(message))
+                msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": "None","Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":''.join(message),"sent":False}
+                mainMsg.append(msgStats)
+                # if message[0] == '!' + config['Twitch']['command']:
+                    # link = message[1]
+                    # # print('Command seen: ', message, link if self._check_if_osu(link) else 'False')
+                    # # if self._check_if_osu(link):
+                        # # await Osu_bot.send_osu_link(link)
+
+                # if message[0] == '!shutdownosu':
+                    # loop.stop()
+        elif data[1] == 'JOIN':
+            #temp
+            x = 1
+        elif data[1] == 'PART':
+            #temp
+            x = 1
+        elif data[1] == 'NOTICE':
+            #temp
+            x = 1
+        elif data[1] == 'RECONNECT':
+            print('[Twitch] ', 'Twitch has requested that I reconnect, This is currently unsupported.')
+            loop.stop()
+
+        elif data[0] == "ERROR":
+            if ' '.join([data[1],data[2]]) == ":Closing link:":
+                print("[Twitch] Lost Connection or disconnected: %s" % ' '.join(data[4:]))
+                loop.stop()
+                
+                
+    async def sendMSG(self,channel, msg):
+        #print("sending")
+        self.writer.write("PRIVMSG #test :{0}".format(msg).encode("utf-8") + b'\r\n')
+        
+        
+
 #this starts everything for the irc client 
 ##possibly could of put all this in a class and been done with it?
 def ircStart():
-    global ircClient, config
-    print(ircClient)
-    
-    #while True:#this infinite loop should force the irc thread back when the irc client disconnects and closes
-    ircClient = MyClient(config["Bot"]["IRC"]["Nickname"])
-    ircClient.connect(config["Bot"]["IRC"]["IP"],config["Bot"]["IRC"]["Port"],password=config["Bot"]["IRC"]["Password"],encoding='utf-8') ##add a option for /pass user:pass this is how znc lets u login
-    print(ircClient)
-    ircClient.handle_forever()
-    print("irc died")
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    #loop = asyncio.get_event_loop(loop)
+    Twitch_boT = irc()
+    loop.create_task(Twitch_boT.irc_bot(loop,config["Bot"]["IRC"]["IP"]))
+    loop.create_task(Twitch_boT.handleMsg(loop))
+    loop.create_task(Twitch_boT.handleSendMsg(loop))
+    loop.run_forever()
+    loop.close()
 
 def ircCheck():
     global processedMSG,config
     ircThread = threading.Thread(target=ircStart) #creates the thread for the irc client
     ircThread.start() #starts the irc bot
-    while True:
-        time.sleep(1)
-        state = ircThread.isAlive()
-        if state == False:
-            print("damn it")
-            ircThread = threading.Thread(target=ircStart) #creates the thread for the irc client
-
-            ircThread.start() #starts the irc bot   
+    time.sleep(10)
+    # while True:
+        # time.sleep(1)
+        # state = ircThread.isAlive()
+        # if state == False:
+            # print("damn it")
+            # ircThread = threading.Thread(target=ircStart) #creates the thread for the irc client
+            # ircThread.start() #starts the irc bot   
         #irc msg handler
-        j = 0
-        for msg in processedMSG: #this cycles through the array for messages unsent to irc and sends them
-            #print(msg["sendTo"])
-            if msg["sent"] == False and msg["sendTo"]["Bot"] == "IRC":
-                ircClient.message(msg["sendTo"]["Channel"],msg["msgFormated"])#sends the message to the irc from whatever
-                processedMSG[j]["sent"] = True#promptly after sets that to the delete code
-            j = j + 1
+        # j = 0
+        # for msg in processedMSG: #this cycles through the array for messages unsent to irc and sends them
+            # #print(msg["sendTo"])
+            # if msg["sent"] == False and msg["sendTo"]["Bot"] == "IRC":
+                # ircClient.message(msg["sendTo"]["Channel"],msg["msgFormated"])#sends the message to the irc from whatever
+                # processedMSG[j]["sent"] = True#promptly after sets that to the delete code
+            # j = j + 1
         
 #youtube
         
@@ -858,6 +967,7 @@ class mainBot():
                     try:#this is here to ensure the thread doesnt crash from looking for something that doesnt exist
                         for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
                             if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
+                                print(msg["Bot"])
                                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"])),"sent": False}
                                 processedMSG.append(msgStats)
                     except KeyError as error:
@@ -1100,12 +1210,12 @@ if config["Bot"]["IRC"]["Enabled"] == True:
 else:
     print("IRC not loaded")
 
-youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
-if config["Bot"]["Youtube"]["Enabled"] == True:
-    youtubeChatThread.start()
-    print("Youtube Loaded")
-else:
-    print("Youtube not loaded")
+# youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
+# if config["Bot"]["Youtube"]["Enabled"] == True:
+    # youtubeChatThread.start()
+    # print("Youtube Loaded")
+# else:
+    # print("Youtube not loaded")
 
 discordThread = threading.Thread(target=client.run(config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
 if config["Bot"]["Discord"]["Enabled"] == True:
