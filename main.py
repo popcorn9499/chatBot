@@ -459,26 +459,28 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
         info_pattern = re.compile(r'00[1234]|37[526]|CAP')
         await asyncio.sleep(1)
         while True:
-            for sKey, sVal in config["Bot"]["IRC"]["Servers"].items():
-                try:
-                    data = (await self.reader[sKey].readuntil(b'\n')).decode("utf-8")
-                except asyncio.streams.IncompleteReadError:
-                    break
-                data = data.rstrip()
-                data = data.split()
-                print(data)
-                if data[0].startswith('@'):
-                    data.pop(0)
-                if data == []:
-                    pass
-                elif data[0] == 'PING':
-                    self.writer.write(b'PONG %s\r\n' % data[1].encode("utf-8"))
-                # elif data[0] == ':user1.irc.popicraft.net' or data[0] ==':irc.popicraft.net' or info_pattern.match(data[1]):
-                    # print('[Twitch] ', ' '.join(data))
-                    # # generally not-as-important info
-                else:
+            for sKey, sVal in config["Bot"]["IRC"]["Servers"].items(): 
+                #this should check to see if the host or ip was used and initialized before trying to read from it
+                if sKey in self.reader:
+                    try:
+                        data = (await self.reader[sKey].readuntil(b'\n')).decode("utf-8")
+                    except asyncio.streams.IncompleteReadError:
+                        break
+                    data = data.rstrip()
+                    data = data.split()
                     print(data)
-                    await self._decoded_send(data, loop,sKey)
+                    if data[0].startswith('@'):
+                        data.pop(0)
+                    if data == []:
+                        pass
+                    elif data[0] == 'PING':
+                        self.writer.write(b'PONG %s\r\n' % data[1].encode("utf-8"))
+                    # elif data[0] == ':user1.irc.popicraft.net' or data[0] ==':irc.popicraft.net' or info_pattern.match(data[1]):
+                        # print('[Twitch] ', ' '.join(data))
+                        # # generally not-as-important info
+                    else:
+                        print(data)
+                        await self._decoded_send(data, loop,sKey)
     
     async def _decoded_send(self, data, loop,host):
         """TODO: remove discord only features..."""
