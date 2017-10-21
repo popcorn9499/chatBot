@@ -166,7 +166,9 @@
             "Port": "6667",
             "Servers": {
                 "irc.popicraft.net": {
+                    "Nickname": "DiscordBot__",
                     "Port": "6667",
+                    "Password": "",
                     "Channel": {
                         "#test": {
                             "Enabled": true,

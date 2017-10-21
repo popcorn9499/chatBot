@@ -419,14 +419,14 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
             self.reader.update({sKey: self.readerBasic})
             self.writer.update({sKey: self.writerBasic})
             await asyncio.sleep(3)
-            if config["Bot"]["IRC"]["Password"] != "":
-                self.writer[sKey].write(b'PASS ' + config["Bot"]["IRC"]["Password"].encode('utf-8') + b'\r\n')
+            if config["Bot"]["IRC"]["Servers"][sKey]["Password"] != "":
+                self.writer[sKey].write(b'PASS ' + config["Bot"]["IRC"]["Servers"][sKey]["Password"].encode('utf-8') + b'\r\n')
             
             print('[Twitch] ', 'setting nick')
             
-            self.writer[sKey].write(b'NICK ' + config["Bot"]["IRC"]["Nickname"].encode('utf-8') + b'\r\n')
+            self.writer[sKey].write(b'NICK ' + config["Bot"]["IRC"]["Servers"][sKey]["Nickname"].encode('utf-8') + b'\r\n')
             print('[Twitch] ', 'setting user')
-            self.writer[sKey].write(b'USER ' + config["Bot"]["IRC"]["Nickname"].encode('utf-8') + b' B hi :' + config["Bot"]["IRC"]["Nickname"].encode('utf-8') + b'\r\n')
+            self.writer[sKey].write(b'USER ' + config["Bot"]["IRC"]["Servers"][sKey]["Nickname"].encode('utf-8') + b' B hi :' + config["Bot"]["IRC"]["Servers"][sKey]["Nickname"].encode('utf-8') + b'\r\n')
             await asyncio.sleep(3)
             for key, val in config["Bot"]["IRC"]["Servers"][sKey]["Channel"].items():
                 print(key)
@@ -1217,12 +1217,12 @@ if config["Bot"]["IRC"]["Enabled"] == True:
 else:
     print("IRC not loaded")
 
-youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
-if config["Bot"]["Youtube"]["Enabled"] == True:
-    youtubeChatThread.start()
-    print("Youtube Loaded")
-else:
-    print("Youtube not loaded")
+# youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
+# if config["Bot"]["Youtube"]["Enabled"] == True:
+    # youtubeChatThread.start()
+    # print("Youtube Loaded")
+# else:
+    # print("Youtube not loaded")
 
 discordThread = threading.Thread(target=client.run(config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
 if config["Bot"]["Discord"]["Enabled"] == True:
