@@ -415,7 +415,7 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
             self.writer = {}
             self.reader = {}
             host = sKey
-            self.readerBasic, self.writerBasic = await asyncio.open_connection(host, 6667, loop=loop)
+            self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config["Bot"]["IRC"]["Servers"][sKey]["Port"], loop=loop)
             self.reader.update({sKey: self.readerBasic})
             self.writer.update({sKey: self.writerBasic})
             await asyncio.sleep(3)

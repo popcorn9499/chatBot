@@ -3,19 +3,31 @@
         "Discord": {
             "Enabled": true,
             "Servers": {
-                "Popicraft Minecraft": {
+                "Popicraft Network": {
                     "Channel": {
+                        "*": {
+                            "Send": true,
+                            "formatting": "{0} : {1}",
+                            "sendTo": {
+                                "test2": {
+                                    "Channel": "test2",
+                                    "Enabled": false,
+                                    "Formatting": "[{0}]{1} : {2}",
+                                    "Server": "Popicraft Minecraft",
+                                    "Site": "Discord"
+                                }
+                            }
+                        },
                         "test": {
                             "Enabled": true,
                             "Send": true,
                             "formatting": "{0} {1}",
                             "sendTo": {
-                                
                                 "#popicraft": {
-                                    "Channel": "#popicraft",
-                                    "Enabled": false,
+                                    "Channel": "#test",
+                                    "Enabled": true,
                                     "Formatting": "{1} : {2}",
-                                    "Server": "None",
+                                    "Server": "irc.popicraft.net",
                                     "Site": "IRC"
                                 },
                                 "Youtube": {
@@ -46,21 +58,7 @@
                                     "Site": "Discord"
                                 }
                             }
-                        },
-                        "*": {
-                            "Send": true,
-                            "formatting": "{0} : {1}",
-                            "sendTo": {
-                                "test2": {
-                                    "Channel": "test2",
-                                    "Enabled": true,
-                                    "Formatting": "[{0}]{1} : {2}",
-                                    "Server": "Popicraft Minecraft",
-                                    "Site": "Discord"
-                                }
-                            }
                         }
-                    
                     },
                     "Commands": {
                         "!SetGame": [
@@ -100,14 +98,6 @@
                                 "commandType": "userMute",
                                 "msgResponse": "user muted {4} for {5} minutes",
                                 "msgResponse1": "user muted {4}",
-                                "rankRequired": "Owner"
-                            }
-                        ],
-                        "!unmute": [
-                            {
-                                "commandType": "userUnmute",
-                                "msgResponse": "user unmuted {4}",
-                                "msgResponse1": "{4} doesnt exist in the mute list",
                                 "rankRequired": "Owner"
                             }
                         ],
@@ -153,6 +143,14 @@
                                 "msgResponse": "viewers {4}",
                                 "rankRequired": "Owner"
                             }
+                        ],
+                        "!unmute": [
+                            {
+                                "commandType": "userUnmute",
+                                "msgResponse": "user unmuted {4}",
+                                "msgResponse1": "{4} doesnt exist in the mute list",
+                                "rankRequired": "Owner"
+                            }
                         ]
                     },
                     "Enabled": true
@@ -163,28 +161,22 @@
         "IRC": {
             "Enabled": true,
             "IP": "irc.popicraft.net",
-            "Nickname": "DiscordBot",
+            "Nickname": "DiscordBot__",
             "Password": "",
             "Port": "6667",
             "Servers": {
-                "None": {
+                "irc.popicraft.net": {
+                    "Port": 6667",
                     "Channel": {
                         "#test": {
                             "Enabled": true,
                             "Send": true,
                             "sendTo": {
-                                "Youtube": {
-                                    "Channel": "Youtube",
-                                    "Enabled": false,
-                                    "Formatting": "{1} : {2}",
-                                    "Server": "None",
-                                    "Site": "Youtube"
-                                },
                                 "test": {
                                     "Channel": "test",
-                                    "Enabled": false,
+                                    "Enabled": true,
                                     "Formatting": "{1} : {2}",
-                                    "Server": "Popicraft Minecraft",
+                                    "Server": "Popicraft Network",
                                     "Site": "Discord"
                                 }
                             }
@@ -397,11 +389,7 @@
     "ircServerIP": "irc.popicraft.net",
     "pageToken": "",
     "serverName": "Popicraft Minecraft",
-    "userMuteList": {
-        "popcorn9499#8130": {
-            "time": "permanent"
-        }
-    },
+    "userMuteList": {},
     "wordBlacklist": [
         "testing123",
         "hi"
