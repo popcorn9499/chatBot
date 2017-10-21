@@ -474,7 +474,7 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
                     if data == []:
                         pass
                     elif data[0] == 'PING':
-                        self.writer.write(b'PONG %s\r\n' % data[1].encode("utf-8"))
+                        self.writer[sKey].write(b'PONG %s\r\n' % data[1].encode("utf-8"))
                     # elif data[0] == ':user1.irc.popicraft.net' or data[0] ==':irc.popicraft.net' or info_pattern.match(data[1]):
                         # print('[Twitch] ', ' '.join(data))
                         # # generally not-as-important info
