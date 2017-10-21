@@ -411,26 +411,30 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
     
     async def irc_bot(self, loop,host): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.
         #host = config["Bot"]["IRC"]["IP"]
-        
-        self.reader, self.writer = await asyncio.open_connection(host, 6667, loop=loop)
-        channel, reader, writer = "test", self.reader, self.writer
-        await asyncio.sleep(3)
-        if config["Bot"]["IRC"]["Password"] != "":
-            writer.write(b'PASS ' + config["Bot"]["IRC"]["Password"].encode('utf-8') + b'\r\n')
-        
-        print('[Twitch] ', 'setting nick')
-        
-        writer.write(b'NICK ' + config["Bot"]["IRC"]["Nickname"].encode('utf-8') + b'\r\n')
-        print('[Twitch] ', 'setting user')
-        writer.write(b'USER ' + config["Bot"]["IRC"]["Nickname"].encode('utf-8') + b' B hi :' + config["Bot"]["IRC"]["Nickname"].encode('utf-8') + b'\r\n')
-        await asyncio.sleep(3)
-        for key, val in config["Bot"]["IRC"]["Servers"]["None"]["Channel"].items():
-            print(key)
-            writer.write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
-        await asyncio.sleep(3)
-        print("sending msg")
-        #writer.write(b'JOIN #' + "test".encode('utf-8')+ b'\r\n')
-        #writer.write("PRIVMSG #test :mods".encode('utf-8')+ b'\r\n')
+        for sKey, sVal in config["Bot"]["IRC"]["Servers"].items():
+            self.writer = {}
+            self.reader = {}
+            host = sKey
+            self.readerBasic, self.writerBasic = await asyncio.open_connection(host, 6667, loop=loop)
+            self.reader.update({sKey: self.readerBasic})
+            self.writer.update({sKey: self.writerBasic})
+            await asyncio.sleep(3)
+            if config["Bot"]["IRC"]["Password"] != "":
+                self.writer[sKey].write(b'PASS ' + config["Bot"]["IRC"]["Password"].encode('utf-8') + b'\r\n')
+            
+            print('[Twitch] ', 'setting nick')
+            
+            self.writer[sKey].write(b'NICK ' + config["Bot"]["IRC"]["Nickname"].encode('utf-8') + b'\r\n')
+            print('[Twitch] ', 'setting user')
+            self.writer[sKey].write(b'USER ' + config["Bot"]["IRC"]["Nickname"].encode('utf-8') + b' B hi :' + config["Bot"]["IRC"]["Nickname"].encode('utf-8') + b'\r\n')
+            await asyncio.sleep(3)
+            for key, val in config["Bot"]["IRC"]["Servers"][sKey]["Channel"].items():
+                print(key)
+                self.writer[sKey].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
+            await asyncio.sleep(3)
+            print("sending msg")
+            #writer.write(b'JOIN #' + "test".encode('utf-8')+ b'\r\n')
+            #writer.write("PRIVMSG #test :mods".encode('utf-8')+ b'\r\n')
             
     async def handleSendMsg(self,loop):
         global processedMSG,config
@@ -444,7 +448,7 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
                 if msg["sent"] == False and msg["sendTo"]["Bot"] == "IRC":
                     #print(msg["msgFormated"])
                     #self.writer.write(b'PRIVMSG #test '+b' :' + msg["msgFormated"].encode("utf-8") + b'\r\n')
-                    await self.sendMSG(msg["sendTo"]["Channel"],msg["msgFormated"])
+                    await self.sendMSG(msg["sendTo"]["Server"],msg["sendTo"]["Channel"],msg["msgFormated"])
                     #sends the message to the irc from whatever
                     processedMSG[j]["sent"] = True#promptly after sets that to the delete code
                 j = j + 1
@@ -455,27 +459,28 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
         info_pattern = re.compile(r'00[1234]|37[526]|CAP')
         await asyncio.sleep(1)
         while True:
-            try:
-                data = (await self.reader.readuntil(b'\n')).decode("utf-8")
-            except asyncio.streams.IncompleteReadError:
-                break
-            data = data.rstrip()
-            data = data.split()
-            print(data)
-            if data[0].startswith('@'):
-                data.pop(0)
-            if data == []:
-                pass
-            elif data[0] == 'PING':
-                self.writer.write(b'PONG %s\r\n' % data[1].encode("utf-8"))
-            # elif data[0] == ':user1.irc.popicraft.net' or data[0] ==':irc.popicraft.net' or info_pattern.match(data[1]):
-                # print('[Twitch] ', ' '.join(data))
-                # # generally not-as-important info
-            else:
+            for sKey, sVal in config["Bot"]["IRC"]["Servers"].items():
+                try:
+                    data = (await self.reader[sKey].readuntil(b'\n')).decode("utf-8")
+                except asyncio.streams.IncompleteReadError:
+                    break
+                data = data.rstrip()
+                data = data.split()
                 print(data)
-                await self._decoded_send(data, loop)
+                if data[0].startswith('@'):
+                    data.pop(0)
+                if data == []:
+                    pass
+                elif data[0] == 'PING':
+                    self.writer.write(b'PONG %s\r\n' % data[1].encode("utf-8"))
+                # elif data[0] == ':user1.irc.popicraft.net' or data[0] ==':irc.popicraft.net' or info_pattern.match(data[1]):
+                    # print('[Twitch] ', ' '.join(data))
+                    # # generally not-as-important info
+                else:
+                    print(data)
+                    await self._decoded_send(data, loop,sKey)
     
-    async def _decoded_send(self, data, loop):
+    async def _decoded_send(self, data, loop,host):
         """TODO: remove discord only features..."""
         
         if data[1] == 'PRIVMSG':
@@ -484,7 +489,7 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
             if m:
                 message = ' '.join(data[3:]).strip(':').lower().split()
                 print(data[2]+ ":" + user +': '+ ''.join(message))
-                msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": "None","Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":''.join(message),"sent":False}
+                msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":''.join(message),"sent":False}
                 mainMsg.append(msgStats)
                 # if message[0] == '!' + config['Twitch']['command']:
                     # link = message[1]
@@ -513,9 +518,9 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
                 loop.stop()
                 
                 
-    async def sendMSG(self,channel, msg):
+    async def sendMSG(self,server,channel, msg):
         #print("sending")
-        self.writer.write("PRIVMSG #test :{0}".format(msg).encode("utf-8") + b'\r\n')
+        self.writer[server].write("PRIVMSG {0} :{1}".format(channel,msg).encode("utf-8") + b'\r\n')
         
         
 
@@ -1210,12 +1215,12 @@ if config["Bot"]["IRC"]["Enabled"] == True:
 else:
     print("IRC not loaded")
 
-# youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
-# if config["Bot"]["Youtube"]["Enabled"] == True:
-    # youtubeChatThread.start()
-    # print("Youtube Loaded")
-# else:
-    # print("Youtube not loaded")
+youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
+if config["Bot"]["Youtube"]["Enabled"] == True:
+    youtubeChatThread.start()
+    print("Youtube Loaded")
+else:
+    print("Youtube not loaded")
 
 discordThread = threading.Thread(target=client.run(config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
 if config["Bot"]["Discord"]["Enabled"] == True:
