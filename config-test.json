@@ -166,7 +166,7 @@
             "Port": "6667",
             "Servers": {
                 "irc.popicraft.net": {
-                    "Port": 6667",
+                    "Port": "6667",
                     "Channel": {
                         "#test": {
                             "Enabled": true,
