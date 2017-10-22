@@ -10,10 +10,10 @@
                             "formatting": "{0} : {1}",
                             "sendTo": {
                                 "test2": {
-                                    "Channel": "test2",
-                                    "Enabled": false,
-                                    "Formatting": "[{0}]{1} : {2}",
-                                    "Server": "Popicraft Minecraft",
+                                    "Channel": "log",
+                                    "Enabled": true,
+                                    "Formatting": "[{5}][{1}][{2}] {3} : {4}",
+                                    "Server": "Popicraft Network",
                                     "Site": "Discord"
                                 }
                             }
@@ -26,21 +26,21 @@
                                 "#popicraft": {
                                     "Channel": "#test",
                                     "Enabled": true,
-                                    "Formatting": "{1} : {2}",
+                                    "Formatting": "{3} : {4}",
                                     "Server": "irc.popicraft.net",
                                     "Site": "IRC"
                                 },
                                 "Youtube": {
                                     "Channel": "Youtube",
                                     "Enabled": false,
-                                    "Formatting": "{1} : {2}",
+                                    "Formatting": "{3} : {4}",
                                     "Server": "None",
                                     "Site": "Youtube"
                                 },
                                 "test": {
                                     "Channel": "test2",
                                     "Enabled": false,
-                                    "Formatting": "{1} : {2}",
+                                    "Formatting": "{3} : {4}",
                                     "Server": "Popicraft Minecraft",
                                     "Site": "Discord"
                                 }
@@ -53,7 +53,7 @@
                                 "test": {
                                     "Channel": "test",
                                     "Enabled": false,
-                                    "Formatting": "{0} : {1}",
+                                    "Formatting": "{3} : {4}",
                                     "Server": "Popicraft Minecraft",
                                     "Site": "Discord"
                                 }
@@ -177,7 +177,7 @@
                                 "test": {
                                     "Channel": "test",
                                     "Enabled": true,
-                                    "Formatting": "{1} : {2}",
+                                    "Formatting": "{3} : {4}",
                                     "Server": "Popicraft Network",
                                     "Site": "Discord"
                                 }
@@ -277,14 +277,14 @@
                                 "#popicraft": {
                                     "Channel": "#popicraft",
                                     "Enabled": false,
-                                    "Formatting": "{1} : {2}",
+                                    "Formatting": "{3} : {4}",
                                     "Server": "None",
                                     "Site": "IRC"
                                 },
                                 "test": {
                                     "Channel": "test",
                                     "Enabled": true,
-                                    "Formatting": "{1} : {2}",
+                                    "Formatting": "{3} : {4}",
                                     "Server": "Popicraft Minecraft",
                                     "Site": "Discord"
                                 }
