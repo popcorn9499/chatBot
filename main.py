@@ -409,7 +409,7 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
     def __init__(self):
         self.messagepattern = re.compile(r"^:(.{1,50})!")
     
-    async def irc_bot(self, loop,host): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.
+    async def irc_bot(self, loop): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.
         #host = config["Bot"]["IRC"]["IP"]
         for sKey, sVal in config["Bot"]["IRC"]["Servers"].items():
             self.writer = {}
@@ -533,7 +533,7 @@ def ircStart():
     asyncio.set_event_loop(loop)
     #loop = asyncio.get_event_loop(loop)
     Twitch_boT = irc()
-    loop.create_task(Twitch_boT.irc_bot(loop,config["Bot"]["IRC"]["IP"]))
+    loop.create_task(Twitch_boT.irc_bot(loop))
     loop.create_task(Twitch_boT.handleMsg(loop))
     loop.create_task(Twitch_boT.handleSendMsg(loop))
     loop.run_forever()

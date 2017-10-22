@@ -7,7 +7,6 @@
                     "Channel": {
                         "*": {
                             "Send": true,
-                            "formatting": "{0} : {1}",
                             "sendTo": {
                                 "test2": {
                                     "Channel": "log",
@@ -21,7 +20,6 @@
                         "test": {
                             "Enabled": true,
                             "Send": true,
-                            "formatting": "{0} {1}",
                             "sendTo": {
                                 "#popicraft": {
                                     "Channel": "#test",
@@ -48,7 +46,6 @@
                         },
                         "test2": {
                             "Send": true,
-                            "formatting": "{0} : {1}",
                             "sendTo": {
                                 "test": {
                                     "Channel": "test",
@@ -160,10 +157,6 @@
         },
         "IRC": {
             "Enabled": true,
-            "IP": "irc.popicraft.net",
-            "Nickname": "DiscordBot__",
-            "Password": "",
-            "Port": "6667",
             "Servers": {
                 "irc.popicraft.net": {
                     "Nickname": "DiscordBot__",
@@ -375,22 +368,11 @@
             "pageToken": ""
         }
     },
-    "IRCToDiscordFormatting": "{1} : {2}",
     "Twitch": {
         "accessToken": "",
         "channelName": "",
         "clientId": ""
     },
-    "channelName": "serverchat",
-    "discordToIRCFormating": "{0} : {1}",
-    "discordToken": "",
-    "ircChannel": "#popicraft",
-    "ircNickname": "DiscordBot",
-    "ircPassword": "",
-    "ircPort": "6667",
-    "ircServerIP": "irc.popicraft.net",
-    "pageToken": "",
-    "serverName": "Popicraft Minecraft",
     "userMuteList": {},
     "wordBlacklist": [
         "testing123",
