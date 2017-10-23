@@ -214,14 +214,14 @@ async def on_ready(): #when the discord api has logged in and is ready then this
             for members in server.members:
                 membersList.update({str(members): members})
             discordMembers.update({str(server.name):membersList})
-            print(discordMembers) 
+            #print(discordMembers) 
             for roles in server.roles:
-                print( "[" + server.name + "]"+ roles.name + ":" + str(roles.position))
+                #print( "[" + server.name + "]"+ roles.name + ":" + str(roles.position))
                 rolesList.update({str(roles.name):{"Number":int(roles.position),"Data": roles}})
                 if roles.name == "Mod":
                     tempRole = roles
             discordRoles.update({str(server.name):rolesList})
-            print(discordRoles)
+            #print(discordRoles)
             discordInfo.update({str(server): {"asdasdhskajhdkjashdlk":"channel info"}})#maybe set a check for that channel
             for channel in server.channels:
                 disc = {str(channel.name): channel}
@@ -408,16 +408,20 @@ class MyClient(pydle.Client):
 class irc():#alot of this code was given to me from a friend then i adapted to more of what i needed
     def __init__(self):
         self.messagepattern = re.compile(r"^:(.{1,50})!")
+        self.writer = {}
+        self.reader = {}
     
     async def irc_bot(self, loop): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.
         #host = config["Bot"]["IRC"]["IP"]
+        
         for sKey, sVal in config["Bot"]["IRC"]["Servers"].items():
-            self.writer = {}
-            self.reader = {}
+            
             host = sKey
             self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config["Bot"]["IRC"]["Servers"][sKey]["Port"], loop=loop)
             self.reader.update({sKey: self.readerBasic})
             self.writer.update({sKey: self.writerBasic})
+            print(self.reader)
+            print(self.writer)
             await asyncio.sleep(3)
             if config["Bot"]["IRC"]["Servers"][sKey]["Password"] != "":
                 self.writer[sKey].write(b'PASS ' + config["Bot"]["IRC"]["Servers"][sKey]["Password"].encode('utf-8') + b'\r\n')
@@ -433,8 +437,15 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
                 self.writer[sKey].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
             await asyncio.sleep(3)
             print("sending msg")
+            loop.create_task(self.handleMsg(loop,host))
+            #loop.create_task(Twitch_boT.handleMsg(loop,"irc.chat.twitch.tv"))
+        
             #writer.write(b'JOIN #' + "test".encode('utf-8')+ b'\r\n')
             #writer.write("PRIVMSG #test :mods".encode('utf-8')+ b'\r\n')
+        asyncio.sleep(3)
+        loop.create_task(self.handleSendMsg(loop))
+        print(self.reader)
+        print(self.writer)
             
     async def handleSendMsg(self,loop):
         global processedMSG,config
@@ -455,32 +466,37 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
             await asyncio.sleep(1)
             
             
-    async def handleMsg(self,loop):
+    async def handleMsg(self,loop,host):
         info_pattern = re.compile(r'00[1234]|37[526]|CAP')
         await asyncio.sleep(1)
         while True:
-            for sKey, sVal in config["Bot"]["IRC"]["Servers"].items(): 
-                #this should check to see if the host or ip was used and initialized before trying to read from it
-                if sKey in self.reader:
-                    try:
-                        data = (await self.reader[sKey].readuntil(b'\n')).decode("utf-8")
-                    except asyncio.streams.IncompleteReadError:
-                        break
+            if host in self.reader:
+                try:
+                    data = (await self.reader[host].readuntil(b'\n')).decode("utf-8")
                     data = data.rstrip()
                     data = data.split()
-                    print(data)
                     if data[0].startswith('@'):
                         data.pop(0)
                     if data == []:
                         pass
                     elif data[0] == 'PING':
-                        self.writer[sKey].write(b'PONG %s\r\n' % data[1].encode("utf-8"))
+                        self.writer[host].write(b'PONG %s\r\n' % data[1].encode("utf-8"))
                     # elif data[0] == ':user1.irc.popicraft.net' or data[0] ==':irc.popicraft.net' or info_pattern.match(data[1]):
                         # print('[Twitch] ', ' '.join(data))
-                        # # generally not-as-important info
+                        #generally not-as-important info
                     else:
                         print(data)
-                        await self._decoded_send(data, loop,sKey)
+                        await self._decoded_send(data, loop,host)
+                except asyncio.streams.IncompleteReadError:
+                    x = 1
+            else:
+                print("{0} doesnt exist".format(host))
+                #for sKey, sVal in config["Bot"]["IRC"]["Servers"].items(): 
+                    # this should check to see if the host or ip was used and initialized before trying to read from it
+                
+    
+
+        
     
     async def _decoded_send(self, data, loop,host):
         """TODO: remove discord only features..."""
@@ -534,8 +550,6 @@ def ircStart():
     #loop = asyncio.get_event_loop(loop)
     Twitch_boT = irc()
     loop.create_task(Twitch_boT.irc_bot(loop))
-    loop.create_task(Twitch_boT.handleMsg(loop))
-    loop.create_task(Twitch_boT.handleSendMsg(loop))
     loop.run_forever()
     loop.close()
 
