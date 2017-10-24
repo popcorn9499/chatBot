@@ -19,6 +19,7 @@
                             }
                         },
                         "test": {
+                            "showName": "TPN",
                             "Enabled": true,
                             "Send": true,
                             "sendTo": {
@@ -46,6 +47,7 @@
                             }
                         },
                         "test2": {
+                            "showName": "TPN",
                             "Send": true,
                             "sendTo": {
                                 "test": {
@@ -166,6 +168,7 @@
                     "Password": "",
                     "Channel": {
                         "#test": {
+                            "showName": "TPN",
                             "Enabled": true,
                             "Send": true,
                             "sendTo": {
@@ -268,6 +271,7 @@
                     "showName": "PN",
                     "Channel": {
                         "Youtube": {
+                            "showName": "TPN",
                             "Enabled": true,
                             "sendTo": {
                                 "#popicraft": {
