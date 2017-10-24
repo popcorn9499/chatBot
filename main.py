@@ -506,7 +506,9 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
             m = re.search(self.messagepattern, data[0])
             if m:
                 message = ' '.join(data[3:]).strip(':').lower().split()
+                
                 print(data[2]+ ":" + user +': '+ ''.join(message))
+                print(''.join(message))
                 msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":''.join(message),"sent":False}
                 mainMsg.append(msgStats)
                 # if message[0] == '!' + config['Twitch']['command']:
@@ -518,9 +520,17 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
                 # if message[0] == '!shutdownosu':
                     # loop.stop()
         elif data[1] == 'JOIN':
+            user = data[0].split('!')[0].lstrip(":")
             #temp
+            print(user+" joined")
+            msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":"{0} joined the channel".format(user),"sent":False}
+            mainMsg.append(msgStats)
             x = 1
-        elif data[1] == 'PART':
+        elif data[1] == 'PART' or data[1] == 'QUIT':
+            user = data[0].split('!')[0].lstrip(":")
+            print(user+" left")
+            msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":"{0} left the channel ({1})".format(user,data[3]),"sent":False}
+            mainMsg.append(msgStats)
             #temp
             x = 1
         elif data[1] == 'NOTICE':
@@ -989,7 +999,7 @@ class mainBot():
                         for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
                             if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
                                 print(msg["Bot"])
-                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"]),self.serverNameReformat(msg["Bot"],msg["Server"])),"sent": False}
+                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"]),self.serverNameReformat(msg["Bot"],msg["Server"]),self.channelNameReformat(msg["Bot"],msg["Server"],msg["Channel"])),"sent": False}
                                 processedMSG.append(msgStats)
                     except KeyError as error:
                         print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
@@ -1054,6 +1064,9 @@ class mainBot():
             
     def serverNameReformat(self,botName,serverName):
         return config["Bot"][botName]["Servers"][serverName]["showName"]
+        
+    def channelNameReformat(self,botName,serverName,channelName):
+        return config["Bot"][botName]["Servers"][serverName]["Channel"][channelName]["showName"]    
             
     def blacklistWorkCheck(self,msg,j):
         found = False
