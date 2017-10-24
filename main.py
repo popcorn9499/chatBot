@@ -696,7 +696,7 @@ def listChat():
             print(botUserID)
             if userID != botUserID:
                 print("{0} {1}".format(username,message))
-                msgStats = {"sentFrom":"Youtube","Bot":"Youtube","Server": None,"Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorRole":None,"msg":message,"sent":False}
+                msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorsRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
                 mainMsg.append(msgStats)
             elif userID == botUserID: #if the userId is the bots then check the message to see if the bot sent it.
                 try:
@@ -1001,6 +1001,7 @@ class mainBot():
                                 print(msg["Bot"])
                                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"]),self.serverNameReformat(msg["Bot"],msg["Server"]),self.channelNameReformat(msg["Bot"],msg["Server"],msg["Channel"])),"sent": False}
                                 processedMSG.append(msgStats)
+
                     except KeyError as error:
                         print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
                 mainMsg[j]["sent"] = True
@@ -1248,12 +1249,12 @@ if config["Bot"]["IRC"]["Enabled"] == True:
 else:
     print("IRC not loaded")
 
-# youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
-# if config["Bot"]["Youtube"]["Enabled"] == True:
-    # youtubeChatThread.start()
-    # print("Youtube Loaded")
-# else:
-    # print("Youtube not loaded")
+youtubeChatThread = threading.Thread(target=youtubeChatControl)#starts my youtube chat thread
+if config["Bot"]["Youtube"]["Enabled"] == True:
+    youtubeChatThread.start()
+    print("Youtube Loaded")
+else:
+    print("Youtube not loaded")
 
 discordThread = threading.Thread(target=client.run(config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
 if config["Bot"]["Discord"]["Enabled"] == True:
