@@ -4,6 +4,7 @@
             "Enabled": true,
             "Servers": {
                 "Popicraft Network": {
+                    "showName": "PN",
                     "Channel": {
                         "*": {
                             "Send": true,
@@ -159,6 +160,7 @@
             "Enabled": true,
             "Servers": {
                 "irc.popicraft.net": {
+                    "showName": "PN",
                     "Nickname": "DiscordBot__",
                     "Port": "6667",
                     "Password": "",
@@ -263,6 +265,7 @@
             "Enabled": true,
             "Servers": {
                 "None": {
+                    "showName": "PN",
                     "Channel": {
                         "Youtube": {
                             "Enabled": true,
