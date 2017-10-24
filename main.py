@@ -415,29 +415,8 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
         #host = config["Bot"]["IRC"]["IP"]
         
         for sKey, sVal in config["Bot"]["IRC"]["Servers"].items():
-            
             host = sKey
-            self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config["Bot"]["IRC"]["Servers"][sKey]["Port"], loop=loop)
-            self.reader.update({sKey: self.readerBasic})
-            self.writer.update({sKey: self.writerBasic})
-            print(self.reader)
-            print(self.writer)
-            await asyncio.sleep(3)
-            if config["Bot"]["IRC"]["Servers"][sKey]["Password"] != "":
-                self.writer[sKey].write(b'PASS ' + config["Bot"]["IRC"]["Servers"][sKey]["Password"].encode('utf-8') + b'\r\n')
-            
-            print('[Twitch] ', 'setting nick')
-            
-            self.writer[sKey].write(b'NICK ' + config["Bot"]["IRC"]["Servers"][sKey]["Nickname"].encode('utf-8') + b'\r\n')
-            print('[Twitch] ', 'setting user')
-            self.writer[sKey].write(b'USER ' + config["Bot"]["IRC"]["Servers"][sKey]["Nickname"].encode('utf-8') + b' B hi :' + config["Bot"]["IRC"]["Servers"][sKey]["Nickname"].encode('utf-8') + b'\r\n')
-            await asyncio.sleep(3)
-            for key, val in config["Bot"]["IRC"]["Servers"][sKey]["Channel"].items():
-                print(key)
-                self.writer[sKey].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
-            await asyncio.sleep(3)
-            print("sending msg")
-            loop.create_task(self.handleMsg(loop,host))
+            await self.ircConnect(loop,host)
             #loop.create_task(Twitch_boT.handleMsg(loop,"irc.chat.twitch.tv"))
         
             #writer.write(b'JOIN #' + "test".encode('utf-8')+ b'\r\n')
@@ -447,6 +426,29 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
         print(self.reader)
         print(self.writer)
             
+    async def ircConnect(self,loop,host):#handles the irc connection
+        self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config["Bot"]["IRC"]["Servers"][host]["Port"], loop=loop)
+        self.reader.update({host: self.readerBasic})
+        self.writer.update({host: self.writerBasic})
+        print(self.reader)
+        print(self.writer)
+        await asyncio.sleep(3)
+        if config["Bot"]["IRC"]["Servers"][host]["Password"] != "":
+            self.writer[host].write(b'PASS ' + config["Bot"]["IRC"]["Servers"][host]["Password"].encode('utf-8') + b'\r\n')
+        
+        print('[Twitch] ', 'setting nick')
+        
+        self.writer[host].write(b'NICK ' + config["Bot"]["IRC"]["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
+        print('[Twitch] ', 'setting user')
+        self.writer[host].write(b'USER ' + config["Bot"]["IRC"]["Servers"][host]["Nickname"].encode('utf-8') + b' B hi :' + config["Bot"]["IRC"]["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
+        await asyncio.sleep(3)
+        for key, val in config["Bot"]["IRC"]["Servers"][host]["Channel"].items():
+            print(key)
+            self.writer[host].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
+        await asyncio.sleep(3)
+        print("sending msg")
+        await loop.create_task(self.handleMsg(loop,host)) 
+        
     async def handleSendMsg(self,loop):
         global processedMSG,config
         #irc msg handler
@@ -465,6 +467,7 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
                 j = j + 1
             await asyncio.sleep(1)
             
+       
             
     async def handleMsg(self,loop,host):
         info_pattern = re.compile(r'00[1234]|37[526]|CAP')
@@ -536,13 +539,26 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
         elif data[1] == 'NOTICE':
             #temp
             x = 1
+        elif data[1] == 'KICK':
+            print('[Twitch] ', 'Twitch has requested that I reconnect, This is currently unsupported.')
+            self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
+            asyncio.sleep(10)
+            print("going")
+            await self.ircConnect(loop,host)
+            loop.stop()
         elif data[1] == 'RECONNECT':
             print('[Twitch] ', 'Twitch has requested that I reconnect, This is currently unsupported.')
+            self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
+            asyncio.sleep(10)
+            await self.ircConnect(loop,host)
             loop.stop()
 
         elif data[0] == "ERROR":
             if ' '.join([data[1],data[2]]) == ":Closing link:":
+                self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
                 print("[Twitch] Lost Connection or disconnected: %s" % ' '.join(data[4:]))
+                asyncio.sleep(10)
+                await self.ircConnect(loop,host)
                 loop.stop()
                 
                 
