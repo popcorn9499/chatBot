@@ -1,3 +1,5 @@
+#async to sync
+from concurrent.futures import ThreadPoolExecutor
 
 
 import datetime
@@ -176,14 +178,15 @@ async def discordCheckCommand(): #checks for a discord message
     for command in processedCommand: #this cycles through the array for messages unsent to discord and sends them
         if command["sent"] == False: 
             if command["Command"] == "setRole":
+                await mainBot().addConsoleAsync('Setting role',"Discord","Info")
                 await client.add_roles(command["authorData"], discordRoles["Popicraft Minecraft"][command["args"][0]]["Data"])
             elif command["Command"] == "removeRole":
-                print("removing")
+                await mainBot().addConsoleAsync('Removing role',"Discord","Info")
                 await client.remove_roles(command["authorData"], discordRoles["Popicraft Minecraft"][command["args"][0]]["Data"])
             elif  command["Command"] == "sendMessage":
-                print("placeholder")
+                await mainBot().addConsoleAsync('PlaceHolder for Send message',"Discord","Info")
             elif command["Command"] == "deleteMessage":
-                print("deleting message")
+                await mainBot().addConsoleAsync('Deleted message',"Discord","Info")
                 await client.delete_message(command["args"][0])
             
             
@@ -204,24 +207,24 @@ async def on_ready(): #when the discord api has logged in and is ready then this
         global channelToUse #this is where we save the channel information (i think its a class)
         global  channelUsed #this is the channel name we are looking for
         #this is just to show what the name of the bot is and the id
-        print('Logged in as') ##these things could be changed a little bit here
-        print(client.user.name+ "#" + client.user.discriminator)
+        await mainBot().addConsoleAsync('Logged in as',"Discord","Info")##these things could be changed a little bit here
+        await mainBot().addConsoleAsync(client.user.name+ "#" + client.user.discriminator,"Discord","Info")
         botName = client.user.name+ "#" + client.user.discriminator #gets and saves the bots name and discord tag
-        print(client.user.id)
+        await mainBot().addConsoleAsync(client.user.id,"Discord","Info")
         rolesList = {}
         membersList = {}
         for server in client.servers: #this portion gets all the info for all the channels and servers the bot is in
             for members in server.members:
                 membersList.update({str(members): members})
             discordMembers.update({str(server.name):membersList})
-            #print(discordMembers) 
+            await mainBot().addConsoleAsync(discordMembers,"Discord","Info")
             for roles in server.roles:
                 #print( "[" + server.name + "]"+ roles.name + ":" + str(roles.position))
                 rolesList.update({str(roles.name):{"Number":int(roles.position),"Data": roles}})
                 if roles.name == "Mod":
                     tempRole = roles
             discordRoles.update({str(server.name):rolesList})
-            #print(discordRoles)
+            await mainBot().addConsoleAsync(discordRoles,"Discord","Info")
             discordInfo.update({str(server): {"asdasdhskajhdkjashdlk":"channel info"}})#maybe set a check for that channel
             for channel in server.channels:
                 disc = {str(channel.name): channel}
@@ -276,7 +279,7 @@ async def on_message(message): #waits for the discord message event and pulls it
             #ircSendMSG(message.author,config["ircChannel"],message.content)
             roleList = {}
             for roles in message.author.roles:
-                print(roles.name + ":" + str(roles.position))
+                #await mainBot().addConsoleAsync(roles.name + ":" + str(roles.position),"Discord","Info") #causes a weird bot:14 spam in console every message
                 roleList.update({str(roles.name):int(roles.position)})
             print(roleList)
             print(tempRole)
@@ -288,7 +291,6 @@ async def on_message(message): #waits for the discord message event and pulls it
 
             
 ##file load and save stuff
-
 def fileSave(fileName,config):
     print("Saving")
     f = open(fileName, 'w') #opens the file your saving to with write permissions
@@ -432,27 +434,32 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
         self.writer.update({host: self.writerBasic})
         print(self.reader)
         print(self.writer)
+        await mainBot().addConsoleAsync("Reader {0}".format(self.reader),host,"Info")
+        await mainBot().addConsoleAsync("Writer {0}".format(self.writer),host,"Info")
         await asyncio.sleep(3)
         if config["Bot"]["IRC"]["Servers"][host]["Password"] != "":
             self.writer[host].write(b'PASS ' + config["Bot"]["IRC"]["Servers"][host]["Password"].encode('utf-8') + b'\r\n')
-        
-        print('[Twitch] ', 'setting nick')
+            await mainBot().addConsoleAsync("Inputing password",host,"Info")
+
+        await mainBot().addConsoleAsync("Setting user {0}".format(config["Bot"]["IRC"]["Servers"][host]["Nickname"]),host,"Info")
+
         
         self.writer[host].write(b'NICK ' + config["Bot"]["IRC"]["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
-        print('[Twitch] ', 'setting user')
+        await mainBot().addConsoleAsync("Setting user {0}".format(config["Bot"]["IRC"]["Servers"][host]["Nickname"]),host,"Info")
         self.writer[host].write(b'USER ' + config["Bot"]["IRC"]["Servers"][host]["Nickname"].encode('utf-8') + b' B hi :' + config["Bot"]["IRC"]["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
         await asyncio.sleep(3)
+        await mainBot().addConsoleAsync("Joining channels",host,"Info")
         for key, val in config["Bot"]["IRC"]["Servers"][host]["Channel"].items():
             print(key)
             self.writer[host].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
+            await mainBot().addConsoleAsync("Joining channel {0}".format(key),host,"Info")
         await asyncio.sleep(3)
-        print("sending msg")
+        await mainBot().addConsoleAsync("Initiating IRC Reader",host,"Info")
         await loop.create_task(self.handleMsg(loop,host)) 
         
     async def handleSendMsg(self,loop):
         global processedMSG,config
         #irc msg handler
-        print("looping")
         while True:
             j = 0
             #print("lo")
@@ -478,7 +485,8 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
                     data = (await self.reader[host].readuntil(b'\n')).decode("utf-8")
                     data = data.rstrip()
                     data = data.split()
-                    if data[0].startswith('@'):
+                    await mainBot().addConsoleAsync(' '.join(data),host,"Info")
+                    if data[0].startswith('@'): 
                         data.pop(0)
                     if data == []:
                         pass
@@ -509,10 +517,8 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
             m = re.search(self.messagepattern, data[0])
             if m:
                 message = ' '.join(data[3:]).strip(':').lower().split()
-                
-                print(data[2]+ ":" + user +': '+ ''.join(message))
-                print(''.join(message))
-                msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":''.join(message),"sent":False}
+                await mainBot().addConsoleAsync(data[2]+ ":" + user +': '+ ' '.join(message),host,"Info")
+                msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":' '.join(message),"sent":False}
                 mainMsg.append(msgStats)
                 # if message[0] == '!' + config['Twitch']['command']:
                     # link = message[1]
@@ -525,13 +531,13 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
         elif data[1] == 'JOIN':
             user = data[0].split('!')[0].lstrip(":")
             #temp
-            print(user+" joined")
+            await mainBot().addConsoleAsync(user+" joined",host,"Info")
             msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":"{0} joined the channel".format(user),"sent":False}
             mainMsg.append(msgStats)
             x = 1
         elif data[1] == 'PART' or data[1] == 'QUIT':
             user = data[0].split('!')[0].lstrip(":")
-            print(user+" left")
+            await mainBot().addConsoleAsync(user+" left",host,"Info")
             msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":"{0} left the channel ({1})".format(user,data[3]),"sent":False}
             mainMsg.append(msgStats)
             #temp
@@ -541,13 +547,13 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
             x = 1
         elif data[1] == 'KICK':
             print('[Twitch] ', 'Twitch has requested that I reconnect, This is currently unsupported.')
+            await mainBot().addConsoleAsync("I was kicked",host,"Info")
             self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
             asyncio.sleep(10)
-            print("going")
             await self.ircConnect(loop,host)
             loop.stop()
         elif data[1] == 'RECONNECT':
-            print('[Twitch] ', 'Twitch has requested that I reconnect, This is currently unsupported.')
+            await mainBot().addConsoleAsync("Reconnecting",host,"Info")
             self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
             asyncio.sleep(10)
             await self.ircConnect(loop,host)
@@ -557,6 +563,7 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
             if ' '.join([data[1],data[2]]) == ":Closing link:":
                 self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
                 print("[Twitch] Lost Connection or disconnected: %s" % ' '.join(data[4:]))
+                await mainBot().addConsoleAsync("Lost connection",host,"Info")
                 asyncio.sleep(10)
                 await self.ircConnect(loop,host)
                 loop.stop()
@@ -811,9 +818,6 @@ def youtubeChatControl():
         time.sleep(2) 
 
 class twitchBot():
-    
-    
-    
     def getChannelID(self):
         from urllib.parse import urlencode
         from requests import Session
@@ -976,14 +980,52 @@ class mainBot():
         cycle = 0
         #time.sleep(20)
         while True:
-            self.checkMSG()
+            if self.checkConsole() == False:
+                self.checkMSG()
             self.authorMuteTimeCheck()
             if cycle == 120: 
                 fileSave("config-test.json",config)
                 cycle = 0
             cycle = cycle + 1
             time.sleep(0.2)
-            
+    
+    def addToConsole(self,msg,host,errorLevel):
+        msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": "Console", "author": "Console","authorData": None,"authorsRole": {"Normal": 0},"msg": msg,"sent":False}
+        mainMsg.append(msgStats)
+        
+    async def addConsoleAsync(self,msg,host,errorLevel):
+        
+        loop  = asyncio.get_event_loop()
+        loop.create_task(mainBot().addConsoleAsync1(loop,msg,host,errorLevel))
+        #loop.run_forever()
+        
+    async def addConsoleAsync1(self,loop,msg,host,errorLevel):
+        await loop.run_in_executor(ThreadPoolExecutor(), self.addToConsole,msg,host,errorLevel)
+        
+    
+    def checkConsole(self):#console sending to another service
+        j = 0
+        for msg in mainMsg:
+            try:
+                if msg["Channel"] == "Console" and msg["sent"] == False:
+                    for key ,val in config["Bot Console"].items():
+                        print(val)
+                        fileSave("Val",val)
+                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":"Discord", "Server": "Popicraft Network", "Channel": "console"} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "{4}".format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"])),"sent": False}
+                        processedMSG.append(msgStats)
+                        print(msgStats)
+                        fileSave("console",str(msgStats))
+                        
+                    mainMsg[j]["sent"] = True
+                    return True
+                    
+                j = j +1
+            except KeyError as error:
+                print("not deleted")
+                print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
+                return False
+ 
+    
     ##remember was working on making all the msg code the same
     def checkMSG(self):
         global processedMSG,mainMsg,processedCommand

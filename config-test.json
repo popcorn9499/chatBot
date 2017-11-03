@@ -375,6 +375,15 @@
             "pageToken": ""
         }
     },
+    "Bot Console": {
+        "Console": {
+            "Channel": "console",
+            "Enabled": true,
+            "Formatting": "[{8}] [{6}][{7}]{3} : {4}",
+            "Server": "Popicraft Network",
+            "Site": "Discord"
+        }
+    },
     "Twitch": {
         "accessToken": "",
         "channelName": "",
