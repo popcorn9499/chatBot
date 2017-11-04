@@ -457,7 +457,7 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
             await mainBot().addConsoleAsync("Joining channel {0}".format(key),host,"Info")
         await asyncio.sleep(3)
         await mainBot().addConsoleAsync("Initiating IRC Reader",host,"Info")
-        await loop.create_task(self.handleMsg(loop,host)) 
+        loop.create_task(self.handleMsg(loop,host)) 
         
     async def handleSendMsg(self,loop):
         global processedMSG,config
