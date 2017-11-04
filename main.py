@@ -418,6 +418,7 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
         
         for sKey, sVal in config["Bot"]["IRC"]["Servers"].items():
             host = sKey
+            await mainBot().addConsoleAsync("Connecting",host,"Info")
             await self.ircConnect(loop,host)
             #loop.create_task(Twitch_boT.handleMsg(loop,"irc.chat.twitch.tv"))
         
@@ -696,42 +697,50 @@ def listChat():
     global config
     global youtube
     global mainMsg
-    
-    list_chatmessages = youtube.liveChatMessages().list( #lists the chat messages
-        part="id,snippet,authorDetails", #gets the author details needed and the snippet all of which giving me the message and username
-        liveChatId=liveChatId,
-        maxResults=500,
-        pageToken=config["Bot"]["Youtube"]["pageToken"] #gives the previous token so it loads a new section of the chat
-    ).execute() #executes it so its not just some object
-
-    config["Bot"]["Youtube"]["pageToken"] = list_chatmessages["nextPageToken"] #page token for next use
-    
-    msgCheckRegex = re.compile(r'(:)') #setup for if we happen to need this it should never change either way
-    
-    for temp in list_chatmessages["items"]: #goes through all the stuff in the list messages list
-        message = temp["snippet"]["displayMessage"] #gets the display message
-        username = temp["authorDetails"]["displayName"] #gets the users name
-        userID = temp["authorDetails"]["channelId"]
-        if message != "" and username != "": #this makes sure that the message and username slot arent empty before putting this to the discord chat        
-            print(temp)
-            fileSave("youtubeMsgJson.json", temp)
-            print(userID)
-            print(botUserID)
-            if userID != botUserID:
-                print("{0} {1}".format(username,message))
-                msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorsRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
-                mainMsg.append(msgStats)
-            elif userID == botUserID: #if the userId is the bots then check the message to see if the bot sent it.
-                try:
-                    msgCheckComplete = msgCheckRegex.search(message) #checks the message against the previously created regex for ":"
-                    if msgCheckComplete.group(1) != ":": #if its this then go and send the message as normal
+    try:
+        continuation = True
+        try:
+            list_chatmessages = youtube.liveChatMessages().list( #lists the chat messages
+                part="id,snippet,authorDetails", #gets the author details needed and the snippet all of which giving me the message and username
+                liveChatId=liveChatId,
+                maxResults=500,
+                pageToken=config["Bot"]["Youtube"]["pageToken"] #gives the previous token so it loads a new section of the chat
+            ).execute() #executes it so its not just some object
+            config["Bot"]["Youtube"]["pageToken"] = list_chatmessages["nextPageToken"] #page token for next use
+        except googleapiclient.errors.HttpError:
+            continuation = False 
+            
+        msgCheckRegex = re.compile(r'(:)') #setup for if we happen to need this it should never change either way
+        if continuation == True:
+            for temp in list_chatmessages["items"]: #goes through all the stuff in the list messages list
+                message = temp["snippet"]["displayMessage"] #gets the display message
+                username = temp["authorDetails"]["displayName"] #gets the users name
+                userID = temp["authorDetails"]["channelId"]
+                if message != "" and username != "": #this makes sure that the message and username slot arent empty before putting this to the discord chat        
+                    print(temp)
+                    fileSave("youtubeMsgJson.json", temp)
+                    print(userID)
+                    print(botUserID)
+                    if userID != botUserID:
                         print("{0} {1}".format(username,message))
-                        msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
+                        msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorsRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
                         mainMsg.append(msgStats)
-                except AttributeError as error:
-                    print("{0} {1}".format(username,message))
-                    msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorsRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
-                    mainMsg.append(msgStats)
+                    elif userID == botUserID: #if the userId is the bots then check the message to see if the bot sent it.
+                        try:
+                            msgCheckComplete = msgCheckRegex.search(message) #checks the message against the previously created regex for ":"
+                            if msgCheckComplete.group(1) != ":": #if its this then go and send the message as normal
+                                print("{0} {1}".format(username,message))
+                                msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
+                                mainMsg.append(msgStats)
+                        except AttributeError as error:
+                            print("{0} {1}".format(username,message))
+                            msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorsRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
+                            mainMsg.append(msgStats)    
+    except ConnectionResetError:
+        x = 1
+        mainBot().addToConsole('Connection Error',"Youtube","Info")
+        
+    
 
 
 def youtubeRoles(authorDetails):
@@ -990,7 +999,7 @@ class mainBot():
             time.sleep(0.2)
     
     def addToConsole(self,msg,host,errorLevel):
-        msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": "Console", "author": "Console","authorData": None,"authorsRole": {"Normal": 0},"msg": msg,"sent":False}
+        msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": "Console", "author": "Console","authorData": None,"authorsRole": {"Normal": 0},"msg": "[{2}] [{1}]{0} ".format(msg,host,errorLevel),"sent":False}
         mainMsg.append(msgStats)
         
     async def addConsoleAsync(self,msg,host,errorLevel):
