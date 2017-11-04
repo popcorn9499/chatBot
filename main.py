@@ -426,6 +426,7 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
             #writer.write("PRIVMSG #test :mods".encode('utf-8')+ b'\r\n')
         asyncio.sleep(3)
         loop.create_task(self.handleSendMsg(loop))
+        await mainBot().addConsoleAsync("Connected",host,"Info")
         print(self.reader)
         print(self.writer)
             
