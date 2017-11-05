@@ -1019,9 +1019,9 @@ class mainBot():
                 if msg["Channel"] == "Console" and msg["sent"] == False:
                     
                     for key ,val in config["Bot Console"].items():
-                        if val["Site"] == "Terminal":
+                        if val["Site"] == "Terminal" and self.consoleDebugCheck(val["Debug"],msg["Info"]["errorLevel"]) == True:
                             print(self.consoleFormat(msg,val))
-                        else:    
+                        elif self.consoleDebugCheck(val["Debug"],msg["Info"]["errorLevel"]) == True:    
                             print(val)
                             fileSave("Val",val)
                             msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":"Discord", "Server": "Popicraft Network", "Channel": "console"} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": self.consoleFormat(msg,val),"sent": False}
@@ -1037,7 +1037,13 @@ class mainBot():
                 print("not deleted")
                 print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
                 return False
- 
+    
+    def consoleDebugCheck(self,debug,info):
+        if debug[info] == True:
+            return True
+        else:
+            return False
+    
     def consoleFormat(self,msg,val):#does all console formatting
         msgStat = val["Formatting"].format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"]),msg["Info"]["Host"],msg["Info"]["errorLevel"])
         return msgStat

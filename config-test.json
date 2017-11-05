@@ -381,15 +381,28 @@
             "Enabled": true,
             "Formatting": "[{7}] [{6}]{4}",
             "Server": "Popicraft Network",
-            "Site": "Discord"
+            "Site": "Discord",
+            "Debug": {
+                "Extra Debug": true,
+                "Debug": true,
+                "Extra Info": true,
+                "Info": false
+                
+            }
         },
         "Terminal":{
             "Channel": "Terminal",
             "Enabled": true,
             "Formatting": "[{7}] [{6}]{4}",
             "Server": "Terminal",
-            "Site": "Terminal"
-        }
+            "Site": "Terminal",
+            "Debug": {
+                "Extra Debug": true,
+                "Debug": true,
+                "Extra Info": true,
+                "Info": false
+                
+            }
     },
     "Twitch": {
         "accessToken": "",
