@@ -1000,11 +1000,10 @@ class mainBot():
             time.sleep(0.2)
     
     def addToConsole(self,msg,host,errorLevel):
-        msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": "Console", "author": "Console","authorData": None,"authorsRole": {"Normal": 0},"msg": "[{2}] [{1}]{0} ".format(msg,host,errorLevel),"sent":False}
+        msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": "Console", "author": "Console","authorData": None,"authorsRole": {"Normal": 0},"msg": msg,"Info": {"Host": host,"errorLevel": errorLevel},"sent":False}
         mainMsg.append(msgStats)
         
     async def addConsoleAsync(self,msg,host,errorLevel):
-        
         loop  = asyncio.get_event_loop()
         loop.create_task(mainBot().addConsoleAsync1(loop,msg,host,errorLevel))
         #loop.run_forever()
@@ -1018,13 +1017,17 @@ class mainBot():
         for msg in mainMsg:
             try:
                 if msg["Channel"] == "Console" and msg["sent"] == False:
+                    
                     for key ,val in config["Bot Console"].items():
-                        print(val)
-                        fileSave("Val",val)
-                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":"Discord", "Server": "Popicraft Network", "Channel": "console"} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "{4}".format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"])),"sent": False}
-                        processedMSG.append(msgStats)
-                        print(msgStats)
-                        fileSave("console",str(msgStats))
+                        if val["Site"] == "Terminal":
+                            print(self.consoleFormat(msg,val))
+                        else:    
+                            print(val)
+                            fileSave("Val",val)
+                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":"Discord", "Server": "Popicraft Network", "Channel": "console"} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": self.consoleFormat(msg,val),"sent": False}
+                            processedMSG.append(msgStats)
+                            print(msgStats)
+                            fileSave("console",str(msgStats))
                         
                     mainMsg[j]["sent"] = True
                     return True
@@ -1035,6 +1038,9 @@ class mainBot():
                 print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
                 return False
  
+    def consoleFormat(self,msg,val):#does all console formatting
+        msgStat = val["Formatting"].format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"]),msg["Info"]["Host"],msg["Info"]["errorLevel"])
+        return msgStat
     
     ##remember was working on making all the msg code the same
     def checkMSG(self):

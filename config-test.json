@@ -379,9 +379,16 @@
         "Console": {
             "Channel": "console",
             "Enabled": true,
-            "Formatting": "[{8}] [{6}][{7}]{3} : {4}",
+            "Formatting": "[{7}] [{6}]{4}",
             "Server": "Popicraft Network",
             "Site": "Discord"
+        },
+        "Terminal":{
+            "Channel": "Terminal",
+            "Enabled": true,
+            "Formatting": "[{7}] [{6}]{4}",
+            "Server": "Terminal",
+            "Site": "Terminal"
         }
     },
     "Twitch": {
