@@ -368,46 +368,6 @@ if firstRun == "on":
 
 
 ##this is the event loop for the irc client
-class MyClient(pydle.Client):
-    """ This is a simple bot that will greet people as they join the channel. """
-
-    def on_connect(self):
-        super().on_connect()
-        # Can't greet many people without joining a channel.
-        for key, val in config["Bot"]["IRC"]["Servers"]["None"]["Channel"].items():
-            self.join(key)
-        
-
-    def on_join(self, channel, user):
-        super().on_join(channel, user)
-        
-    def on_disconnect(self,expected): #this event detects disconnects
-        global config
-        #this will stop the irc event loop from running in the event that something goes wrong and the connection fails
-        print(expected) #prints a debug of if the client disconnected
-        retry =  0 #sets the 
-        time.sleep(15) #waits a few seconds till the first retry
-        while retry <= 50: #forces a reconnect if something goes wrong
-            self._reset_connection_attributes() #resets connection info
-            print("retrying connection") 
-            self.connect(config["Bot"]["IRC"]["IP"],config["Bot"]["IRC"]["Port"]) #starts the connection
-            time.sleep(15) #waits so the client can finish connecting and things can actually be processes
-            print(self.connected) #status connected or not
-            if self.connected: #if connected to irc server leave this loop and be done.
-                retry = 59
-            else:
-                self.connection.stop() #alternative if it failes and go through the previous method that worked partially.
-            retry = retry + 1 #keeps going up till the number or retries is hit
-
-        
-    def on_channel_message(self,target,by,message):
-        global mainMsg
-        #self.connection.stop() #this stops the event loop when the client gives up just need to figure out how to determine that
-        super().on_channel_message(target,by,message) 
-        print(target + ":" + by +  ":" + message )
-        msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": "None","Channel": target, "author": by,"authorData": None,"authorsRole": {"Normal": 0},"msg":message,"sent":False}
-        mainMsg.append(msgStats)
-
 class irc():#alot of this code was given to me from a friend then i adapted to more of what i needed
     def __init__(self):
         self.messagepattern = re.compile(r"^:(.{1,50})!")
