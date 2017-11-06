@@ -15,7 +15,6 @@ import asyncio
 import time
 
 #irc stuff
-import pydle
 ####variables
 config = {"channelName": "", "pageToken": "", "serverName": "", "discordToken": "","discordToIRCFormating": "", "IRCToDiscordFormatting":""}
 
@@ -40,7 +39,6 @@ haltDeleteMSG = 0
 
 
 #irc stuff
-import pydle
 
 ircClient = 0
 discordMSG = []
