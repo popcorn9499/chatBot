@@ -178,15 +178,15 @@ async def discordCheckCommand(): #checks for a discord message
     for command in processedCommand: #this cycles through the array for messages unsent to discord and sends them
         if command["sent"] == False: 
             if command["Command"] == "setRole":
-                await mainBot().addConsoleAsync('Setting role',"Discord","Info")
+                await mainBot().addConsoleAsync('Setting role',"Discord","Extra Info")
                 await client.add_roles(command["authorData"], discordRoles["Popicraft Minecraft"][command["args"][0]]["Data"])
             elif command["Command"] == "removeRole":
-                await mainBot().addConsoleAsync('Removing role',"Discord","Info")
+                await mainBot().addConsoleAsync('Removing role',"Discord","Extra Info")
                 await client.remove_roles(command["authorData"], discordRoles["Popicraft Minecraft"][command["args"][0]]["Data"])
             elif  command["Command"] == "sendMessage":
-                await mainBot().addConsoleAsync('PlaceHolder for Send message',"Discord","Info")
+                await mainBot().addConsoleAsync('PlaceHolder for Send message',"Discord","Extra Info")
             elif command["Command"] == "deleteMessage":
-                await mainBot().addConsoleAsync('Deleted message',"Discord","Info")
+                await mainBot().addConsoleAsync('Deleted message',"Discord"," Extra Info")
                 await client.delete_message(command["args"][0])
             
             
@@ -217,14 +217,14 @@ async def on_ready(): #when the discord api has logged in and is ready then this
             for members in server.members:
                 membersList.update({str(members): members})
             discordMembers.update({str(server.name):membersList})
-            await mainBot().addConsoleAsync(discordMembers,"Discord","Info")
+            await mainBot().addConsoleAsync(discordMembers,"Discord","Extra Debug")
             for roles in server.roles:
                 #print( "[" + server.name + "]"+ roles.name + ":" + str(roles.position))
                 rolesList.update({str(roles.name):{"Number":int(roles.position),"Data": roles}})
                 if roles.name == "Mod":
                     tempRole = roles
             discordRoles.update({str(server.name):rolesList})
-            await mainBot().addConsoleAsync(discordRoles,"Discord","Info")
+            await mainBot().addConsoleAsync(discordRoles,"Discord","Extra Debug")
             discordInfo.update({str(server): {"asdasdhskajhdkjashdlk":"channel info"}})#maybe set a check for that channel
             for channel in server.channels:
                 disc = {str(channel.name): channel}
@@ -263,9 +263,10 @@ async def on_ready(): #when the discord api has logged in and is ready then this
     
 @client.event
 async def on_error(event):
-    print("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1}".format(datetime.datetime.now(),event))
+    #print("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1}".format(datetime.datetime.now(),event))
     f = open("error.log","r+")
     f.write("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1}".format(datetime.datetime.now(),event))
+    await mainBot().addConsoleAsync("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1}".format(datetime.datetime.now(),event),"Discord","Debug")
     f.close()
     
     
@@ -274,7 +275,7 @@ async def on_message(message): #waits for the discord message event and pulls it
     global mainMsg,discord,tempRole,discordRoles,processedCommand
     if firstRun == "off":
         if str(message.author) != botName: #this checks to see if it is using the correct discord channel to make sure its the right channel. also checks to make sure the botname isnt our discord bot name
-            print("{0} : {1}".format(message.author,message.content)) #prints this to the screen
+            #print("{0} : {1}".format(message.author,message.content)) #prints this to the screen
             #await client.send_message(message.channel, 'Hello.')          
             #ircSendMSG(message.author,config["ircChannel"],message.content)
             roleList = {}
@@ -436,18 +437,18 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
         self.writer.update({host: self.writerBasic})
         print(self.reader)
         print(self.writer)
-        await mainBot().addConsoleAsync("Reader {0}".format(self.reader),host,"Info")
-        await mainBot().addConsoleAsync("Writer {0}".format(self.writer),host,"Info")
+        await mainBot().addConsoleAsync("Reader {0}".format(self.reader),host,"Extra Debug")
+        await mainBot().addConsoleAsync("Writer {0}".format(self.writer),host,"Extra Debug")
         await asyncio.sleep(3)
         if config["Bot"]["IRC"]["Servers"][host]["Password"] != "":
             self.writer[host].write(b'PASS ' + config["Bot"]["IRC"]["Servers"][host]["Password"].encode('utf-8') + b'\r\n')
             await mainBot().addConsoleAsync("Inputing password",host,"Info")
 
-        await mainBot().addConsoleAsync("Setting user {0}".format(config["Bot"]["IRC"]["Servers"][host]["Nickname"]),host,"Info")
+        await mainBot().addConsoleAsync("Setting user {0}".format(config["Bot"]["IRC"]["Servers"][host]["Nickname"]),host,"Debug")
 
         
         self.writer[host].write(b'NICK ' + config["Bot"]["IRC"]["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
-        await mainBot().addConsoleAsync("Setting user {0}".format(config["Bot"]["IRC"]["Servers"][host]["Nickname"]),host,"Info")
+        await mainBot().addConsoleAsync("Setting user {0}".format(config["Bot"]["IRC"]["Servers"][host]["Nickname"]),host,"Extra Info")
         self.writer[host].write(b'USER ' + config["Bot"]["IRC"]["Servers"][host]["Nickname"].encode('utf-8') + b' B hi :' + config["Bot"]["IRC"]["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
         await asyncio.sleep(3)
         await mainBot().addConsoleAsync("Joining channels",host,"Info")
@@ -456,7 +457,7 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
             self.writer[host].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
             await mainBot().addConsoleAsync("Joining channel {0}".format(key),host,"Info")
         await asyncio.sleep(3)
-        await mainBot().addConsoleAsync("Initiating IRC Reader",host,"Info")
+        await mainBot().addConsoleAsync("Initiating IRC Reader",host,"Debug")
         loop.create_task(self.handleMsg(loop,host)) 
         
     async def handleSendMsg(self,loop):
@@ -487,7 +488,7 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
                     data = (await self.reader[host].readuntil(b'\n')).decode("utf-8")
                     data = data.rstrip()
                     data = data.split()
-                    await mainBot().addConsoleAsync(' '.join(data),host,"Info")
+                    await mainBot().addConsoleAsync(' '.join(data),host,"Extra Debug")
                     if data[0].startswith('@'): 
                         data.pop(0)
                     if data == []:
@@ -1036,6 +1037,7 @@ class mainBot():
             except KeyError as error:
                 print("not deleted")
                 print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
+                await mainBot().addConsoleAsync('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error,"Discord"," Extra Debug")
                 return False
     
     def consoleDebugCheck(self,debug,info):
@@ -1063,8 +1065,9 @@ class mainBot():
                             msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot": msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "[Deleted] {1} : {2}".format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"])),"sent": False}
                             processedMSG.append(msgStats)
                     except KeyError as error:
-                        print("not deleted")
+                        #print("not deleted")
                         print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
+                        await mainBot().addConsoleAsync('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error,"Discord"," Extra Debug")
 
                     #all channels catch portion
                     try:
@@ -1078,12 +1081,13 @@ class mainBot():
                     try:#this is here to ensure the thread doesnt crash from looking for something that doesnt exist
                         for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
                             if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
-                                print(msg["Bot"])
+                                #print(msg["Bot"])
                                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"]),self.serverNameReformat(msg["Bot"],msg["Server"]),self.channelNameReformat(msg["Bot"],msg["Server"],msg["Channel"])),"sent": False}
                                 processedMSG.append(msgStats)
 
                     except KeyError as error:
                         print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
+                        await mainBot().addConsoleAsync('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error,"Discord"," Extra Debug")
                 mainMsg[j]["sent"] = True
             j = j +1
             
@@ -1288,7 +1292,7 @@ class mainBot():
                             
             except KeyError as error:
                     print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
-            
+                    await mainBot().addConsoleAsync('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error,"Discord"," Extra Debug")
             if tempMsg[0] == "!temp" and discordRoles[msg["Server"]]["Mod"]["Number"] <= roleNum:
                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
                 commandStats = {"sentFrom":msg["sentFrom"],"Command":"setRole","args": ["Mod"],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
