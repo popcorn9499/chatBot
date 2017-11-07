@@ -3,7 +3,7 @@ from modules import variables
 import asyncio
 import time
 from modules import fileIO
-
+from modules import twitchCommands
 
 class mainBot():
     def main(self):
@@ -253,16 +253,16 @@ class mainBot():
                         print("placeholder")
                     elif val["commandType"] == "twitchSetGame" and variables.discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
                         game = msg["msg"][len(tempMsg[0])+1:]
-                        twitchBot().setGame(game)
+                        twitchCommands.setGame(game)
                         msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"]),"sent": False}
                         print("placeholder")
                     elif val["commandType"] == "twitchSetTitle" and variables.discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
                         title = msg["msg"][len(tempMsg[0])+1:]
-                        twitchBot().setGame(title)
+                        twitchCommands.setGame(title)
                         msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"]),"sent": False}
                         print("placeholder")
                     elif val["commandType"] == "twitchGetViewers" and variables.discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
-                        viewers = twitchBot().getViewerCount()
+                        viewers = twitchCommands.getViewerCount()
                         print("twitch viewers: " + str(viewers))
                         msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],viewers),"sent": False}
                         print("placeholder")

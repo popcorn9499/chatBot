@@ -4,6 +4,7 @@ from modules import variables
 from modules import mainBot
 
 
+
 ##this is the event loop for the irc client
 class irc():#alot of this code was given to me from a friend then i adapted to more of what i needed
     def __init__(self):
