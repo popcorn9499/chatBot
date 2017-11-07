@@ -119,7 +119,7 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
                 message = ' '.join(data[3:]).strip(':').lower().split()
                 await mainBot.mainBot().addConsoleAsync(data[2]+ ":" + user +': '+ ' '.join(message),host,"Info")
                 msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":' '.join(message),"sent":False}
-                mainMsg.append(msgStats)
+                variables.mainMsg.append(msgStats)
                 # if message[0] == '!' + variables.config['Twitch']['command']:
                     # link = message[1]
                     # # print('Command seen: ', message, link if self._check_if_osu(link) else 'False')
@@ -133,13 +133,13 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
             #temp
             await mainBot.mainBot().addConsoleAsync(user+" joined",host,"Info")
             msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":"{0} joined the channel".format(user),"sent":False}
-            mainMsg.append(msgStats)
+            variables.mainMsg.append(msgStats)
             x = 1
         elif data[1] == 'PART' or data[1] == 'QUIT':
             user = data[0].split('!')[0].lstrip(":")
             await mainBot.mainBot().addConsoleAsync(user+" left",host,"Info")
             msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":"{0} left the channel ({1})".format(user,data[3]),"sent":False}
-            mainMsg.append(msgStats)
+            variables.mainMsg.append(msgStats)
             #temp
             x = 1
         elif data[1] == 'NOTICE':
