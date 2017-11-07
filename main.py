@@ -1,6 +1,8 @@
 #async to sync
 from concurrent.futures import ThreadPoolExecutor
-
+from modules import variables
+from modules import mainBot
+from modules import fileIO
 
 import datetime
 #used for the main program
@@ -24,7 +26,7 @@ youtube = ""
 
 firstRun = "on"
 discordInfo = {}
-discordRoles = {}
+#variables.discordRoles = {}
 #used as global varibles and were defined before we start using them to avoid problems down the road
 channelToUse = ""
 
@@ -39,6 +41,7 @@ haltDeleteMSG = 0
 
 
 #irc stuff
+
 
 ircClient = 0
 discordMSG = []
@@ -59,6 +62,7 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
 import time
+
 
 
 
@@ -91,7 +95,7 @@ import time
 
 ####variables
 config = {"channelName": "", "pageToken": "", "serverName": "", "discordToken": "","discordToIRCFormating": "", "IRCToDiscordFormatting":""}
-
+from modules.irc import irc
 botName = "none"
 
 youtube = ""
@@ -104,11 +108,7 @@ channelToUse = ""
 haltDiscordMSG = 0
 haltDeleteMSG = 0
 
-mainMsg = []
-tempRole = 0
-discordMembers = {}
-processedCommand = []
-processedMSG = []
+
 ##jadens shift code
 #delete code is: 98reghwkjfgh8932guicdsb98r3280yioufsdgcgbf98
 #delete code is: 98reghwkjfgh8932guicdsb98r3280yioufsdgcgbf98
@@ -156,47 +156,47 @@ client = discord.Client() #sets this to just client for reasons cuz y not? (didn
 
 
 async def discordSendMsg(msg): #this is for sending messages to discord
-    global config, discordInfo,discordRoles
+    global config, discordInfo
     await client.send_message(discordInfo[msg["Server"]][msg["ChannelTo"]], msg["msgFormated"]["Discord"]) #sends the message to the channel specified in the beginning
     
 async def discordCheckMsg(): #checks for a discord message
-    global processedMSG, haltDiscordMSG, haltDeleteMSG, config
+    global haltDiscordMSG, haltDeleteMSG, config
     j = 0
-    for msg in processedMSG: #this cycles through the array for messages unsent to discord and sends them
+    for msg in variables.processedMSG: #this cycles through the array for messages unsent to discord and sends them
         if msg["sent"] == False and msg["sendTo"]["Bot"] == "Discord": 
             #await discordSendMsg(msg) #sends message
             await client.send_message(discordInfo[msg["sendTo"]["Server"]][msg["sendTo"]["Channel"]], msg["msgFormated"]) #sends the message to the channel specified in the beginning
-            processedMSG[j]["sent"] = True#promptly after sets that to the delete code
+            variables.processedMSG[j]["sent"] = True#promptly after sets that to the delete code
         j = j + 1
         
         
 async def discordCheckCommand(): #checks for a discord message
-    global processedCommand, haltDiscordMSG, haltDeleteMSG, config,discord,discordMembers
+    global haltDiscordMSG, haltDeleteMSG, config,discord
     j = 0
-    for command in processedCommand: #this cycles through the array for messages unsent to discord and sends them
+    for command in variables.processedCommand: #this cycles through the array for messages unsent to discord and sends them
         if command["sent"] == False: 
             if command["Command"] == "setRole":
-                await mainBot().addConsoleAsync('Setting role',"Discord","Extra Info")
-                await client.add_roles(command["authorData"], discordRoles["Popicraft Minecraft"][command["args"][0]]["Data"])
+                await mainBot.mainBot().addConsoleAsync('Setting role',"Discord","Extra Info")
+                await client.add_roles(command["authorData"], variables.discordRoles["Popicraft Minecraft"][command["args"][0]]["Data"])
             elif command["Command"] == "removeRole":
-                await mainBot().addConsoleAsync('Removing role',"Discord","Extra Info")
-                await client.remove_roles(command["authorData"], discordRoles["Popicraft Minecraft"][command["args"][0]]["Data"])
+                await mainBot.mainBot().addConsoleAsync('Removing role',"Discord","Extra Info")
+                await client.remove_roles(command["authorData"], variables.discordRoles["Popicraft Minecraft"][command["args"][0]]["Data"])
             elif  command["Command"] == "sendMessage":
-                await mainBot().addConsoleAsync('PlaceHolder for Send message',"Discord","Extra Info")
+                await mainBot.mainBot().addConsoleAsync('PlaceHolder for Send message',"Discord","Extra Info")
             elif command["Command"] == "deleteMessage":
-                await mainBot().addConsoleAsync('Deleted message',"Discord"," Extra Info")
+                await mainBot.mainBot().addConsoleAsync('Deleted message',"Discord"," Extra Info")
                 await client.delete_message(command["args"][0])
             
             
             
                 
             #await client.send_message(discordInfo[msg["sendTo"]["Server"]][msg["sendTo"]["Channel"]], msg["msgFormated"]) #sends the message to the channel specified in the beginning
-            processedCommand[j]["sent"] = True#promptly after sets that to the delete code
+            variables.processedCommand[j]["sent"] = True#promptly after sets that to the delete code
         j = j + 1
 
 @client.event
 async def on_ready(): #when the discord api has logged in and is ready then this even is fired
-    global ircClient, discord,discordRoles,tempRole,discordMembers
+    global ircClient
     firstRun = "off"
     if firstRun == "off":
         #print(discord.Server)
@@ -205,24 +205,24 @@ async def on_ready(): #when the discord api has logged in and is ready then this
         global channelToUse #this is where we save the channel information (i think its a class)
         global  channelUsed #this is the channel name we are looking for
         #this is just to show what the name of the bot is and the id
-        await mainBot().addConsoleAsync('Logged in as',"Discord","Info")##these things could be changed a little bit here
-        await mainBot().addConsoleAsync(client.user.name+ "#" + client.user.discriminator,"Discord","Info")
+        await mainBot.mainBot().addConsoleAsync('Logged in as',"Discord","Info")##these things could be changed a little bit here
+        await mainBot.mainBot().addConsoleAsync(client.user.name+ "#" + client.user.discriminator,"Discord","Info")
         botName = client.user.name+ "#" + client.user.discriminator #gets and saves the bots name and discord tag
-        await mainBot().addConsoleAsync(client.user.id,"Discord","Info")
+        await mainBot.mainBot().addConsoleAsync(client.user.id,"Discord","Info")
         rolesList = {}
         membersList = {}
         for server in client.servers: #this portion gets all the info for all the channels and servers the bot is in
             for members in server.members:
                 membersList.update({str(members): members})
-            discordMembers.update({str(server.name):membersList})
-            await mainBot().addConsoleAsync(discordMembers,"Discord","Extra Debug")
+            variables.discordMembers.update({str(server.name):membersList})
+            await mainBot.mainBot().addConsoleAsync(variables.discordMembers,"Discord","Extra Debug")
             for roles in server.roles:
                 #print( "[" + server.name + "]"+ roles.name + ":" + str(roles.position))
                 rolesList.update({str(roles.name):{"Number":int(roles.position),"Data": roles}})
                 if roles.name == "Mod":
-                    tempRole = roles
-            discordRoles.update({str(server.name):rolesList})
-            await mainBot().addConsoleAsync(discordRoles,"Discord","Extra Debug")
+                    variables.tempRole = roles
+            variables.discordRoles.update({str(server.name):rolesList})
+            await mainBot.mainBot().addConsoleAsync(variables.discordRoles,"Discord","Extra Debug")
             discordInfo.update({str(server): {"asdasdhskajhdkjashdlk":"channel info"}})#maybe set a check for that channel
             for channel in server.channels:
                 disc = {str(channel.name): channel}
@@ -241,7 +241,7 @@ async def on_ready(): #when the discord api has logged in and is ready then this
 #I need to get the person who deleted this message to make this useful            
 # @client.event
 # async def on_message_delete(message): #waits for the discord message event and pulls it somewhere
-    # global mainMsg,discord,tempRole,discordRoles,processedCommand
+    # global variables.mainMsg,discord,variables.tempRole,variables.discordRoles,variables.processedCommand
     # if firstRun == "off":
         # if str(message.author) != botName: #this checks to see if it is using the correct discord channel to make sure its the right channel. also checks to make sure the botname isnt our discord bot name
             # print("[Deleted]{0} : {1}".format(message.author,message.content)) #prints this to the screen
@@ -252,25 +252,24 @@ async def on_ready(): #when the discord api has logged in and is ready then this
                 # print(roles.name + ":" + str(roles.position))
                 # roleList.update({str(roles.name):int(roles.position)})
             # print(roleList)
-            # print(tempRole)
+            # print(variables.tempRole)
             # # commandStats = {"Command":"deleteMessage","args": [message],"sent": False}
-            # # processedCommand.append(commandStats)
-            # # await client.add_roles(message.author, discordRoles["Popicraft Minecraft"]["Mod"]["Data"])
+            # # variables.processedCommand.append(commandStats)
+            # # await client.add_roles(message.author, variables.discordRoles["Popicraft Minecraft"]["Mod"]["Data"])
             # msgStats = {"sentFrom":"Discord","deleted": True,"msgData": message,"Bot":"Discord","Server": str(message.server.name),"Channel":str(message.channel.name), "author":message.author.name,"authorData":message.author,"authorsRole":roleList,"msg":message.content,"sent":False}
-            # mainMsg.append(msgStats)
+            # variables.mainMsg.append(msgStats)
     
 @client.event
 async def on_error(event):
     #print("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1}".format(datetime.datetime.now(),event))
     f = open("error.log","r+")
     f.write("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1}".format(datetime.datetime.now(),event))
-    await mainBot().addConsoleAsync("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1}".format(datetime.datetime.now(),event),"Discord","Debug")
+    await mainBot.mainBot().addConsoleAsync("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1}".format(datetime.datetime.now(),event),"Discord","Debug")
     f.close()
     
     
 @client.event
 async def on_message(message): #waits for the discord message event and pulls it somewhere
-    global mainMsg,discord,tempRole,discordRoles,processedCommand
     if firstRun == "off":
         if str(message.author) != botName: #this checks to see if it is using the correct discord channel to make sure its the right channel. also checks to make sure the botname isnt our discord bot name
             #print("{0} : {1}".format(message.author,message.content)) #prints this to the screen
@@ -278,15 +277,15 @@ async def on_message(message): #waits for the discord message event and pulls it
             #ircSendMSG(message.author,config["ircChannel"],message.content)
             roleList = {}
             for roles in message.author.roles:
-                #await mainBot().addConsoleAsync(roles.name + ":" + str(roles.position),"Discord","Info") #causes a weird bot:14 spam in console every message
+                #await mainBot.mainBot().addConsoleAsync(roles.name + ":" + str(roles.position),"Discord","Info") #causes a weird bot:14 spam in console every message
                 roleList.update({str(roles.name):int(roles.position)})
             print(roleList)
-            print(tempRole)
+            print(variables.tempRole)
             #commandStats = {"Command":"deleteMessage","args": [message],"sent": False}
-            #processedCommand.append(commandStats)
-            #await client.add_roles(message.author, discordRoles["Popicraft Minecraft"]["Mod"]["Data"])
+            #variables.processedCommand.append(commandStats)
+            #await client.add_roles(message.author, variables.discordRoles["Popicraft Minecraft"]["Mod"]["Data"])
             msgStats = {"sentFrom":"Discord","msgData": message,"Bot":"Discord","Server": str(message.server.name),"Channel":str(message.channel.name), "author":message.author.name,"authorData":message.author,"authorsRole":roleList,"msg":message.content,"sent":False}
-            mainMsg.append(msgStats)
+            variables.mainMsg.append(msgStats)
 
             
 ##file load and save stuff
@@ -364,175 +363,6 @@ if firstRun == "on":
     config = {"channelName": "", "pageToken": "", "serverName": "", "discordToken": "","discordToIRCFormating": "", "IRCToDiscordFormatting":""}
     getToken()
 
-
-##this is the event loop for the irc client
-class irc():#alot of this code was given to me from a friend then i adapted to more of what i needed
-    def __init__(self):
-        self.messagepattern = re.compile(r"^:(.{1,50})!")
-        self.writer = {}
-        self.reader = {}
-    
-    async def irc_bot(self, loop): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.
-        #host = config["Bot"]["IRC"]["IP"]
-        
-        for sKey, sVal in config["Bot"]["IRC"]["Servers"].items():
-            host = sKey
-            await mainBot().addConsoleAsync("Connecting",host,"Info")
-            await self.ircConnect(loop,host)
-            #loop.create_task(Twitch_boT.handleMsg(loop,"irc.chat.twitch.tv"))
-        
-            #writer.write(b'JOIN #' + "test".encode('utf-8')+ b'\r\n')
-            #writer.write("PRIVMSG #test :mods".encode('utf-8')+ b'\r\n')
-        asyncio.sleep(3)
-        loop.create_task(self.handleSendMsg(loop))
-        await mainBot().addConsoleAsync("Connected",host,"Info")
-        print(self.reader)
-        print(self.writer)
-            
-    async def ircConnect(self,loop,host):#handles the irc connection
-        self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config["Bot"]["IRC"]["Servers"][host]["Port"], loop=loop)
-        self.reader.update({host: self.readerBasic})
-        self.writer.update({host: self.writerBasic})
-        print(self.reader)
-        print(self.writer)
-        await mainBot().addConsoleAsync("Reader {0}".format(self.reader),host,"Extra Debug")
-        await mainBot().addConsoleAsync("Writer {0}".format(self.writer),host,"Extra Debug")
-        await asyncio.sleep(3)
-        if config["Bot"]["IRC"]["Servers"][host]["Password"] != "":
-            self.writer[host].write(b'PASS ' + config["Bot"]["IRC"]["Servers"][host]["Password"].encode('utf-8') + b'\r\n')
-            await mainBot().addConsoleAsync("Inputing password",host,"Info")
-
-        await mainBot().addConsoleAsync("Setting user {0}".format(config["Bot"]["IRC"]["Servers"][host]["Nickname"]),host,"Debug")
-
-        
-        self.writer[host].write(b'NICK ' + config["Bot"]["IRC"]["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
-        await mainBot().addConsoleAsync("Setting user {0}".format(config["Bot"]["IRC"]["Servers"][host]["Nickname"]),host,"Extra Info")
-        self.writer[host].write(b'USER ' + config["Bot"]["IRC"]["Servers"][host]["Nickname"].encode('utf-8') + b' B hi :' + config["Bot"]["IRC"]["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
-        await asyncio.sleep(3)
-        await mainBot().addConsoleAsync("Joining channels",host,"Info")
-        for key, val in config["Bot"]["IRC"]["Servers"][host]["Channel"].items():
-            print(key)
-            self.writer[host].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
-            await mainBot().addConsoleAsync("Joining channel {0}".format(key),host,"Info")
-        await asyncio.sleep(3)
-        await mainBot().addConsoleAsync("Initiating IRC Reader",host,"Debug")
-        loop.create_task(self.handleMsg(loop,host)) 
-        
-    async def handleSendMsg(self,loop):
-        global processedMSG,config
-        #irc msg handler
-        while True:
-            j = 0
-            #print("lo")
-            for msg in processedMSG: #this cycles through the array for messages unsent to irc and sends them
-                #print(msg["sendTo"])
-                if msg["sent"] == False and msg["sendTo"]["Bot"] == "IRC":
-                    #print(msg["msgFormated"])
-                    #self.writer.write(b'PRIVMSG #test '+b' :' + msg["msgFormated"].encode("utf-8") + b'\r\n')
-                    await self.sendMSG(msg["sendTo"]["Server"],msg["sendTo"]["Channel"],msg["msgFormated"])
-                    #sends the message to the irc from whatever
-                    processedMSG[j]["sent"] = True#promptly after sets that to the delete code
-                j = j + 1
-            await asyncio.sleep(1)
-            
-       
-            
-    async def handleMsg(self,loop,host):
-        info_pattern = re.compile(r'00[1234]|37[526]|CAP')
-        await asyncio.sleep(1)
-        while True:
-            if host in self.reader:
-                try:
-                    data = (await self.reader[host].readuntil(b'\n')).decode("utf-8")
-                    data = data.rstrip()
-                    data = data.split()
-                    await mainBot().addConsoleAsync(' '.join(data),host,"Extra Debug")
-                    if data[0].startswith('@'): 
-                        data.pop(0)
-                    if data == []:
-                        pass
-                    elif data[0] == 'PING':
-                        self.writer[host].write(b'PONG %s\r\n' % data[1].encode("utf-8"))
-                    # elif data[0] == ':user1.irc.popicraft.net' or data[0] ==':irc.popicraft.net' or info_pattern.match(data[1]):
-                        # print('[Twitch] ', ' '.join(data))
-                        #generally not-as-important info
-                    else:
-                        print(data)
-                        await self._decoded_send(data, loop,host)
-                except asyncio.streams.IncompleteReadError:
-                    x = 1
-            else:
-                print("{0} doesnt exist".format(host))
-                #for sKey, sVal in config["Bot"]["IRC"]["Servers"].items(): 
-                    # this should check to see if the host or ip was used and initialized before trying to read from it
-                
-    
-
-        
-    
-    async def _decoded_send(self, data, loop,host):
-        """TODO: remove discord only features..."""
-        
-        if data[1] == 'PRIVMSG':
-            user = data[0].split('!')[0].lstrip(":")
-            m = re.search(self.messagepattern, data[0])
-            if m:
-                message = ' '.join(data[3:]).strip(':').lower().split()
-                await mainBot().addConsoleAsync(data[2]+ ":" + user +': '+ ' '.join(message),host,"Info")
-                msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":' '.join(message),"sent":False}
-                mainMsg.append(msgStats)
-                # if message[0] == '!' + config['Twitch']['command']:
-                    # link = message[1]
-                    # # print('Command seen: ', message, link if self._check_if_osu(link) else 'False')
-                    # # if self._check_if_osu(link):
-                        # # await Osu_bot.send_osu_link(link)
-
-                # if message[0] == '!shutdownosu':
-                    # loop.stop()
-        elif data[1] == 'JOIN':
-            user = data[0].split('!')[0].lstrip(":")
-            #temp
-            await mainBot().addConsoleAsync(user+" joined",host,"Info")
-            msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":"{0} joined the channel".format(user),"sent":False}
-            mainMsg.append(msgStats)
-            x = 1
-        elif data[1] == 'PART' or data[1] == 'QUIT':
-            user = data[0].split('!')[0].lstrip(":")
-            await mainBot().addConsoleAsync(user+" left",host,"Info")
-            msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":"{0} left the channel ({1})".format(user,data[3]),"sent":False}
-            mainMsg.append(msgStats)
-            #temp
-            x = 1
-        elif data[1] == 'NOTICE':
-            #temp
-            x = 1
-        elif data[1] == 'KICK':
-            print('[Twitch] ', 'Twitch has requested that I reconnect, This is currently unsupported.')
-            await mainBot().addConsoleAsync("I was kicked",host,"Info")
-            self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
-            asyncio.sleep(10)
-            await self.ircConnect(loop,host)
-            loop.stop()
-        elif data[1] == 'RECONNECT':
-            await mainBot().addConsoleAsync("Reconnecting",host,"Info")
-            self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
-            asyncio.sleep(10)
-            await self.ircConnect(loop,host)
-            loop.stop()
-
-        elif data[0] == "ERROR":
-            if ' '.join([data[1],data[2]]) == ":Closing link:":
-                self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
-                print("[Twitch] Lost Connection or disconnected: %s" % ' '.join(data[4:]))
-                await mainBot().addConsoleAsync("Lost connection",host,"Info")
-                asyncio.sleep(10)
-                await self.ircConnect(loop,host)
-                loop.stop()
-                
-                
-    async def sendMSG(self,server,channel, msg):
-        #print("sending")
-        self.writer[server].write("PRIVMSG {0} :{1}".format(channel,msg).encode("utf-8") + b'\r\n')
         
         
 
@@ -548,7 +378,7 @@ def ircStart():
     loop.close()
 
 def ircCheck():
-    global processedMSG,config
+    global config
     ircThread = threading.Thread(target=ircStart) #creates the thread for the irc client
     ircThread.start() #starts the irc bot
     time.sleep(10)
@@ -561,11 +391,11 @@ def ircCheck():
             # ircThread.start() #starts the irc bot   
         #irc msg handler
         # j = 0
-        # for msg in processedMSG: #this cycles through the array for messages unsent to irc and sends them
+        # for msg in variables.processedMSG: #this cycles through the array for messages unsent to irc and sends them
             # #print(msg["sendTo"])
             # if msg["sent"] == False and msg["sendTo"]["Bot"] == "IRC":
                 # ircClient.message(msg["sendTo"]["Channel"],msg["msgFormated"])#sends the message to the irc from whatever
-                # processedMSG[j]["sent"] = True#promptly after sets that to the delete code
+                # variables.processedMSG[j]["sent"] = True#promptly after sets that to the delete code
             # j = j + 1
         
 #youtube
@@ -656,7 +486,6 @@ def listChat():
     global botUserID #pulls in the bots channel ID
     global config
     global youtube
-    global mainMsg
     try:
         continuation = True
         try:
@@ -684,21 +513,21 @@ def listChat():
                     if userID != botUserID:
                         print("{0} {1}".format(username,message))
                         msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorsRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
-                        mainMsg.append(msgStats)
+                        variables.mainMsg.append(msgStats)
                     elif userID == botUserID: #if the userId is the bots then check the message to see if the bot sent it.
                         try:
                             msgCheckComplete = msgCheckRegex.search(message) #checks the message against the previously created regex for ":"
                             if msgCheckComplete.group(1) != ":": #if its this then go and send the message as normal
                                 print("{0} {1}".format(username,message))
                                 msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
-                                mainMsg.append(msgStats)
+                                variables.mainMsg.append(msgStats)
                         except AttributeError as error:
                             print("{0} {1}".format(username,message))
                             msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorsRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
-                            mainMsg.append(msgStats)    
+                            variables.mainMsg.append(msgStats)    
     except ConnectionResetError:
         x = 1
-        mainBot().addToConsole('Connection Error',"Youtube","Info")
+        mainBot.mainBot().addToConsole('Connection Error',"Youtube","Info")
         
     
 
@@ -720,8 +549,7 @@ def listLiveStreams():
     global liveChatId #pulls in the liveChatID
     global botUserID #pulls in the bots channel ID
     global config
-    global youtube
-    global mainMsg            
+    global youtube           
     x = list_streams_request = youtube.liveStreams().list(
         part="id,snippet",
         mine=True,
@@ -735,8 +563,7 @@ def listLiveBroadcasts():
     global liveChatId #pulls in the liveChatID
     global botUserID #pulls in the bots channel ID
     global config
-    global youtube
-    global mainMsg            
+    global youtube       
     x = youtube.liveBroadcasts().list(
     broadcastStatus="all",
     part="id,snippet",
@@ -773,16 +600,15 @@ if __name__ == "__main__":
     
     
 def youtubeChatControl():
-    global processedMSG
     while True:    
         listChat()
         listLiveStreams()
         listLiveBroadcasts()
         j = 0
-        for msg in processedMSG: #this cycles through the array for messages unsent to irc and sends them
+        for msg in variables.processedMSG: #this cycles through the array for messages unsent to irc and sends them
             if msg["sent"] == False and msg["sendTo"]["Bot"] == "Youtube":
                 sendLiveChat(msg["msgFormated"])#sends the message to the irc from whatever
-                processedMSG[j]["sent"] = True
+                variables.processedMSG[j]["sent"] = True
             j = j + 1
         time.sleep(2) 
 
@@ -939,336 +765,9 @@ class twitchBot():
     
     
     
-    
+variables.config = fileIO.fileLoad("config-test.json")    
 
         
-class mainBot():
-    global config , discord
-    def main(self):
-        print("bot loaded")
-        cycle = 0
-        #time.sleep(20)
-        while True:
-            if self.checkConsole() == False:
-                self.checkMSG()
-            self.authorMuteTimeCheck()
-            if cycle == 120: 
-                fileSave("config-test.json",config)
-                cycle = 0
-            cycle = cycle + 1
-            time.sleep(0.2)
-    
-    def addToConsole(self,msg,host,errorLevel):
-        msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": "Console", "author": "Console","authorData": None,"authorsRole": {"Normal": 0},"msg": msg,"Info": {"Host": host,"errorLevel": errorLevel},"sent":False}
-        mainMsg.append(msgStats)
-        
-    async def addConsoleAsync(self,msg,host,errorLevel):
-        loop  = asyncio.get_event_loop()
-        loop.create_task(mainBot().addConsoleAsync1(loop,msg,host,errorLevel))
-        #loop.run_forever()
-        
-    async def addConsoleAsync1(self,loop,msg,host,errorLevel):
-        await loop.run_in_executor(ThreadPoolExecutor(), self.addToConsole,msg,host,errorLevel)
-        
-    
-    def checkConsole(self):#console sending to another service
-        j = 0
-        for msg in mainMsg:
-            try:
-                if msg["Channel"] == "Console" and msg["sent"] == False:
-                    
-                    for key ,val in config["Bot Console"].items():
-                        if val["Site"] == "Terminal" and self.consoleDebugCheck(val["Debug"],msg["Info"]["errorLevel"]) == True:
-                            print(self.consoleFormat(msg,val))
-                        elif self.consoleDebugCheck(val["Debug"],msg["Info"]["errorLevel"]) == True:    
-                            print(val)
-                            fileSave("Val",val)
-                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":"Discord", "Server": "Popicraft Network", "Channel": "console"} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": self.consoleFormat(msg,val),"sent": False}
-                            processedMSG.append(msgStats)
-                            print(msgStats)
-                            fileSave("console",str(msgStats))
-                        
-                    mainMsg[j]["sent"] = True
-                    return True
-                    
-                j = j +1
-            except KeyError as error:
-                print("not deleted")
-                print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
-                await mainBot().addConsoleAsync('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error,"Discord"," Extra Debug")
-                return False
-    
-    def consoleDebugCheck(self,debug,info):
-        if debug[info] == True:
-            return True
-        else:
-            return False
-    
-    def consoleFormat(self,msg,val):#does all console formatting
-        msgStat = val["Formatting"].format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"]),msg["Info"]["Host"],msg["Info"]["errorLevel"])
-        return msgStat
-    
-    ##remember was working on making all the msg code the same
-    def checkMSG(self):
-        global processedMSG,mainMsg,processedCommand
-        j = 0
-        for msg in mainMsg: #this cycles through the array for messages unsent to discord and sends them
-            if msg["sent"] == False:
-                #print(str(msg["authorData"]))
-                #try: #this is here to ensure the thread doesnt crash from looking for something that doesnt exist
-                if self.blacklistWorkCheck(msg,j) == False and self.commandCheck(msg,j) == False and self.authorMute(msg) == False:
-                    #deleted code check
-                    try:
-                        if msg["deleted"] == True:
-                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot": msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "[Deleted] {1} : {2}".format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"])),"sent": False}
-                            processedMSG.append(msgStats)
-                    except KeyError as error:
-                        #print("not deleted")
-                        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
-                        await mainBot().addConsoleAsync('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error,"Discord"," Extra Debug")
-
-                    #all channels catch portion
-                    try:
-                        #"*" stands for all channels
-                        for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"]["*"]["sendTo"].items(): #cycles to figure out which channels to send the message to
-                            if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
-                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"])),"sent": False}
-                                processedMSG.append(msgStats)
-                    except KeyError as error:
-                        x = 1
-                    try:#this is here to ensure the thread doesnt crash from looking for something that doesnt exist
-                        for key, val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
-                            if val["Enabled"] == True and config["Bot"][val["Site"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["Enabled"] == True and config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
-                                #print(msg["Bot"])
-                                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"]),self.serverNameReformat(msg["Bot"],msg["Server"]),self.channelNameReformat(msg["Bot"],msg["Server"],msg["Channel"])),"sent": False}
-                                processedMSG.append(msgStats)
-
-                    except KeyError as error:
-                        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
-                        await mainBot().addConsoleAsync('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error,"Discord"," Extra Debug")
-                mainMsg[j]["sent"] = True
-            j = j +1
-            
-    def authorMuteTimeCheck(self): #this checks to see if the mute time has been up for all the muted users
-        for val, key in config["userMuteList"].copy().items(): #copys items to prevent it from editing a dictionary in use
-            #print("{0} : {1}".format(val,key))
-            
-            if key["time"] == "timer":
-                #gets the time checked
-                config["userMuteList"][val]["timeChecked"]["second"] = int(time.strftime("%S", time.gmtime()))
-                config["userMuteList"][val]["timeChecked"]["minute"] = int(time.strftime("%M", time.gmtime()))
-                config["userMuteList"][val]["timeChecked"]["hour"] = int(time.strftime("%H", time.gmtime()))
-                config["userMuteList"][val]["timeChecked"]["day"] = int(time.strftime("%d", time.gmtime()))
-                
-                #calculating the time elapsed
-                config["userMuteList"][val]["timeElaplsed"]["second"] = config["userMuteList"][val]["timeChecked"]["second"] - int(config["userMuteList"][val]["timeStarted"]["second"])
-                config["userMuteList"][val]["timeElaplsed"]["minute"] = config["userMuteList"][val]["timeChecked"]["minute"] - int(config["userMuteList"][val]["timeStarted"]["minute"])
-                config["userMuteList"][val]["timeElaplsed"]["hour"] = config["userMuteList"][val]["timeChecked"]["hour"]- int(config["userMuteList"][val]["timeStarted"]["hour"])
-                config["userMuteList"][val]["timeElaplsed"]["day"] = config["userMuteList"][val]["timeChecked"]["day"] - int(config["userMuteList"][val]["timeStarted"]["day"])
-                
-                #converts everything to seconds
-                hour = (config["userMuteList"][val]["timeElaplsed"]["day"] * 24) + config["userMuteList"][val]["timeElaplsed"]["hour"]
-                minute = (hour * 60) + config["userMuteList"][val]["timeElaplsed"]["minute"]
-                second = (minute * 60) + config["userMuteList"][val]["timeElaplsed"]["second"]
-                
-                # calculates the time muted for to seconds
-                timeMutedFor = int(key["timeMutedFor"]["minute"]) * 60
-                #debug displaying
-                print(second - timeMutedFor)
-                print(" ")
-                
-                # removes user from the mute list when done
-                if second >= timeMutedFor:
-                    config["userMuteList"].pop(val)
-                    
-
-    def authorMute(self,msg): #deletes the message when people mute others
-        mute = False
-        #cycles through mute list
-        for val, key in config["userMuteList"].items():
-            #checks if the users name is muted
-            if str(msg["authorData"]) == val:
-                print("muted") 
-                #deletes the message
-                commandStats = {"sentFrom":msg["sentFrom"],"Command":"deleteMessage","args": [msg["msgData"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False} 
-                processedCommand.append(commandStats)
-                mute = True
-        print(mute)
-        return mute #returns back if it was muted or not
-    
-    def botNameReformat(self,botName):
-        if botName == "Discord":
-            return "D"
-        elif botName == "IRC":
-            return "I"
-        elif botName == "Youtube":
-            return "Y"
-            
-            
-    def serverNameReformat(self,botName,serverName):
-        return config["Bot"][botName]["Servers"][serverName]["showName"]
-        
-    def channelNameReformat(self,botName,serverName,channelName):
-        return config["Bot"][botName]["Servers"][serverName]["Channel"][channelName]["showName"]    
-            
-    def blacklistWorkCheck(self,msg,j):
-        found = False
-        for val in config["wordBlacklist"]:#this part cycles through the actual blacklist
-            for split in msg["msg"].split(): #this part cycles through every word in the message
-                if split == val and found == False:#this is the check to see if the word matchs the blacklisted one and checks to see if it has already found one for said word
-                    commandStats = {"sentFrom":msg["sentFrom"],"Command":"deleteMessage","args": [msg["msgData"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False} #sends delete command
-                    processedCommand.append(commandStats)
-                    found = True #sets to true if found one blacklisted word
-                    print("blacklisted")
-                    mainMsg[j]["sent"] = True #sets the message to true so it doesnt get cyclee through again
-                    return True
-        return False
-                    
-
-    def commandCheck(self,msg,j):
-        global discordRoles
-        realCommand = False
-        commandStats = ""
-        msgStats = ""
-        if msg["msg"].startswith("!") == True and msg["sent"] == False:
-            
-            tempMsg = msg["msg"].split()
-            print("MSG Type {0} {1} {2}".format(type(msg["msg"]),msg["msg"],tempMsg))
-            print(config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Commands"])
-            roleNum = 0
-            for key,val in msg["authorsRole"].items():
-                if val > roleNum:
-                    roleNum = val
-            print(tempMsg)
-            try:
-                print("before commands")
-                for val in config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Commands"][tempMsg[0]]: #loops through the commands
-                    print("in Commands")
-                    if val["commandType"] == "setRole": #sets a role to the user
-                        if  discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
-                            print("passed the right command and the correct role")
-                            commandStats = {"sentFrom":msg["sentFrom"],"Command":"setRole","args": [val["rankToBe"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
-                    elif val["commandType"] == "removeRole": #removes a role from the user
-                        if discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
-                            print("passed the right command and the correct role")
-                            commandStats = {"sentFrom":msg["sentFrom"],"Command":"removeRole","args": [val["rankToBe"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
-                    elif val["commandType"] == "sendMessage": #sends a message to discord in the channel it was set to
-                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"]),"sent": False}
-                    elif val["commandType"] == "setFile" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum:
-                        print("placeholder")
-                    elif val["commandType"] == "incrementFile" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #increments a file by blank
-                        f = open(val["file"], 'r')#opens file
-                        file = []
-                        print("incrementFile")
-                        for line in f: #pulls the file line by line into a array
-                            file.append(line)
-                        incrementBy = val["incrementBy"].format(int(file[val["lineToIncrement"]])).split() #splits the formatted string
-                        if incrementBy[1] == "+" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #checks to see which operation needs to be  done and applys it
-                            x = int(incrementBy[0]) + int(incrementBy[2])
-                        elif incrementBy[1] == "-":
-                            x = int(incrementBy[0]) - int(incrementBy[2])
-                        elif incrementBy[1] == "*":
-                            x = int(incrementBy[0]) * int(incrementBy[2])
-                        elif incrementBy[1] == "/":
-                            x = int(incrementBy[0]) / int(incrementBy[2])
-                        elif incrementBy[1] == "//":
-                            x = int(incrementBy[0]) // int(incrementBy[2])
-                        elif incrementBy[1] == "**":
-                            x = int(incrementBy[0]) ** int(incrementBy[2])
-                        print(x)
-            
-                        file[val["lineToIncrement"]] = str(x) #converts it back to string and saves it to the array on said line
-                        test=""
-                        for x in file: #puts it back into the file
-                            test = test + x
-                        f.close() #closes file
-                        f = open(val["file"], 'w') #writes it back to file                        
-                        f.write(test)
-                    elif val["commandType"] == "readFile" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #reads a file and sends it to the service
-                        f = open(val["file"], 'r')#opens file
-                        print("readFile")
-                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(f.read()),"sent": False}
-                    elif val["commandType"] == "relayCommand": #will relay a command from said service (IRC,Youtube or discord)
-                        print("placeholder")
-                    elif val["commandType"] == "twitchSetGame" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
-                        game = msg["msg"][len(tempMsg[0])+1:]
-                        twitchBot().setGame(game)
-                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"]),"sent": False}
-                        print("placeholder")
-                    elif val["commandType"] == "twitchSetTitle" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
-                        title = msg["msg"][len(tempMsg[0])+1:]
-                        twitchBot().setGame(title)
-                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"]),"sent": False}
-                        print("placeholder")
-                    elif val["commandType"] == "twitchGetViewers" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
-                        viewers = twitchBot().getViewerCount()
-                        print("twitch viewers: " + str(viewers))
-                        msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],viewers),"sent": False}
-                        print("placeholder")
-                    elif val["commandType"] == "userMute" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
-                        #determining if a time was set for the mute length
-                        try:
-                            #gets time to set the start time of the mute to later be stored
-                            startSecond = int(time.strftime("%S", time.gmtime()))
-                            startMinute = int(time.strftime("%M", time.gmtime()))
-                            startHour = int(time.strftime("%H", time.gmtime()))
-                            startDay = int(time.strftime("%d", time.gmtime()))
-                            #clears the lists of info needed
-                            muteAddtimeStarted = {"second":startSecond,"minute":startMinute,"hour": startHour, "day":startDay}
-                            mutedFor = {"minute": tempMsg[2]}
-                            muteAdd = {"time": "timer", "timeStarted": muteAddtimeStarted,"timeChecked": muteAddtimeStarted,"timeMutedFor": mutedFor,"timeElaplsed": muteAddtimeStarted}
-                            #print(muteAdd)
-                            config["userMuteList"].update({tempMsg[1]:muteAdd})
-                            fileSave("config-test.json",config)
-                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],tempMsg[1],tempMsg[2]),"sent": False}
-                        except IndexError as error: #if no mute length then the mute is permenant
-                            toAdd = {tempMsg[1]: {"time": "permanent"}}
-                            config["userMuteList"].update(toAdd)
-                            fileSave("config-test.json",config)
-                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse1"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],tempMsg[1]),"sent": False}
-                    elif val["commandType"] == "userUnmute" and discordRoles[msg["Server"]][val["rankRequired"]]["Number"] <= roleNum: #will relay a command from said service (IRC,Youtube or discord)
-                        # !unmute (username)
-                        try:
-                            print("unmuted")
-                            config["userMuteList"].pop(tempMsg[1])
-                            #print message
-                            fileSave("config-test.json",config)
-                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],tempMsg[1]),"sent": False}
-                        except IndexError as error:
-                            print("user not valid")
-                            fileSave("config-test.json",config)
-                            msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse1"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],tempMsg[1]),"sent": False}
-                    print("done command check")
-                    if commandStats != "":
-                        processedCommand.append(commandStats)
-                        commandStats = ""
-                        return True
-                    if msgStats != "":
-                        processedMSG.append(msgStats)
-                        msgStats = ""
-                        return True
-                            
-            except KeyError as error:
-                    print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
-                    await mainBot().addConsoleAsync('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error,"Discord"," Extra Debug")
-            if tempMsg[0] == "!temp" and discordRoles[msg["Server"]]["Mod"]["Number"] <= roleNum:
-                msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
-                commandStats = {"sentFrom":msg["sentFrom"],"Command":"setRole","args": ["Mod"],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
-                processedCommand.append(commandStats)
-                realCommand = True
-           
-
-            if realCommand == True:
-                mainMsg[j]["sent"] = True
-
-            
-            if commandStats != "":
-                processedCommand.append(commandStats)
-               
-            if msgStats != "":
-                processedMSG.append(msgStats)
-        print("none")
-        return False
 
 
         
@@ -1279,9 +778,9 @@ class mainBot():
 #deleteThread = threading.Thread(target=deleteIrcToDiscordMsgThread) #this is broken and needs rewriting
 #deleteThread.start()
 
-#mainBot().main()
+#mainBot.mainBot().main()
 print("test")
-chatControlThread = threading.Thread(target=mainBot().main)
+chatControlThread = threading.Thread(target=mainBot.mainBot().main)
 chatControlThread.start()
 
 ircCheckThread = threading.Thread(target=ircCheck)#starts my irc check thread which should print false if the irc thread dies.
