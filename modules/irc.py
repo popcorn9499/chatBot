@@ -3,7 +3,7 @@ import re
 from modules import variables
 from modules import mainBot
 import threading
-
+import time
 
 ##this is the event loop for the irc client
 class irc():#alot of this code was given to me from a friend then i adapted to more of what i needed

@@ -42,7 +42,8 @@ class mainBot():
                     
                     for key ,val in variables.config["Bot Console"].items():
                         if val["Site"] == "Terminal" and self.consoleDebugCheck(val["Debug"],msg["Info"]["errorLevel"]) == True:
-                            print(self.consoleFormat(msg,val))
+                            #print(self.consoleFormat(msg,val))
+                            x = 1
                         elif self.consoleDebugCheck(val["Debug"],msg["Info"]["errorLevel"]) == True:    
                             print(val)
                             fileIO.fileSave("Val",val)
@@ -200,7 +201,7 @@ class mainBot():
             for key,val in msg["authorsRole"].items():
                 if val > roleNum:
                     roleNum = val
-            print(tempMsg)
+            #print(tempMsg)
             try:
                 print("before commands")
                 for val in variables.config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Commands"][tempMsg[0]]: #loops through the commands
