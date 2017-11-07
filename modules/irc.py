@@ -2,7 +2,7 @@ import asyncio
 import re
 from modules import variables
 from modules import mainBot
-
+import threading
 
 
 ##this is the event loop for the irc client
@@ -173,3 +173,36 @@ class irc():#alot of this code was given to me from a friend then i adapted to m
     async def sendMSG(self,server,channel, msg):
         #print("sending")
         self.writer[server].write("PRIVMSG {0} :{1}".format(channel,msg).encode("utf-8") + b'\r\n')
+
+        
+#this starts everything for the irc client 
+##possibly could of put all this in a class and been done with it?
+def ircStart():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    #loop = asyncio.get_event_loop(loop)
+    loop.create_task(irc().irc_bot(loop))
+    loop.run_forever()
+    loop.close()
+
+def ircCheck():
+    global config
+    ircThread = threading.Thread(target=ircStart) #creates the thread for the irc client
+    ircThread.start() #starts the irc bot
+    time.sleep(10)
+    # while True:
+        # time.sleep(1)
+        # state = ircThread.isAlive()
+        # if state == False:
+            # print("damn it")
+            # ircThread = threading.Thread(target=ircStart) #creates the thread for the irc client
+            # ircThread.start() #starts the irc bot   
+        #irc msg handler
+        # j = 0
+        # for msg in variables.processedMSG: #this cycles through the array for messages unsent to irc and sends them
+            # #print(msg["sendTo"])
+            # if msg["sent"] == False and msg["sendTo"]["Bot"] == "IRC":
+                # ircClient.message(msg["sendTo"]["Channel"],msg["msgFormated"])#sends the message to the irc from whatever
+                # variables.processedMSG[j]["sent"] = True#promptly after sets that to the delete code
+            # j = j + 1
+        
