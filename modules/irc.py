@@ -20,10 +20,6 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             host = sKey
             await mainBot.mainBot().addConsoleAsync("Connecting",host,"Info")
             await self.ircConnect(loop,host)
-            #loop.create_task(Twitch_boT.handleMsg(loop,"irc.chat.twitch.tv"))
-        
-            #writer.write(b'JOIN #' + "test".encode('utf-8')+ b'\r\n')
-            #writer.write("PRIVMSG #test :mods".encode('utf-8')+ b'\r\n')
         asyncio.sleep(3)
         loop.create_task(self.handleSendMsg(loop))
         await mainBot.mainBot().addConsoleAsync("Connected",host,"Info")
@@ -63,12 +59,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         #irc msg handler
         while True:
             j = 0
-            #print("lo")
+
             for msg in variables.processedMSG: #this cycles through the array for messages unsent to irc and sends them
-                #print(msg["sendTo"])
                 if msg["sent"] == False and msg["sendTo"]["Bot"] == "IRC":
-                    #print(msg["msgFormated"])
-                    #self.writer.write(b'PRIVMSG #test '+b' :' + msg["msgFormated"].encode("utf-8") + b'\r\n')
                     await self.sendMSG(msg["sendTo"]["Server"],msg["sendTo"]["Channel"],msg["msgFormated"])
                     #sends the message to the irc from whatever
                     variables.processedMSG[j]["sent"] = True#promptly after sets that to the delete code
@@ -103,8 +96,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                     x = 1
             else:
                 print("{0} doesnt exist".format(host))
-                #for sKey, sVal in variables.config["Bot"]["IRC"]["Servers"].items(): 
-                    # this should check to see if the host or ip was used and initialized before trying to read from it
+
                 
     
 
@@ -121,14 +113,6 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 await mainBot.mainBot().addConsoleAsync(data[2]+ ":" + user +': '+ ' '.join(message),host,"Info")
                 msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":' '.join(message),"sent":False}
                 variables.mainMsg.append(msgStats)
-                # if message[0] == '!' + variables.config['Twitch']['command']:
-                    # link = message[1]
-                    # # print('Command seen: ', message, link if self._check_if_osu(link) else 'False')
-                    # # if self._check_if_osu(link):
-                        # # await Osu_bot.send_osu_link(link)
-
-                # if message[0] == '!shutdownosu':
-                    # loop.stop()
         elif data[1] == 'JOIN':
             user = data[0].split('!')[0].lstrip(":")
             #temp
@@ -171,7 +155,6 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 
                 
     async def sendMSG(self,server,channel, msg):
-        #print("sending")
         self.writer[server].write("PRIVMSG {0} :{1}".format(channel,msg).encode("utf-8") + b'\r\n')
 
         
@@ -180,7 +163,6 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
 def ircStart():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    #loop = asyncio.get_event_loop(loop)
     loop.create_task(irc().irc_bot(loop))
     loop.run_forever()
     loop.close()

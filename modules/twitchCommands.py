@@ -38,8 +38,6 @@ def getChannelID(self):
      
     print(channelId)
     return clientId, accessToken, channelId
-    #self.setTitle(channelId,clientId,accessToken)
-    #self.setGame(channelId,clientId,accessToken)
     
 def setTitle(self,title):
     #initiate the requests library
@@ -50,7 +48,6 @@ def setTitle(self,title):
     import json
     
     session=Session()
-    #channelId=""
      
     clientId, accessToken, channelId =  self.getChannelID()
     
@@ -123,7 +120,6 @@ def getViewerCount(self):
     import json
     
     session=Session()
-    #channelId=""
      
     clientId, accessToken, channelId =  self.getChannelID() 
      

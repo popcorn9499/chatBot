@@ -1,39 +1,19 @@
-#async to sync
-from concurrent.futures import ThreadPoolExecutor
+
+from concurrent.futures import ThreadPoolExecutor #async to sync
 from modules import variables
 from modules import mainBot
 from modules import fileIO
 from modules import youtube
 from modules import discordBot
 
-import datetime
 #used for the main program
 import threading
 
-import json
 
 import sys, os
 #discord stuff imported
 import discord #gets the discord and asyncio librarys
 import asyncio
-import time
-
-#irc stuff
-####variables
-
-
-
-#config  = {"IRCToDiscordFormatting": "{1} : {2}", "channelName": "serverchat", "discordToIRCFormating": "{0} : {1}", "discordToken": "MzM2MzMzMDg1Mzg3OTE1Mjc2.DE21Bw.VnzklzkKApU2wigbsNGnTVrsNNg", "ircChannel": "#popicraft", "ircNickname": "DiscordBot", "ircPassword": "", "ircPort": "6667", "ircServerIP": "irc.popicraft.net", "pageToken": "", "serverName": "Popicraft Minecraft","Bots": {"Discord": {"Channels":{"serverchat":{"formatting":"{0}{1}", "send": True, "sendTo": {"console": {"type": "Discord", "send": False}}}}}}}
-
-
-
-
-
-
-
-
-##Youtube api stuff
-
 
 
 
@@ -48,18 +28,6 @@ import time
 ##problems
 #unsure what will happen in a headless enviroment if the oauth hasnt been set
 ##if the token and you input a invalid token the first time it will continue to say invalid token for tokens that are even valid
-
-
-
-##ideas
-#possiblity of use of file io to get the information of the client token for discord and stuff.
-#use regex to help format the chat (honestly not needed)
-
-
-##youtube chat porition
-#this will handle getting chat from youtube which will then be pushed to discord
-
-#!/usr/bin/python
 
 
 
@@ -193,23 +161,22 @@ chatControlThread = threading.Thread(target=mainBot.mainBot().main)
 chatControlThread.start()
 
 ircCheckThread = threading.Thread(target=irc.ircCheck)#starts my irc check thread which should print false if the irc thread dies.
-if config["Bot"]["IRC"]["Enabled"] == True:
+if variables.config["Bot"]["IRC"]["Enabled"] == True:
     ircCheckThread.start()
     print("IRC Loaded")
 else:
     print("IRC not loaded")
 
-print(type(youtube))
 
 youtubeChatThread = threading.Thread(target=youtube.youtubeChatControl)#starts my youtube chat thread
-if config["Bot"]["Youtube"]["Enabled"] == True:
+if variables.config["Bot"]["Youtube"]["Enabled"] == True:
     youtubeChatThread.start()
     print("Youtube Loaded")
 else:
     print("Youtube not loaded")
 
-discordThread = threading.Thread(target=discordBot.client.run(config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
-if config["Bot"]["Discord"]["Enabled"] == True:
+discordThread = threading.Thread(target=discordBot.client.run(variables.config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
+if variables.config["Bot"]["Discord"]["Enabled"] == True:
     print("Discord Loaded")
     discordThread.start()
 else:

@@ -9,7 +9,6 @@ class mainBot():
     def main(self):
         print("bot loaded")
         cycle = 0
-        #time.sleep(20)
         while True:
             if self.checkConsole() == False:
                 self.checkMSG()
@@ -28,7 +27,6 @@ class mainBot():
     async def addConsoleAsync(self,msg,host,errorLevel):
         loop  = asyncio.get_event_loop()
         loop.create_task(mainBot().addConsoleAsync1(loop,msg,host,errorLevel))
-        #loop.run_forever()
         
     async def addConsoleAsync1(self,loop,msg,host,errorLevel):
         await loop.run_in_executor(ThreadPoolExecutor(), self.addToConsole,msg,host,errorLevel)
@@ -42,7 +40,6 @@ class mainBot():
                     
                     for key ,val in variables.config["Bot Console"].items():
                         if val["Site"] == "Terminal" and self.consoleDebugCheck(val["Debug"],msg["Info"]["errorLevel"]) == True:
-                            #print(self.consoleFormat(msg,val))
                             x = 1
                         elif self.consoleDebugCheck(val["Debug"],msg["Info"]["errorLevel"]) == True:    
                             print(val)
@@ -77,8 +74,6 @@ class mainBot():
         j = 0
         for msg in variables.mainMsg: #this cycles through the array for messages unsent to discord and sends them
             if msg["sent"] == False:
-                #print(str(msg["authorData"]))
-                #try: #this is here to ensure the thread doesnt crash from looking for something that doesnt exist
                 if self.blacklistWorkCheck(msg,j) == False and self.commandCheck(msg,j) == False and self.authorMute(msg) == False:
                     #deleted code check
                     try:
@@ -102,7 +97,6 @@ class mainBot():
                     try:#this is here to ensure the thread doesnt crash from looking for something that doesnt exist
                         for key, val in variables.config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["sendTo"].items(): #cycles to figure out which channels to send the message to
                             if val["Enabled"] == True and variables.config["Bot"][val["Site"]]["Enabled"] == True and variables.config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["Enabled"] == True and variables.config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
-                                #print(msg["Bot"])
                                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"]),self.serverNameReformat(msg["Bot"],msg["Server"]),self.channelNameReformat(msg["Bot"],msg["Server"],msg["Channel"])),"sent": False}
                                 variables.processedMSG.append(msgStats)
 
@@ -114,8 +108,6 @@ class mainBot():
             
     def authorMuteTimeCheck(self): #this checks to see if the mute time has been up for all the muted users
         for val, key in variables.config["userMuteList"].copy().items(): #copys items to prevent it from editing a dictionary in use
-            #print("{0} : {1}".format(val,key))
-            
             if key["time"] == "timer":
                 #gets the time checked
                 variables.config["userMuteList"][val]["timeChecked"]["second"] = int(time.strftime("%S", time.gmtime()))
@@ -279,7 +271,6 @@ class mainBot():
                             muteAddtimeStarted = {"second":startSecond,"minute":startMinute,"hour": startHour, "day":startDay}
                             mutedFor = {"minute": tempMsg[2]}
                             muteAdd = {"time": "timer", "timeStarted": muteAddtimeStarted,"timeChecked": muteAddtimeStarted,"timeMutedFor": mutedFor,"timeElaplsed": muteAddtimeStarted}
-                            #print(muteAdd)
                             variables.config["userMuteList"].update({tempMsg[1]:muteAdd})
                             fileSave("variables.config-test.json",variables.config)
                             msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["msgResponse"].format(msg["author"],msg["Server"],msg["Channel"],msg["Bot"],tempMsg[1],tempMsg[2]),"sent": False}
