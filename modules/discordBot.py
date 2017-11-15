@@ -7,7 +7,7 @@ import time
 import datetime
 
 
-firstRun = "pff"
+firstRun = "off"
 discordInfo = {}
 haltDiscordMSG = 0
 haltDeleteMSG = 0 
