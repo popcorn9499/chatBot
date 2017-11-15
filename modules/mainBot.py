@@ -56,9 +56,10 @@ class mainBot():
                     
                 j = j +1
             except KeyError as error:
-                print("not deleted")
-                print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
-                mainBot().addToConsole('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error,"Discord"," Extra Debug")
+                #print("not deleted")
+                #print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
+                errorMsg= 'Error on line {}'.format(sys.exc_info()[-1].tb_lineno, type(error).__name__, error)
+                #mainBot().addToConsole(errorMsg,"Discord"," Extra Debug")
                 return False
     
     def consoleDebugCheck(self,debug,info):
@@ -75,7 +76,7 @@ class mainBot():
     def checkMSG(self):
         j = 0
         for msg in variables.mainMsg: #this cycles through the array for messages unsent to discord and sends them
-            if msg["sent"] == False:
+            if msg["sent"] == False and msg["Channel"] != "Console":
                 if self.blacklistWorkCheck(msg,j) == False and self.commandCheck(msg,j) == False and self.authorMute(msg) == False:
                     #deleted code check
                     try:
@@ -85,7 +86,8 @@ class mainBot():
                     except KeyError as error:
                         #print("not deleted")
                         print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
-                        #mainBot().addToConsole('Error on line {}'.format(sys.exc_info()[-1].tb_lineno, type(error).__name__, error),"Discord"," Extra Debug")
+                        errorMsg= 'Error on line {}'.format(sys.exc_info()[-1].tb_lineno, type(error).__name__, error)
+                        mainBot().addToConsole(errorMsg,"Discord"," Extra Debug")
                     #all channels catch portion
                     try:
                         #"*" stands for all channels
@@ -102,7 +104,8 @@ class mainBot():
                                 variables.processedMSG.append(msgStats)
                     except KeyError as error:
                         print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
-                        #mainBot().addToConsole('Error on line {}'.format(sys.exc_info()[-1].tb_lineno, type(error).__name__, error),"Discord"," Extra Debug")
+                        errorMsg= 'Error on line {}'.format(sys.exc_info()[-1].tb_lineno, type(error).__name__, error)
+                        mainBot().addToConsole(errorMsg,"Discord"," Extra Debug")
                 variables.mainMsg[j]["sent"] = True
             j = j +1
             
@@ -303,7 +306,8 @@ class mainBot():
                             
             except KeyError as error:
                     print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
-                    mainBot().addToConsole('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error,"Discord"," Extra Debug")
+                    errorMsg= 'Error on line {}'.format(sys.exc_info()[-1].tb_lineno, type(error).__name__, error)
+                    mainBot().addToConsole(errorMsg,"Discord"," Extra Debug")
             if tempMsg[0] == "!temp" and variables.discordRoles[msg["Server"]]["Mod"]["Number"] <= roleNum:
                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": "Hi user","sent": False}
                 commandStats = {"sentFrom":msg["sentFrom"],"Command":"setRole","args": ["Mod"],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False}
