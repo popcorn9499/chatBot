@@ -109,7 +109,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             user = data[0].split('!')[0].lstrip(":")
             m = re.search(self.messagepattern, data[0])
             if m:
-                message = ' '.join(data[3:]).strip(':').lower().split()
+                message = ' '.join(data[3:]).strip(':').split()
                 await mainBot.mainBot().addConsoleAsync(data[2]+ ":" + user +': '+ ' '.join(message),host,"Info")
                 msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":' '.join(message),"sent":False}
                 variables.mainMsg.append(msgStats)

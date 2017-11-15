@@ -7,7 +7,7 @@ import time
 import datetime
 
 
-firstRun = "on"
+firstRun = "pff"
 discordInfo = {}
 haltDiscordMSG = 0
 haltDeleteMSG = 0 
@@ -56,7 +56,7 @@ async def discordCheckCommand(): #checks for a discord message
 
 @client.event
 async def on_ready(): #when the discord api has logged in and is ready then this even is fired
-    global ircClient
+    global ircClient,firstRun
     firstRun = "off"
     if firstRun == "off":
         #print(discord.Server)

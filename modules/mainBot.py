@@ -2,6 +2,8 @@ from concurrent.futures import ThreadPoolExecutor
 from modules import variables
 import asyncio
 import time
+import sys
+import os
 from modules import fileIO
 from modules import twitchCommands
 
@@ -10,8 +12,8 @@ class mainBot():
         print("bot loaded")
         cycle = 0
         while True:
-            if self.checkConsole() == False:
-                self.checkMSG()
+            self.checkConsole()
+            self.checkMSG()
             self.authorMuteTimeCheck()
             if cycle == 120: 
                 fileIO.fileSave("variables.config-test.json",variables.config)
@@ -83,8 +85,7 @@ class mainBot():
                     except KeyError as error:
                         #print("not deleted")
                         print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
-                        mainBot().addToConsole('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error,"Discord"," Extra Debug")
-
+                        #mainBot().addToConsole('Error on line {}'.format(sys.exc_info()[-1].tb_lineno, type(error).__name__, error),"Discord"," Extra Debug")
                     #all channels catch portion
                     try:
                         #"*" stands for all channels
@@ -99,10 +100,9 @@ class mainBot():
                             if val["Enabled"] == True and variables.config["Bot"][val["Site"]]["Enabled"] == True and variables.config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Channel"][msg["Channel"]]["Enabled"] == True and variables.config["Bot"][msg["Bot"]]["Servers"][msg["Server"]]["Enabled"] == True:#this code checks to see if the message should be disabled and not sent onward
                                 msgStats = {"sentFrom":msg["sentFrom"],"Bot":msg["Bot"],"Server": msg["Server"],"sendTo": {"Bot":val["Site"], "Server": val["Server"], "Channel": val["Channel"]} ,"Channel":msg["Channel"], "author":msg["author"],"msg":msg["msg"],"msgFormated": val["Formatting"].format(msg["Bot"],msg["Server"],msg["Channel"],msg["author"],msg["msg"],self.botNameReformat(msg["Bot"]),self.serverNameReformat(msg["Bot"],msg["Server"]),self.channelNameReformat(msg["Bot"],msg["Server"],msg["Channel"])),"sent": False}
                                 variables.processedMSG.append(msgStats)
-
                     except KeyError as error:
                         print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error)
-                        mainBot().addToConsole('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(error).__name__, error,"Discord"," Extra Debug")
+                        #mainBot().addToConsole('Error on line {}'.format(sys.exc_info()[-1].tb_lineno, type(error).__name__, error),"Discord"," Extra Debug")
                 variables.mainMsg[j]["sent"] = True
             j = j +1
             
@@ -169,7 +169,7 @@ class mainBot():
     def blacklistWorkCheck(self,msg,j):
         found = False
         for val in variables.config["wordBlacklist"]:#this part cycles through the actual blacklist
-            for split in msg["msg"].split(): #this part cycles through every word in the message
+            for split in str(msg["msg"]).split(): #this part cycles through every word in the message
                 if split == val and found == False:#this is the check to see if the word matchs the blacklisted one and checks to see if it has already found one for said word
                     commandStats = {"sentFrom":msg["sentFrom"],"Command":"deleteMessage","args": [msg["msgData"]],"author":msg["author"],"authorData":msg["authorData"] ,"sendTo": {"Bot":msg["Bot"], "Server": msg["Server"], "Channel": msg["Channel"]} ,"sent": False} #sends delete command
                     variables.processedCommand.append(commandStats)
@@ -184,7 +184,7 @@ class mainBot():
         realCommand = False
         commandStats = ""
         msgStats = ""
-        if msg["msg"].startswith("!") == True and msg["sent"] == False:
+        if str(msg["msg"]).startswith("!") == True and msg["sent"] == False:
             
             tempMsg = msg["msg"].split()
             print("MSG Type {0} {1} {2}".format(type(msg["msg"]),msg["msg"],tempMsg))
