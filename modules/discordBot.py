@@ -136,6 +136,9 @@ async def on_message(message): #waits for the discord message event and pulls it
             #await client.send_message(message.channel, 'Hello.')          
             #ircSendMSG(message.author,config["ircChannel"],message.content)
             roleList = {}
+            attachments = ""
+            for i in message.attachments:
+                attachments += i.url
             for roles in message.author.roles:
                 #await mainBot.mainBot().addConsoleAsync(roles.name + ":" + str(roles.position),"Discord","Info") #causes a weird bot:14 spam in console every message
                 roleList.update({str(roles.name):int(roles.position)})
@@ -144,6 +147,17 @@ async def on_message(message): #waits for the discord message event and pulls it
             #commandStats = {"Command":"deleteMessage","args": [message],"sent": False}
             #variables.processedCommand.append(commandStats)
             #await client.add_roles(message.author, variables.discordRoles["Popicraft Minecraft"]["Mod"]["Data"])
-            await mainBot.mainBot().addConsoleAsync("{0} : {1}".format(message.author,message.content),"Discord","Info")
-            msgStats = {"sentFrom":"Discord","msgData": message,"Bot":"Discord","Server": str(message.server.name),"Channel":str(message.channel.name), "author":message.author.name,"authorData":message.author,"authorsRole":roleList,"msg":message.content,"sent":False}
+            messageContent = str(message.content) + str(attachments)
+            await mainBot.mainBot().addConsoleAsync("{0} : {1}".format(message.author,messageContent),"Discord","Info")
+            msgStats = {"sentFrom":"Discord","msgData": message,"Bot":"Discord","Server": str(message.server.name),"Channel":str(message.channel.name), "author":message.author.name,"authorData":message.author,"authorsRole":roleList,"msg":messageContent,"sent":False}
             variables.mainMsg.append(msgStats)
+
+def start(token):
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(client.start(token))
+    except KeyboardInterrupt:
+        loop.run_until_complete(client.logout())
+        # cancel all tasks lingering
+    finally:
+        loop.close()

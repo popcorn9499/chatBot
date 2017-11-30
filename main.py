@@ -175,7 +175,9 @@ if variables.config["Bot"]["Youtube"]["Enabled"] == True:
 else:
     print("Youtube not loaded")
 
-discordThread = threading.Thread(target=discordBot.client.run(variables.config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
+#discordThread = threading.Thread(target=discordBot.client.run(variables.config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
+discordThread = threading.Thread(target=discordBot.start(variables.config["Bot"]["Discord"]["Token"]))#creates the thread for the discord bot
+
 if variables.config["Bot"]["Discord"]["Enabled"] == True:
     print("Discord Loaded")
     discordThread.start()
