@@ -156,8 +156,12 @@ def start(token):
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(client.start(token))
+    except (discord.ConnectionClosed, discord.GatewayNotFound) as error:
+        loop.run_until_complete(client.logout())
+        loop.close()
+        start(token)
+        # cancel all tasks lingering
     except KeyboardInterrupt:
         loop.run_until_complete(client.logout())
-        # cancel all tasks lingering
     finally:
         loop.close()
