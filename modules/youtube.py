@@ -138,8 +138,7 @@ def listChat():
                             variables.mainMsg.append(msgStats)    
     except ConnectionResetError:
         x = 1
-        youtube = Login()
-        mainBot.mainBot().addToConsole('Connection Error reconnecting',"Youtube","Info")
+        mainBot.mainBot().addToConsole('Connection Error',"Youtube","Info")
         
     
 
@@ -200,13 +199,13 @@ def sendLiveChat(msg): #sends messages to youtube live chat
     list_chatmessages_inset.execute()
     #print(list_chatmessages_inset.execute()) #debug for sending live chat messages
   
-def Login():
-    if "__main__" == "__main__":
-        args = argparser.parse_args()
-            
-        youtube = get_authenticated_service(args) #authenticates the api and saves it to youtube
-        getLiveId(youtube)   
-        return youtube
+
+
+if "__main__" == "__main__":
+    args = argparser.parse_args()
+        
+    youtube = get_authenticated_service(args) #authenticates the api and saves it to youtube
+    getLiveId(youtube)     
     
 def youtubeChatControl():
     while True:    
@@ -220,7 +219,3 @@ def youtubeChatControl():
                 variables.processedMSG[j]["sent"] = True
             j = j + 1
         time.sleep(2) 
-
-
-youtube = Login()
-print("logged in to youtube")
