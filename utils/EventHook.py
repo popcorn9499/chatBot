@@ -1,7 +1,7 @@
 # https://emptypage.jp/notes/pyevent.en.html
 import asyncio
 
-class Event(object):
+class EventHook(object):
 
     def __init__(self):
         self.handlers = []
