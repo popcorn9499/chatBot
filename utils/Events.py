@@ -1,10 +1,14 @@
 
 '''
--On Message
 
--On Ready
+-On Connect #Creates the connection
 
--On Error
+
+-On Message #spews message object
+
+-On Ready #Spews ready information
+
+-On Error #spews error
 
 -On Message Delete
 
