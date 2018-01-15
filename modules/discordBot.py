@@ -120,11 +120,12 @@ async def on_ready(): #when the discord api has logged in and is ready then this
             # variables.mainMsg.append(msgStats)
     
 @client.event
-async def on_error(event):
+async def on_error(event,*args, **kwargs):
     #print("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1}".format(datetime.datetime.now(),event))
     f = open("error.log","r+")
-    f.write("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1}".format(datetime.datetime.now(),event))
-    await mainBot.mainBot().addConsoleAsync("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1}".format(datetime.datetime.now(),event),"Discord","Debug")
+    f.write("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1} : {2}".format(datetime.datetime.now(),event,traceback.format_exc()))
+
+    await mainBot.mainBot().addConsoleAsync("[{0:%Y-%m-%d %H:%M:%S}][ERROR] {1} : {2}".format(datetime.datetime.now(),event,traceback.format_exc()),"Discord","Debug")
     f.close()
     
     
@@ -138,7 +139,7 @@ async def on_message(message): #waits for the discord message event and pulls it
             roleList = {}
             attachments = ""
             for i in message.attachments:
-                attachments += i.url
+                attachments += i["url"]
             for roles in message.author.roles:
                 #await mainBot.mainBot().addConsoleAsync(roles.name + ":" + str(roles.position),"Discord","Info") #causes a weird bot:14 spam in console every message
                 roleList.update({str(roles.name):int(roles.position)})
