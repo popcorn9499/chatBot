@@ -1,59 +1,80 @@
+from utils.EventHook import EventHook
+class Events(object):
+    def __init__(self):
+        Event = EventHook()
+        self.onMessage = EventHook()
+        self.onConnect = EventHook()
+        self.onMessageDelete = EventHook()
+        self.onMessageEdit = EventHook()
+        self.onReactAdd = EventHook()
+        self.onReactRemove = EventHook()
+        self.onReady = EventHook()
+        self.onMemberJoin = EventHook()
+        self.onMemberUpdate = EventHook()
 
-'''
-
--On Connect #Creates the connection
 
 
--On Message #spews message object
 
--On Ready #Spews ready information
 
--On Error #spews error
+# events = Events()
 
--On Message Delete
+# events.on_message += messageTest("test")
 
--On Message Edit
 
--On React Add
 
--On React Remove
+# '''
+# -On Connect #Creates the connection
 
--On Channel Delete
 
--On Channel Create
+# -On Message #spews message object
 
--On Channel Update
+# -On Ready #Spews ready information
 
--On Member Join
+# -On Error #spews error
 
--On Member Update
+# -On Message Delete
 
--On Server Join
+# -On Message Edit
 
--On Server Remove
+# -On React Add
 
--On Server Update
+# -On React Remove
 
--On Server Role Create
+# -On Channel Delete
 
--On Server Role Delete
+# -On Channel Create
 
--On Server Role Update
+# -On Channel Update
 
--On Server Emojis Update
+# -On Member Join
 
--On Server Avaliable
+# -On Member Update
 
--On Server Unavaliable
+# -On Server Join
 
--On Member Ban
+# -On Server Remove
 
--On Member Unban
+# -On Server Update
 
--On Typing?
+# -On Server Role Create
 
--On Group Join?
+# -On Server Role Delete
 
--On Group Remove?
+# -On Server Role Update
 
-'''
+# -On Server Emojis Update
+
+# -On Server Avaliable
+
+# -On Server Unavaliable
+
+# -On Member Ban
+
+# -On Member Unban
+
+# -On Typing?
+
+# -On Group Join?
+
+# -On Group Remove?
+# '''

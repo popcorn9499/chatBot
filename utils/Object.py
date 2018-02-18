@@ -3,7 +3,9 @@ class Object():
         self.__dict__ = attributes
 
 
-
+class ObjectLayout():
+    async def message():
+        
 
 #me playing around code
 t = Object({"test":1,"why":5})

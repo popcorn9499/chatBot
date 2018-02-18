@@ -24,7 +24,7 @@ class EventHook(object):
         return self
     
     def fire(self, *args, **keywargs): # ex: onMessage()
-    """Fire event and call all handler functions
+        """Fire event and call all handler functions
         
         You can call EventHandler object itself like e(earg) instead of 
         e.fire(earg).
