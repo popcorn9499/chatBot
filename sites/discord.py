@@ -1,5 +1,5 @@
 from utils import config
-
+from utils import Object
 import discord #gets the discord and asyncio librarys
 import asyncio
 import time
@@ -44,8 +44,10 @@ async def on_ready(): #when the discord api has logged in and is ready then this
 
 @client.event
 async def on_message(message): #waits for the discord message event and pulls it somewhere
-    print(message.author.name + message.content)
-    config.events.onMessage(message.author.name + message.content)
+    #print(message.author.name + message.content)
+    obj = await Object.ObjectLayout.message(Author=message.author.name,Contents=message.content)
+    print(type(obj))
+    config.events.onMessage(obj)
 
 async def discordSendMsg(msg): #this is for sending messages to discord
     global config, discordInfo

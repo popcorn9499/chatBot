@@ -5,7 +5,7 @@ from sites import discord
 
 
 async def messageTest(Message):
-    print(Message)
+    print(Message.Contents)
 
 
 

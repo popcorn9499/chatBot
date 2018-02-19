@@ -3,13 +3,18 @@ class Object():
         self.__dict__ = attributes
 
 
-class ObjectLayout():
-    async def message():
+class ObjectLayout:
+
+    async def message(Contents,Author):
+        print(Object({"Contents":Contents,"Author":Author}).__dict__)
+        return Object({"Contents":Contents,"Author":Author})
+
+
         
 
-#me playing around code
-t = Object({"test":1,"why":5})
-print(t.why)
+# #me playing around code
+# t = Object({"test":1,"why":5})
+# print(t.why)
 
 
 #things I will need to layout
