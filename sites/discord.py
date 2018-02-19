@@ -45,8 +45,16 @@ async def on_ready(): #when the discord api has logged in and is ready then this
 @client.event
 async def on_message(message): #waits for the discord message event and pulls it somewhere
     #print(message.author.name + message.content)
-    obj = await Object.ObjectLayout.message(Author=message.author.name,Contents=message.content)
-    print(type(obj))
+    attachments = "" #gets the attachments so we dont loose that
+    for i in message.attachments: 
+        attachments += i["url"]
+
+
+    roleList={}
+    for roles in message.author.roles: #gets the authors roles and saves that to a list
+        roleList.update({str(roles.name):int(roles.position)})
+    messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
+    obj = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
     config.events.onMessage(obj)
 
 async def discordSendMsg(msg): #this is for sending messages to discord

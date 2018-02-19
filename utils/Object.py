@@ -5,10 +5,10 @@ class Object():
 
 class ObjectLayout:
 
-    async def message(Contents,Author):
-        print(Object({"Contents":Contents,"Author":Author}).__dict__)
-        return Object({"Contents":Contents,"Author":Author})
-
+    async def message(Contents,Author,Server,Channel,Service,Roles):
+        messageObj = Object({"Contents":Contents,"Author":Author,"Server":Server,"Channel":Channel,"Service":Service,"Roles":Roles})
+        print(messageObj.__dict__)
+        return messageObj
 
         
 
