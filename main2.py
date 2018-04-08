@@ -2,7 +2,7 @@ from utils.Events import Events
 from utils.EventHook import EventHook
 from utils import config
 from sites import discord
-
+from utils import logger
 
 async def messageTest(Message):
     print(Message.Contents)
@@ -11,18 +11,19 @@ async def messageTest(Message):
 
 
 #events.onMessage += messageTest
-config.events.onMessage += messageTest
+# config.events.onMessage += messageTest
 
-print(config.events.__dict__)
+# print(config.events.__dict__)
 
-print(config.x)
-
-
-discord.start(config.discordToken)
+# print(config.x)
 
 
+# discord.start(config.discordToken)
 
 
+
+l = logger.logs("test")
+l.logger.debug("test")
 
 # x = input()
 

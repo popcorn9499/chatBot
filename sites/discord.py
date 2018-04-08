@@ -46,10 +46,9 @@ async def on_ready(): #when the discord api has logged in and is ready then this
 async def on_message(message): #waits for the discord message event and pulls it somewhere
     #print(message.author.name + message.content)
     attachments = "" #gets the attachments so we dont loose that
-    for i in message.attachments: 
+    for i in message.attachments:
         attachments += i["url"]
-
-
+        
     roleList={}
     for roles in message.author.roles: #gets the authors roles and saves that to a list
         roleList.update({str(roles.name):int(roles.position)})
