@@ -4,6 +4,7 @@ from utils import config
 from sites import discord
 from utils import logger
 
+
 async def messageTest(Message):
     print(Message.Contents)
 
@@ -18,12 +19,15 @@ async def messageTest(Message):
 # print(config.x)
 
 
-# discord.start(config.discordToken)
-
 
 
 l = logger.logs("test")
 l.logger.debug("test")
+
+discord.start(config.discordToken)
+
+
+
 
 # x = input()
 

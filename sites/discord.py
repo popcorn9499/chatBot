@@ -4,27 +4,30 @@ import discord #gets the discord and asyncio librarys
 import asyncio
 import time
 import datetime
-
+from utils import logger
 client = discord.Client() #sets this to just client for reasons cuz y not? (didnt have to be done like this honestly could of been just running discord.Client().)
 
 
-
+l = logger.logs("Discord")
+l.logger.debug("test")
 
 @client.event
 async def on_ready(): #when the discord api has logged in and is ready then this even is fired
-    print('Logged in as',"Discord","Info")##these things could be changed a little bit here
-    print(client.user.name+ "#" + client.user.discriminator,"Discord","Info")
+    l.logger.info('Logged in as')##these things could be changed a little bit here
+    l.logger.info(client.user.name+ "#" + client.user.discriminator)
     botName = client.user.name+ "#" + client.user.discriminator #gets and saves the bots name and discord tag
-    print(client.user.id,"Discord","Info")
+    l.logger.info(client.user.id,)
 
 
     rolesList = {}
     membersList = {}
+    discordMembers = {}
+    discordRoles = {}
     for server in client.servers: #this portion gets all the info for all the channels and servers the bot is in
         for members in server.members:
             membersList.update({str(members): members})
-        config.discordMembers.update({str(server.name):membersList})
-        print(config.discordMembers,"Discord","Extra Debug")
+        discordMembers.update({str(server.name):membersList})
+        l.logger.warning(discordMembers)
         for roles in server.roles:
             #print( "[" + server.name + "]"+ roles.name + ":" + str(roles.position))
             rolesList.update({str(roles.name):{"Number":int(roles.position),"Data": roles}})
@@ -32,8 +35,8 @@ async def on_ready(): #when the discord api has logged in and is ready then this
                 pass
                 #variables.tempRole = roles
 
-        config.discordRoles.update({str(server.name):rolesList})
-        print(config.discordRoles,"Discord","Extra Debug")
+        discordRoles.update({str(server.name):rolesList})
+        l.logger.warning(discordRoles)
 
 
         config.discordServerInfo.update({str(server): {"asdasdhskajhdkjashdlk":"channel info"}})#maybe set a check for that channel
@@ -63,6 +66,7 @@ async def discordSendMsg(msg): #this is for sending messages to discord
 
 
 def start(token):
+    
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(client.start(token))
