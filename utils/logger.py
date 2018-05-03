@@ -7,7 +7,7 @@ class logs:
         self.logger = logging.getLogger(name)
         formatter = logging.Formatter('%(asctime)s [Thread/%(threadName)s] - %(name)s - %(levelname)s - %(message)s') #sets formatting for the console output
         terminal = logging.StreamHandler()
-        terminal.setLevel(logging.DEBUG)#sets the debug level
+        terminal.setLevel(logging.INFO)#sets the debug level
         terminal.setFormatter(formatter)
         self.logger.setLevel(logging.DEBUG)
         self.logger.addHandler(terminal) #adds the console handler
@@ -16,7 +16,10 @@ class logs:
 
 class LogFile(logging.Handler):
     def emit(self, record):#creates the log file with whats required
-        self.logFile("Log.log","{0} [Thread/{1}] - {2} - {3} - {4} ".format(record.asctime,record.threadName,record.name,record.levelname,record.message))
+        try:
+            self.logFile("Log.log","{0} [Thread/{1}] - {2} - {3} - {4} ".format(record.asctime,record.threadName,record.name,record.levelname,record.message))
+        except AttributeError:
+            pass
 
     def logFile(self,file,msg): #creates the file with what was specified to be put into it
         current_time = time.time()
