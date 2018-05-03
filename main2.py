@@ -23,8 +23,8 @@ async def messageTest(Message):
 
 l = logger.logs("test")
 l.logger.debug("test")
-
-discord.start(config.discordToken)
+discordP = discord.Discord()
+discordP.start(config.discordToken)
 
 
 
