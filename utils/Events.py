@@ -11,6 +11,7 @@ class Events(object):
         self.onReady = EventHook()
         self.onMemberJoin = EventHook()
         self.onMemberUpdate = EventHook()
+        self.onMessageSend = EventHook()
 
 
 
