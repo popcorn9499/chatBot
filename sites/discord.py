@@ -12,7 +12,7 @@ client = discord.Client() #sets this to just client for reasons cuz y not? (didn
 
 
 l = logger.logs("Discord")
-l.logger.info("test")
+l.logger.info("Starting")
 
 class Discord:
     #client=discord.Client()
@@ -53,6 +53,7 @@ class Discord:
             for channel in server.channels: #get channels and add them to the list to store for later
                 disc = {str(channel.name): channel}
                 config.discordServerInfo[str(server)].update(disc)
+            l.logger.info("Started")
 
 
     @client.event
@@ -73,7 +74,6 @@ class Discord:
         global config, discordInfo
         #print(message.__dict__)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord":
-            print("Test")
             await client.send_message(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel], sndMessage.Message.Contents) #sends the message to the channel specified in the beginning
             
 
@@ -87,8 +87,10 @@ class Discord:
             loop.run_until_complete(client.logout())
             loop.close()
             start(token)
+            l.logger.info("Client Connection Lost")
             # cancel all tasks lingering
         except KeyboardInterrupt:
             loop.run_until_complete(client.logout())
         finally:
+            l.logger.info("Client Closed")
             loop.close()

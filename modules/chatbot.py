@@ -10,8 +10,9 @@ from utils import logger
 class chatbot:
     def __init__(self):
         self.l = logger.logs("Chatbot")
-        self.l.logger.info("test")
+        self.l.logger.info("Starting")
         config.events.onMessage += self.sortMessage
+        self.l.logger.info("Started")
 
     async def sortMessage(self,message):
         self.l.logger.info(message.__dict__)
@@ -21,7 +22,7 @@ class chatbot:
                     if message.Service == val["From"]["Service"]:
                         if message.Server == val["From"]["Server"]:
                             if message.Channel == val["From"]["Channel"]:
-                                print("Sorted")
+                                self.l.logger.info('Send Message')
                                 objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(ModuleTo=val["To"]["Module"],Service=val["To"]["Service"], Server=val["To"]["Server"],Channel=val["To"]["Channel"])
                                 objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails)
                                 print(objSendMsg)
