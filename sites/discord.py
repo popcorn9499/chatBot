@@ -18,6 +18,7 @@ class Discord:
     #client=discord.Client()
     def __init__(self):
         pass
+        config.events.onMessageSend += self.discordSendMsg
         #config.events.onMessage += self.discordSendMsg
 
     @client.event
@@ -68,12 +69,13 @@ class Discord:
         obj = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
         config.events.onMessage(message=obj)
 
-    async def discordSendMsg(self,message): #this is for sending messages to discord
-        pass
+    async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
         global config, discordInfo
         #print(message.__dict__)
-        await client.send_message(config.discordServerInfo[message.Server][message.Channel], message.Contents) #sends the message to the channel specified in the beginning
-        
+        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord":
+            print("Test")
+            await client.send_message(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel], sndMessage.Message.Contents) #sends the message to the channel specified in the beginning
+            
 
 
     def start(self,token):

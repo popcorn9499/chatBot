@@ -22,7 +22,7 @@ def loadConf(file):
 
 discordToken = loadConf("config{0}auth{0}discord.json")["Token"]
 
-#chatbot = loadconf("config{0}chatbot{0}chatbot.json")
+chatbot = loadConf("config{0}chatbot{0}chatbot.json")
 
 
 

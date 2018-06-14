@@ -1,0 +1,16 @@
+{
+    "thing1":{
+        "From":{
+            "Channel": "test",
+            "Service": "Discord",
+            "Server": "Popicraft Network",
+            "Module": "Site"
+        },
+        "To":{
+            "Channel": "test2",
+            "Service": "Discord",
+            "Server": "Popicraft Network",
+            "Module": "Site"
+        }
+    }
+}
