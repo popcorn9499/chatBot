@@ -9,7 +9,7 @@ from utils import logger
 
 
 client = discord.Client() #sets this to just client for reasons cuz y not? (didnt have to be done like this honestly could of been just running discord.Client().)
-
+clientID="IDK"
 
 l = logger.logs("Discord")
 l.logger.info("Starting")
@@ -23,10 +23,12 @@ class Discord:
 
     @client.event
     async def on_ready(): #when the discord api has logged in and is ready then this even is fired
+        global clientID
         l.logger.info('Logged in as')##these things could be changed a little bit here
         l.logger.info(client.user.name+ "#" + client.user.discriminator)
         botName = client.user.name+ "#" + client.user.discriminator #gets and saves the bots name and discord tag
         l.logger.info(client.user.id,)
+        clientID = str(client.user.id)
 
 
         rolesList = {}
@@ -59,16 +61,17 @@ class Discord:
     @client.event
     async def on_message(message): #waits for the discord message event and pulls it somewhere
         #print(message.author.name + message.content)
-        attachments = "" #gets the attachments so we dont loose that
-        for i in message.attachments:
-            attachments += i["url"]
-            
-        roleList={}
-        for roles in message.author.roles: #gets the authors roles and saves that to a list
-            roleList.update({str(roles.name):int(roles.position)})
-        messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
-        obj = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
-        config.events.onMessage(message=obj)
+        if str(message.author.id) != clientID:
+            attachments = "" #gets the attachments so we dont loose that
+            for i in message.attachments:
+                attachments += i["url"]
+                
+            roleList={}
+            for roles in message.author.roles: #gets the authors roles and saves that to a list
+                roleList.update({str(roles.name):int(roles.position)})
+            messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
+            obj = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
+            config.events.onMessage(message=obj)
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
         global config, discordInfo

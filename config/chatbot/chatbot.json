@@ -12,5 +12,33 @@
             "Server": "Popicraft Network",
             "Module": "Site"
         }
+    },
+        "thing2":{
+        "From":{
+            "Channel": "test",
+            "Service": "Discord",
+            "Server": "Popicraft Network",
+            "Module": "Site"
+        },
+        "To":{
+            "Channel": "test2",
+            "Service": "Discord",
+            "Server": "Popicraft Network",
+            "Module": "Site"
+        }
+    },
+        "thing3":{
+        "From":{
+            "Channel": "test2",
+            "Service": "Discord",
+            "Server": "Popicraft Network",
+            "Module": "Site"
+        },
+        "To":{
+            "Channel": "test",
+            "Service": "Discord",
+            "Server": "Popicraft Network",
+            "Module": "Site"
+        }
     }
 }
