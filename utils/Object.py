@@ -7,7 +7,7 @@ class ObjectLayout:
 
     async def message(Contents,Author,Server,Channel,Service,Roles):
         messageObj = Object({"Contents":Contents,"Author":Author,"Server":Server,"Channel":Channel,"Service":Service,"Roles":Roles})
-        print(messageObj.__dict__)
+        #print(messageObj.__dict__)
         return messageObj
 
         

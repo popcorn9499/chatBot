@@ -3,7 +3,7 @@ from utils.EventHook import EventHook
 from utils import config
 from sites import discord
 from utils import logger
-
+from modules import chatbot
 
 async def messageTest(Message):
     print(Message.Contents)
@@ -18,8 +18,7 @@ async def messageTest(Message):
 
 # print(config.x)
 
-
-
+chat = chatbot.chatbot()
 
 l = logger.logs("test")
 l.logger.debug("test")

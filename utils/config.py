@@ -6,6 +6,8 @@ events = Events()
 x = 1
 
 
+
+
 #runtime created
 discordServerInfo = {}
 discordRoles = {}
@@ -13,12 +15,14 @@ discord = None
 discordToken = None
 
 
-def loadConf():
-    file = fileIO.fileLoad("config{0}auth{0}discord.json".format(os.sep))
+
+def loadConf(file):
+    file = fileIO.fileLoad(file.format(os.sep))
     return file
 
-discordToken = loadConf()["Token"]
+discordToken = loadConf("config{0}auth{0}discord.json")["Token"]
 
+#chatbot = loadconf("config{0}chatbot{0}chatbot.json")
 
 
 

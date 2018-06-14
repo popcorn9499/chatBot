@@ -15,8 +15,10 @@ l = logger.logs("Discord")
 l.logger.info("test")
 
 class Discord:
+    #client=discord.Client()
     def __init__(self):
-        config.events.onMessage += self.discordSendMsg
+        pass
+        #config.events.onMessage += self.discordSendMsg
 
     @client.event
     async def on_ready(): #when the discord api has logged in and is ready then this even is fired
@@ -64,12 +66,13 @@ class Discord:
             roleList.update({str(roles.name):int(roles.position)})
         messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
         obj = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
-        config.events.onMessage(obj)
+        config.events.onMessage(message=obj)
 
-    async def discordSendMsg(self,msg): #this is for sending messages to discord
-        #global config, discordInfo
-        print(msg.__dict__)
-        await client.send_message(config.discordServerInfo[msg.Server][msg.Channel], msg.Contents) #sends the message to the channel specified in the beginning
+    async def discordSendMsg(self,message): #this is for sending messages to discord
+        pass
+        global config, discordInfo
+        #print(message.__dict__)
+        await client.send_message(config.discordServerInfo[message.Server][message.Channel], message.Contents) #sends the message to the channel specified in the beginning
         
 
 
