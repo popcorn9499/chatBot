@@ -20,8 +20,6 @@ async def messageTest(Message):
 
 chat = chatbot.chatbot()
 
-l = logger.logs("test")
-l.logger.debug("test")
 discordP = discord.Discord()
 discordP.start(config.discordToken)
 

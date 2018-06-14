@@ -29,8 +29,6 @@ class Discord:
         botName = client.user.name+ "#" + client.user.discriminator #gets and saves the bots name and discord tag
         l.logger.info(client.user.id,)
         clientID = str(client.user.id)
-
-
         rolesList = {}
         membersList = {}
         discordMembers = {}
@@ -71,29 +69,30 @@ class Discord:
                 roleList.update({str(roles.name):int(roles.position)})
             messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
             obj = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
+            objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
             config.events.onMessage(message=obj)
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
         global config, discordInfo
-        #print(message.__dict__)
-        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord":
+        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             await client.send_message(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel], sndMessage.Message.Contents) #sends the message to the channel specified in the beginning
             
 
 
     def start(self,token):
-        
-        loop = asyncio.get_event_loop()
-        try:
-            loop.run_until_complete(client.start(token))
-        except (discord.ConnectionClosed, discord.GatewayNotFound) as error:
-            loop.run_until_complete(client.logout())
-            loop.close()
-            start(token)
-            l.logger.info("Client Connection Lost")
-            # cancel all tasks lingering
-        except KeyboardInterrupt:
-            loop.run_until_complete(client.logout())
-        finally:
-            l.logger.info("Client Closed")
-            loop.close()
+        while True:
+            loop = asyncio.get_event_loop()
+            try:
+                loop.run_until_complete(client.start(token))
+            except (discord.ConnectionClosed, discord.GatewayNotFound) as error:
+                loop.run_until_complete(client.logout())
+                loop.close()
+                start(token)
+                l.logger.info("Client Connection Lost")
+                # cancel all tasks lingering
+            except KeyboardInterrupt:
+                loop.run_until_complete(client.logout())
+            finally:
+                l.logger.info("Client Closed")
+                loop.close()
+            l.logger.info("Reconnecting")
