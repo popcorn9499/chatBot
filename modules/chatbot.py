@@ -15,7 +15,7 @@ class chatbot:
         self.l.logger.info("Started")
 
     async def sortMessage(self,message):
-        self.l.logger.info(message.__dict__):
+        self.l.logger.info(message.__dict__)
         for key ,val in config.chatbot.items():
             if message.Service == val["From"]["Service"]:
                 if message.Server == val["From"]["Server"]:
