@@ -1,0 +1,15 @@
+{
+    "1": {
+        "To":{
+          "Channel": "test2",
+          "Service": "Discord",
+          "Server": "Popicraft Network"
+        },
+        "From":{
+          "Channel": "test",
+          "Service": "Discord",
+           "Server": "Popicraft Network"
+        },
+        "Format": "[T]"
+    }
+}

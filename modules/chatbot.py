@@ -22,9 +22,23 @@ class chatbot:
                     if message.Channel == val["From"]["Channel"]:
                         self.l.logger.info('Send Message')
                         objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(ModuleTo=val["To"]["Module"],Service=val["To"]["Service"], Server=val["To"]["Server"],Channel=val["To"]["Channel"])
-                        objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message.Message, DeliveryDetails=objDeliveryDetails)
-                        print(objSendMsg)
-                        config.events.onMessageSend(sndMessage=objSendMsg)
+                        message.Contents = await self.serviceIdentifier(fromService=message.Service,fromServer=message.Server,fromChannel=message.Channel,toService=val["To"]["Service"],toServer=val["To"]["Server"],toChannel=val["To"]["Channel"],message=message.Contents)
+                        await self.sendMessage(message=message,objDeliveryDetails=objDeliveryDetails)
 
-    async def sendMessage(self,message):
+                        
+
+    async def serviceIdentifier(self,fromService,fromServer,fromChannel,toService,toServer,toChannel,message):
+        for key ,val in config.chatbotIdentifier.items():
+            if val["To"]["Service"] == toService and val["From"]["Service"] == fromService:
+                if val["To"]["Server"] == toServer and val["From"]["Server"] == fromServer:
+                    if val["To"]["Channel"] == toChannel and val["From"]["Channel"] == fromChannel:
+                        return "{0} {1}".format(val["Format"],message)
+        return message
+
+
+
+    async def sendMessage(self,message,objDeliveryDetails):
+        objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails)
+
+        config.events.onMessageSend(sndMessage=objSendMsg)
         pass
