@@ -20,8 +20,8 @@ class chatbot:
             if message.Service == val["From"]["Service"]: #decides weather this is the correct message matching it to the config
                 if message.Server == val["From"]["Server"]:
                     if message.Channel == val["From"]["Channel"]:
-                        self.l.logger.info('Sent Message') 
-                        objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Chatbot",ModuleTo=val["To"]["ModuleTo"],Service=val["To"]["Service"], Server=val["To"]["Server"],Channel=val["To"]["Channel"]) #prepares the delivery location
+                        self.l.logger.info('Sent Message')
+                        objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Chatbot",ModuleTo=val["To"]["Module"],Service=val["To"]["Service"], Server=val["To"]["Server"],Channel=val["To"]["Channel"]) #prepares the delivery location
                         message.Contents = await self.serviceIdentifier(fromService=message.Service,fromServer=message.Server,fromChannel=message.Channel,toService=val["To"]["Service"],toServer=val["To"]["Server"],toChannel=val["To"]["Channel"],message=message.Contents) #sees if it needs to be identified
                         await self.sendMessage(message=message,objDeliveryDetails=objDeliveryDetails) #sends the message
 
