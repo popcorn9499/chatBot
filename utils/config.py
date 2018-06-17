@@ -26,6 +26,9 @@ chatbot = loadConf("config{0}chatbot{0}chatbot.json")
 chatbotIdentifier = loadConf("config{0}chatbot{0}chatbotIdentifier.json")
 
 
+chatLogRules = loadConf("config{0}chatLog{0}logRules.json")
+
+
 
 
 

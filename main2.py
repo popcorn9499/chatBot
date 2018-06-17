@@ -4,6 +4,7 @@ from utils import config
 from sites import discord
 from utils import logger
 from modules import chatbot
+from modules import chatLog
 
 async def messageTest(Message):
     print(Message.Contents)
@@ -18,7 +19,9 @@ async def messageTest(Message):
 
 # print(config.x)
 
-chat = chatbot.chatbot()
+chatbot = chatbot.chatbot()
+
+chatLog = chatLog.chatLog()
 
 discordP = discord.Discord()
 discordP.start(config.discordToken)
