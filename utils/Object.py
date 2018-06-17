@@ -10,8 +10,8 @@ class ObjectLayout:
         #print(messageObj.__dict__)
         return messageObj
     
-    async def DeliveryDetails(ModuleTo,Service,Server,Channel):
-        DeliveryDetailsObj = Object({"ModuleTo":ModuleTo,"Service": Service,"Server": Server, "Channel": Channel})
+    async def DeliveryDetails(Module,ModuleTo,Service,Server,Channel):
+        DeliveryDetailsObj = Object({"Module":Module,"ModuleTo":ModuleTo,"Service": Service,"Server": Server, "Channel": Channel})
         return DeliveryDetailsObj
 
     async def sendMsgDeliveryDetails(Message,DeliveryDetails):
