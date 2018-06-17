@@ -69,7 +69,7 @@ class Discord:
                 roleList.update({str(roles.name):int(roles.position)})
             messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
             obj = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
-            objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
+            objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
             config.events.onMessage(message=obj)
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
