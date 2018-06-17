@@ -16,6 +16,7 @@ class chatbot:
 
     async def sortMessage(self,message): #sorts messages sending themto the correct locations
         self.l.logger.info(message.__dict__) #more or less debug code
+        message = message.Message
         for key ,val in config.chatbot.items(): #cycles through the config of options
             if message.Service == val["From"]["Service"]: #decides weather this is the correct message matching it to the config
                 if message.Server == val["From"]["Server"]:

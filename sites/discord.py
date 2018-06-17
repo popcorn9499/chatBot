@@ -34,6 +34,7 @@ class Discord:
         discordMembers = {}
         discordRoles = {}
         for server in client.servers: #this portion gets all the info for all the channels and servers the bot is in
+            print(server)
             for members in server.members:
                 membersList.update({str(members): members})
             discordMembers.update({str(server.name):membersList})
@@ -60,6 +61,7 @@ class Discord:
     async def on_message(message): #waits for the discord message event and pulls it somewhere
         #print(message.author.name + message.content)
         if str(message.author.id) != clientID:
+            print(message.author.name)
             attachments = "" #gets the attachments so we dont loose that
             for i in message.attachments:
                 attachments += i["url"]
@@ -68,9 +70,10 @@ class Discord:
             for roles in message.author.roles: #gets the authors roles and saves that to a list
                 roleList.update({str(roles.name):int(roles.position)})
             messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
-            obj = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
+            message = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
             objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
-            config.events.onMessage(message=obj)
+            objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails)
+            config.events.onMessage(message=objSendMsg)
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
         global config, discordInfo
