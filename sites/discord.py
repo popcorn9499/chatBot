@@ -16,11 +16,9 @@ l = logger.logs("Discord")
 l.logger.info("Starting")
 
 class Discord:
-    #client=discord.Client()
     def __init__(self):
         pass
         config.events.onMessageSend += self.discordSendMsg
-        #config.events.onMessage += self.discordSendMsg
 
     @client.event
     async def on_ready(): #when the discord api has logged in and is ready then this even is fired
@@ -41,16 +39,12 @@ class Discord:
             discordMembers.update({str(server.name):membersList})
             l.logger.debug(discordMembers)
             for roles in server.roles:
-                #print( "[" + server.name + "]"+ roles.name + ":" + str(roles.position))
                 rolesList.update({str(roles.name):{"Number":int(roles.position),"Data": roles}})
                 if roles.name == "Mod":
                     pass
                     #variables.tempRole = roles
-
             discordRoles.update({str(server.name):rolesList})
             l.logger.debug(discordRoles)
-
-
             config.discordServerInfo.update({str(server): {"asdasdhskajhdkjashdlk":"channel info"}})#maybe set a check for that channel
             for channel in server.channels: #get channels and add them to the list to store for later
                 disc = {str(channel.name): channel}
@@ -66,7 +60,6 @@ class Discord:
             attachments = "" #gets the attachments so we dont loose that
             for i in message.attachments:
                 attachments += i["url"]
-                
             roleList={}
             for roles in message.author.roles: #gets the authors roles and saves that to a list
                 roleList.update({str(roles.name):int(roles.position)})
