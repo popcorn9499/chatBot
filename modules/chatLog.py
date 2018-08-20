@@ -20,12 +20,13 @@ class chatLog:
         if message.DeliveryDetails.Module == "Site":
             for key ,val in config.chatLogRules.items():
                 objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="ChatLog",ModuleTo="Site",Service=val["Service"], Server=val["Server"],Channel=val["Channel"]) #prepares the delivery location
-                await self.sendMessage(message=message.Message,objDeliveryDetails=objDeliveryDetails)
+                await self.sendMessage(message=message.Message,objDeliveryDetails=objDeliveryDetails, FormattingOptions=message.FormattingOptions)
             pass
 
 
-    async def sendMessage(self,message,objDeliveryDetails): #sends the message
-        objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails) #prepares the delivery object and sends the message send event
+    async def sendMessage(self,message,objDeliveryDetails,FormattingOptions): #sends the message
+        formatterOptions = {""}
+        objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails,FormattingOptions=FormattingOptions) #prepares the delivery object and sends the message send event
         config.events.onMessageSend(sndMessage=objSendMsg)
 
 

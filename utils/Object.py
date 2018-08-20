@@ -14,8 +14,8 @@ class ObjectLayout:
         DeliveryDetailsObj = Object({"Module":Module,"ModuleTo":ModuleTo,"Service": Service,"Server": Server, "Channel": Channel})
         return DeliveryDetailsObj
 
-    async def sendMsgDeliveryDetails(Message,DeliveryDetails):
-        sendMsgDeliveryDetails = Object({"Message": Message, "DeliveryDetails":DeliveryDetails})
+    async def sendMsgDeliveryDetails(Message,DeliveryDetails,FormattingOptions):
+        sendMsgDeliveryDetails = Object({"Message": Message, "DeliveryDetails":DeliveryDetails,"FormattingOptions":FormattingOptions})
         return sendMsgDeliveryDetails
         
 
