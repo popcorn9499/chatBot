@@ -26,7 +26,7 @@ class chatbot:
                         objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Chatbot",ModuleTo=val["To"]["Module"],Service=val["To"]["Service"], Server=val["To"]["Server"],Channel=val["To"]["Channel"]) #prepares the delivery location
                         #message.Contents = await self.serviceIdentifier(fromService=message.Service,fromServer=message.Server,fromChannel=message.Channel,toService=val["To"]["Service"],toServer=val["To"]["Server"],toChannel=val["To"]["Channel"],message=message.Contents) #sees if it needs to be identified
                         ServiceIcon = await self.serviceIdentifier(fromService=message.Service,fromServer=message.Server,fromChannel=message.Channel,toService=val["To"]["Service"],toServer=val["To"]["Server"],toChannel=val["To"]["Channel"],message=message.Contents) #sees if it needs to be identified
-                        formatOptions.update({"%serviceIcon%": ServiceIcon})
+                        formatOptions.update({"%serviceIcon%": ServiceIcon}) #Adds more formatting options
                         await self.sendMessage(message=message,objDeliveryDetails=objDeliveryDetails,FormattingOptions=formatOptions) #sends the message
 
                         

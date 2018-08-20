@@ -1,6 +1,7 @@
 #may want to make this more modular for multiple things
 
 import json
+import os
 
 #file load and save stuff
 def fileSave(fileName,config):
@@ -13,3 +14,7 @@ def fileLoad(fileName):#loads files
     with open(fileName, 'r') as handle:#loads the json file
         config = json.load(handle) 
     return config
+
+def loadConf(file):
+    file = fileLoad(file.format(os.sep))
+    return file
