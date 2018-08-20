@@ -19,6 +19,8 @@ class Discord:
     def __init__(self):
         pass
         config.events.onMessageSend += self.discordSendMsg
+        
+
 
     @client.event
     async def on_ready(): #when the discord api has logged in and is ready then this even is fired
@@ -94,3 +96,4 @@ class Discord:
                 l.logger.info("Client Closed")
                 loop.close()
             l.logger.info("Reconnecting")
+
