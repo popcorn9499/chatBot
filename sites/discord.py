@@ -80,6 +80,8 @@ class Discord:
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
         global config, discordInfo
+        while discordStarted != True:
+            await asyncio.sleep(5)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             print(await messageFormatter.formatter(sndMessage))
             await client.send_message(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel], await messageFormatter.formatter(sndMessage)) #sends the message to the channel specified in the beginning
