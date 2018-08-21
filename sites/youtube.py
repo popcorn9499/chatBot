@@ -32,6 +32,7 @@ class Youtube:
     def __init__(self):
         self.pageToken = ""
         self.youtube = ""
+        self.serviceStarted = False
         self.l = logger.logs("Youtube")
         self.l.logger.info("Starting")
         self.initAuth()
@@ -91,10 +92,10 @@ class Youtube:
     # Retrieve a list of the liveStream resources associated with the currently
     # authenticated user's channel.
 
-    async def getLiveId(self,youtube): #this gets the live chat id
+    async def getLiveId(self): #this gets the live chat id
         #global liveChatId,botUserID #pulls in the bots livechatid and botuserid for further saving and modifying
       
-        list_streams_request = youtube.liveBroadcasts().list( #checks for the live chat id through this
+        list_streams_request = self.youtube.liveBroadcasts().list( #checks for the live chat id through this
             part="snippet", #this is what we look through to get the live chat id
             broadcastStatus="all", #we need both of these to get the live chat id
             broadcastType="all"
@@ -107,20 +108,17 @@ class Youtube:
      
       
     async def listChat(self):
-        global pageToken #pulls in the page token
-        global liveChatId #pulls in the liveChatID
-        global botUserID #pulls in the bots channel ID
-        global youtube
         try:
             continuation = True
             try:
-                list_chatmessages = youtube.liveChatMessages().list( #lists the chat messages
+                list_chatmessages = self.youtube.liveChatMessages().list( #lists the chat messages
                     part="id,snippet,authorDetails", #gets the author details needed and the snippet all of which giving me the message and username
                     liveChatId=self.liveChatId,
                     maxResults=500,
                     pageToken=self.pageToken #gives the previous token so it loads a new section of the chat
                 ).execute() #executes it so its not just some object
-                variables.config["Bot"]["Youtube"]["pageToken"] = list_chatmessages["nextPageToken"] #page token for next use
+                #variables.config["Bot"]["Youtube"]["pageToken"] = list_chatmessages["nextPageToken"]
+                self.pageToken = list_chatmessages["nextPageToken"] #page token for next use
             except googleapiclient.errors.HttpError:
                 continuation = False 
                 
@@ -134,34 +132,34 @@ class Youtube:
                         self.l.logger.info(temp)
                         fileIO.fileSave("youtubeMsgJson.json", temp)
                         self.l.logger.info(userID)
-                        self.l.logger.info(botUserID)
-                        if userID != botUserID:
+                        self.l.logger.info(self.botUserID)
+                        if userID != self.botUserID:
                             self.l.logger.info("{0} {1}".format(username,message))
-                            msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": variables.config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorsRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
-                            processMsg(username=username,message=message,roleList=youtubeRoles(temp["authorDetails"]))
+                            #msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": variables.config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorsRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
+                            await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
                             #variables.mainMsg.append(msgStats)
-                        elif userID == botUserID: #if the userId is the bots then check the message to see if the bot sent it.
+                        elif userID == self.botUserID: #if the userId is the bots then check the message to see if the bot sent it.
                             try:
                                 msgCheckComplete = msgCheckRegex.search(message) #checks the message against the previously created regex for ":"
                                 if msgCheckComplete.group(1) != ":": #if its this then go and send the message as normal
                                     self.l.logger.info("{0} {1}".format(username,message))
-                                    msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": variables.config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
-                                    processMsg(username=username,message=message,roleList=youtubeRoles(temp["authorDetails"]))
+                                    #msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": variables.config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
+                                    await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
  
                                     #variables.mainMsg.append(msgStats)
                             except AttributeError as error:
                                 self.l.logger.info("{0} {1}".format(username,message))
-                                msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": variables.config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorsRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
-                                processMsg(username=username,message=message,roleList=youtubeRoles(temp["authorDetails"]))
+                                #msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": variables.config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorsRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
+                                await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
                                 #variables.mainMsg.append(msgStats)
         except ConnectionResetError:
             x = 1
             youtube = self.Login()
             self.l.logger.info('Connection Error reconnecting')
             
-    async def processMsg(username,message,roleList):
+    async def processMsg(self,username,message,roleList):
         formatOptions = {"%authorName%": username, "%channelFrom%": "Popcorn9499", "%serverFrom%": "Youtube", "%serviceFrom%": "youtube","%message%":"message"}
-        message = await Object.ObjectLayout.message(Author=username,Contents=message,Server="Youtube",Channel="Popcorn9499",Service="Youtube",Roles=rolelist)
+        message = await Object.ObjectLayout.message(Author=username,Contents=message,Server="Youtube",Channel="Popcorn9499",Service="Youtube",Roles=roleList)
         objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
         objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions)
         #config.events.onMessage(message=)
@@ -184,7 +182,7 @@ class Youtube:
         #global liveChatId #pulls in the liveChatID
         #global botUserID #pulls in the bots channel ID
         #global youtube           
-        x = list_streams_request = youtube.liveStreams().list(
+        x = list_streams_request = self.youtube.liveStreams().list(
             part="id,snippet",
             mine=True,
             maxResults=50
@@ -197,7 +195,7 @@ class Youtube:
         #global liveChatId #pulls in the liveChatID
         #global botUserID #pulls in the bots channel ID
         #global youtube       
-        x = youtube.liveBroadcasts().list(
+        x = self.youtube.liveBroadcasts().list(
         broadcastStatus="all",
         part="id,snippet",
         maxResults=50
@@ -208,7 +206,7 @@ class Youtube:
 
         
     async def sendLiveChat(self,msg): #sends messages to youtube live chat
-        list_chatmessages_inset = youtube.liveChatMessages().insert(
+        list_chatmessages_inset = self.youtube.liveChatMessages().insert(
             part = "snippet",
             body = dict (
                 snippet = dict(
@@ -224,28 +222,31 @@ class Youtube:
         #print(list_chatmessages_inset.execute()) #debug for sending live chat messages
       
     async def Login(self):
+
         if "__main__" == "__main__":
             self.l.logger.info("Logging In")
             args = argparser.parse_args()
             
             self.youtube = await self.get_authenticated_service(args) #authenticates the api and saves it to youtube
-            await self.getLiveId(self.youtube) 
-            self.l.logger.info("Logged in")  
+            await self.getLiveId() 
+            self.l.logger.info("Logged in")
+            self.serviceStarted = True
             #return youtube
         
     async def youtubeChatControl(self):
         self.l.logger.info("Started")
-        while True:    
-            self.listChat()
-            self.listLiveStreams()
-            self.listLiveBroadcasts()
-            j = 0
-            for msg in variables.processedMSG: #this cycles through the array for messages unsent to irc and sends them
-                if msg["sent"] == False and msg["sendTo"]["Bot"] == "Youtube":
-                    self.sendLiveChat(msg["msgFormated"])#sends the message to the irc from whatever
-                    variables.processedMSG[j]["sent"] = True
-                j = j + 1
-            time.sleep(2)
+        while True:  
+            if self.serviceStarted == True:  
+                await self.listChat()
+                await self.listLiveStreams()
+                await self.listLiveBroadcasts()
+            #j = 0
+            #for msg in variables.processedMSG: #this cycles through the array for messages unsent to irc and sends them
+                #if msg["sent"] == False and msg["sendTo"]["Bot"] == "Youtube":
+                    #self.sendLiveChat(msg["msgFormated"])#sends the message to the irc from whatever
+                    #variables.processedMSG[j]["sent"] = True
+                #j = j + 1
+            asyncio.sleep(2)
 
 
    #  # youtube = Login()
@@ -262,5 +263,6 @@ y = Youtube()
 loop = asyncio.get_event_loop()
 asyncio.set_event_loop(loop)
 loop.create_task(y.Login())
+loop.create_task(y.youtubeChatControl())
 loop.run_forever()
 loop.close()
