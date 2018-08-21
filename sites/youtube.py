@@ -36,7 +36,7 @@ class Youtube:
         self.l = logger.logs("Youtube")
         self.l.logger.info("Starting")
         self.initAuth()
-        config.events.onMessageSend += self.sendLiveChat #needs to be completed
+        #config.events.onMessageSend += self.sendLiveChat #needs to be completed
 
     def initAuth(self):
         # The CLIENT_SECRETS_FILE variable specifies the name of a file that contains
@@ -129,7 +129,7 @@ class Youtube:
                     username = temp["authorDetails"]["displayName"] #gets the users name
                     userID = temp["authorDetails"]["channelId"]
                     if message != "" and username != "": #this makes sure that the message and username slot arent empty before putting this to the discord chat        
-                        self.l.logger.info(temp)
+                        #self.l.logger.info(temp)
                         fileIO.fileSave("youtubeMsgJson.json", temp)
                         self.l.logger.info(userID)
                         self.l.logger.info(self.botUserID)
@@ -162,7 +162,7 @@ class Youtube:
         message = await Object.ObjectLayout.message(Author=username,Contents=message,Server="Youtube",Channel="Popcorn9499",Service="Youtube",Roles=roleList)
         objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
         objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions)
-        #config.events.onMessage(message=)
+        config.events.onMessage(message=objSendMsg)
 
 
     async def youtubeRoles(self,authorDetails):
@@ -246,7 +246,7 @@ class Youtube:
                     #self.sendLiveChat(msg["msgFormated"])#sends the message to the irc from whatever
                     #variables.processedMSG[j]["sent"] = True
                 #j = j + 1
-            asyncio.sleep(2)
+            await asyncio.sleep(2)
 
 
    #  # youtube = Login()
@@ -261,8 +261,6 @@ y = Youtube()
 
 
 loop = asyncio.get_event_loop()
-asyncio.set_event_loop(loop)
+#asyncio.set_event_loop(loop)
 loop.create_task(y.Login())
 loop.create_task(y.youtubeChatControl())
-loop.run_forever()
-loop.close()

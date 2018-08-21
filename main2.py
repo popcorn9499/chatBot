@@ -20,14 +20,14 @@ async def messageTest(Message):
 
 # print(config.x)
 
-# chatbot = chatbot.chatbot()
+chatbot = chatbot.chatbot()
 
-# chatLog = chatLog.chatLog()
+chatLog = chatLog.chatLog()
 
 
-# #this is the starting point for all the bot tasks
-# discordP = discord.Discord()
-# discordP.start(config.discordToken)
+#this is the starting point for all the bot tasks
+discordP = discord.Discord()
+discordP.start(config.discordToken)
 
 
 
