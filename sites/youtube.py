@@ -20,6 +20,7 @@ from utils import config
 from utils import Object
 from utils import logger
 from utils import messageFormatter
+import asyncio
 
 
 #youtube = ""
@@ -73,7 +74,7 @@ class Youtube:
         """ % os.path.abspath(os.path.join(os.path.dirname(__file__),
                                            self.CLIENT_SECRETS_FILE))
 
-    def get_authenticated_service(self,args):
+    async def get_authenticated_service(self,args):
       flow = flow_from_clientsecrets(self.CLIENT_SECRETS_FILE,
         scope=self.YOUTUBE_READ_WRITE_SCOPE,
         message=self.MISSING_CLIENT_SECRETS_MESSAGE)
@@ -90,7 +91,7 @@ class Youtube:
     # Retrieve a list of the liveStream resources associated with the currently
     # authenticated user's channel.
 
-    def getLiveId(self,youtube): #this gets the live chat id
+    async def getLiveId(self,youtube): #this gets the live chat id
         #global liveChatId,botUserID #pulls in the bots livechatid and botuserid for further saving and modifying
       
         list_streams_request = youtube.liveBroadcasts().list( #checks for the live chat id through this
@@ -105,7 +106,7 @@ class Youtube:
       
      
       
-    def listChat(self):
+    async def listChat(self):
         global pageToken #pulls in the page token
         global liveChatId #pulls in the liveChatID
         global botUserID #pulls in the bots channel ID
@@ -146,6 +147,7 @@ class Youtube:
                                     self.l.logger.info("{0} {1}".format(username,message))
                                     msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": variables.config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
                                     processMsg(username=username,message=message,roleList=youtubeRoles(temp["authorDetails"]))
+ 
                                     #variables.mainMsg.append(msgStats)
                             except AttributeError as error:
                                 self.l.logger.info("{0} {1}".format(username,message))
@@ -157,15 +159,15 @@ class Youtube:
             youtube = self.Login()
             self.l.logger.info('Connection Error reconnecting')
             
-    def processMsg(username,message,roleList):
+    async def processMsg(username,message,roleList):
         formatOptions = {"%authorName%": username, "%channelFrom%": "Popcorn9499", "%serverFrom%": "Youtube", "%serviceFrom%": "youtube","%message%":"message"}
-        message = await Object.ObjectLayout.message(Author=username,Contents=message,Server="Youtube",Channel="Popcorn9499",Service="Youtube",Roles=roleList)
+        message = await Object.ObjectLayout.message(Author=username,Contents=message,Server="Youtube",Channel="Popcorn9499",Service="Youtube",Roles=rolelist)
         objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
         objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions)
         #config.events.onMessage(message=)
 
 
-    def youtubeRoles(self,authorDetails):
+    async def youtubeRoles(self,authorDetails):
         roles = {}
         if authorDetails["isChatModerator"] == True:
             roles.update({"Mod":2})
@@ -177,7 +179,7 @@ class Youtube:
         self.l.logger.info("roles {0}".format(roles))
         return roles 
         
-    def listLiveStreams(self):
+    async def listLiveStreams(self):
         #global pageToken #pulls in the page token
         #global liveChatId #pulls in the liveChatID
         #global botUserID #pulls in the bots channel ID
@@ -190,7 +192,7 @@ class Youtube:
         fileIO.fileSave("youtubeliveStreamsJson.json", x)
         
         
-    def listLiveBroadcasts(self):
+    async def listLiveBroadcasts(self):
         #global pageToken #pulls in the page token
         #global liveChatId #pulls in the liveChatID
         #global botUserID #pulls in the bots channel ID
@@ -205,7 +207,7 @@ class Youtube:
         
 
         
-    def sendLiveChat(self,msg): #sends messages to youtube live chat
+    async def sendLiveChat(self,msg): #sends messages to youtube live chat
         list_chatmessages_inset = youtube.liveChatMessages().insert(
             part = "snippet",
             body = dict (
@@ -221,17 +223,17 @@ class Youtube:
         list_chatmessages_inset.execute()
         #print(list_chatmessages_inset.execute()) #debug for sending live chat messages
       
-    def Login(self):
+    async def Login(self):
         if "__main__" == "__main__":
             self.l.logger.info("Logging In")
             args = argparser.parse_args()
             
-            self.youtube = self.get_authenticated_service(args) #authenticates the api and saves it to youtube
-            self.getLiveId(self.youtube) 
+            self.youtube = await self.get_authenticated_service(args) #authenticates the api and saves it to youtube
+            await self.getLiveId(self.youtube) 
             self.l.logger.info("Logged in")  
             #return youtube
         
-    def youtubeChatControl(self):
+    async def youtubeChatControl(self):
         self.l.logger.info("Started")
         while True:    
             self.listChat()
@@ -254,4 +256,11 @@ class Youtube:
 
 
 y = Youtube()
-y.Login()
+# y.Login()
+
+
+loop = asyncio.get_event_loop()
+asyncio.set_event_loop(loop)
+loop.create_task(y.Login())
+loop.run_forever()
+loop.close()
