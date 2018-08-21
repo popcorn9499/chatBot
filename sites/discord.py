@@ -38,7 +38,6 @@ class Discord:
         discordMembers = {}
         discordRoles = {}
         for server in client.servers: #this portion gets all the info for all the channels and servers the bot is in
-            print(server)
             for members in server.members:
                 membersList.update({str(members): members})
             discordMembers.update({str(server.name):membersList})
@@ -61,16 +60,16 @@ class Discord:
     @client.event
     async def on_message(message): #waits for the discord message event and pulls it somewhere
         if discordStarted == True:
-            #print(message.author.name + message.content)
+            l.logger.debug(message.author.name + message.content)
             if str(message.author.id) != clientID:
-                print(message.author.name)
+                l.logger.debug(message.author.name)
                 attachments = "" #gets the attachments so we dont loose that
                 for i in message.attachments:
                     attachments += i["url"]
                 roleList={}
                 for roles in message.author.roles: #gets the authors roles and saves that to a list
                     roleList.update({str(roles.name):int(roles.position)})
-                print(roleList)
+                l.logger.debug(roleList)
                 formatOptions = {"%authorName%": message.author.name, "%channelFrom%": message.channel.name, "%serverFrom%": message.server.name, "%serviceFrom%": "Discord","%message%":"message"}
                 messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
                 message = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
@@ -83,7 +82,6 @@ class Discord:
         while discordStarted != True:
             await asyncio.sleep(5)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
-            print(await messageFormatter.formatter(sndMessage))
             await client.send_message(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel], await messageFormatter.formatter(sndMessage)) #sends the message to the channel specified in the beginning
 
     def start(self,token):

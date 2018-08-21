@@ -1,7 +1,9 @@
 import os
+from utils import logger
+import asyncio
 from utils import fileIO
 
-
+l = logger.logs("Messages")
 
 async def formatter(unformatMsg):
     formatting = "%authorName% %message%"
@@ -14,6 +16,7 @@ async def formatter(unformatMsg):
             formatting = formatting.replace(items,unformatMsg.Message.Contents)
         else:
             formatting = formatting.replace(items,unformatMsg.FormattingOptions[items])
+    l.logger.info("{0}".format(formatting))
     return formatting
 
 async def removeChar(char,string):

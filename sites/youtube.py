@@ -131,8 +131,8 @@ class Youtube:
                     if message != "" and username != "": #this makes sure that the message and username slot arent empty before putting this to the discord chat        
                         self.l.logger.debug(temp)
                         fileIO.fileSave("youtubeMsgJson.json", temp)
-                        self.l.logger.info(userID)
-                        self.l.logger.info(self.botUserID)
+                        self.l.logger.debug(userID)
+                        self.l.logger.debug(self.botUserID)
                         if userID != self.botUserID:
                             self.l.logger.info("{0} {1}".format(username,message))
                             await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
@@ -168,7 +168,7 @@ class Youtube:
         if authorDetails["isChatSponsor"] == True:
             roles.update({"Sponsor":1})
         roles.update({"Normal": 0})
-        self.l.logger.info("roles {0}".format(roles))
+        self.l.logger.debug("roles {0}".format(roles))
         return roles 
         
     async def listLiveStreams(self):       
