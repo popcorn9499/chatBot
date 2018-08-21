@@ -129,29 +129,23 @@ class Youtube:
                     username = temp["authorDetails"]["displayName"] #gets the users name
                     userID = temp["authorDetails"]["channelId"]
                     if message != "" and username != "": #this makes sure that the message and username slot arent empty before putting this to the discord chat        
-                        #self.l.logger.info(temp)
+                        self.l.logger.debug(temp)
                         fileIO.fileSave("youtubeMsgJson.json", temp)
                         self.l.logger.info(userID)
                         self.l.logger.info(self.botUserID)
                         if userID != self.botUserID:
                             self.l.logger.info("{0} {1}".format(username,message))
-                            #msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": variables.config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorsRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
                             await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
-                            #variables.mainMsg.append(msgStats)
                         elif userID == self.botUserID: #if the userId is the bots then check the message to see if the bot sent it.
                             try:
                                 msgCheckComplete = msgCheckRegex.search(message) #checks the message against the previously created regex for ":"
                                 if msgCheckComplete.group(1) != ":": #if its this then go and send the message as normal
                                     self.l.logger.info("{0} {1}".format(username,message))
-                                    #msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": variables.config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
                                     await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
- 
-                                    #variables.mainMsg.append(msgStats)
+
                             except AttributeError as error:
                                 self.l.logger.info("{0} {1}".format(username,message))
-                                #msgStats = {"sentFrom":"Youtube","msgData": None,"Bot":"Youtube","Server": "None","Channel": variables.config["Bot"]["Youtube"]["ChannelName"], "author": username,"authorData":None,"authorsRole": youtubeRoles(temp["authorDetails"]),"msg":message,"sent":False}
                                 await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
-                                #variables.mainMsg.append(msgStats)
         except ConnectionResetError:
             x = 1
             youtube = self.Login()
@@ -177,11 +171,7 @@ class Youtube:
         self.l.logger.info("roles {0}".format(roles))
         return roles 
         
-    async def listLiveStreams(self):
-        #global pageToken #pulls in the page token
-        #global liveChatId #pulls in the liveChatID
-        #global botUserID #pulls in the bots channel ID
-        #global youtube           
+    async def listLiveStreams(self):       
         x = list_streams_request = self.youtube.liveStreams().list(
             part="id,snippet",
             mine=True,
@@ -191,10 +181,7 @@ class Youtube:
         
         
     async def listLiveBroadcasts(self):
-        #global pageToken #pulls in the page token
-        #global liveChatId #pulls in the liveChatID
-        #global botUserID #pulls in the bots channel ID
-        #global youtube       
+
         x = self.youtube.liveBroadcasts().list(
         broadcastStatus="all",
         part="id,snippet",

@@ -15,8 +15,9 @@ class chatLog:
         self.l.logger.info("Started")
         
     async def logMessage(self,message):
-        print(message.DeliveryDetails.__dict__)
-        print(message.Message.__dict__)
+        self.l.logger.debug("Logging")
+        self.l.logger.debug(message.DeliveryDetails.__dict__)
+        self.l.logger.debug(message.Message.__dict__)
         if message.DeliveryDetails.Module == "Site":
             for key ,val in config.chatLogRules.items():
                 objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="ChatLog",ModuleTo="Site",Service=val["Service"], Server=val["Server"],Channel=val["Channel"]) #prepares the delivery location

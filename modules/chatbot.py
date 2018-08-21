@@ -15,14 +15,14 @@ class chatbot:
         self.l.logger.info("Started")
 
     async def sortMessage(self,message): #sorts messages sending themto the correct locations
-        self.l.logger.info(message.__dict__) #more or less debug code
+        self.l.logger.debug(message.__dict__) #more or less debug code
         formatOptions = message.FormattingOptions
         message = message.Message
         for key ,val in config.chatbot.items(): #cycles through the config of options
             if message.Service == val["From"]["Service"]: #decides weather this is the correct message matching it to the config
                 if message.Server == val["From"]["Server"]:
                     if message.Channel == val["From"]["Channel"]:
-                        self.l.logger.info('Sent Message')
+                        self.l.logger.debug('Sent Message')
                         objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Chatbot",ModuleTo=val["To"]["Module"],Service=val["To"]["Service"], Server=val["To"]["Server"],Channel=val["To"]["Channel"]) #prepares the delivery location
                         ServiceIcon = await self.serviceIdentifier(fromService=message.Service,fromServer=message.Server,fromChannel=message.Channel,toService=val["To"]["Service"],toServer=val["To"]["Server"],toChannel=val["To"]["Channel"],message=message.Contents) #sees if it needs to be identified
                         formatOptions.update({"%serviceIcon%": ServiceIcon}) #Adds more formatting options
