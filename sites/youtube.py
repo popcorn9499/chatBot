@@ -36,6 +36,8 @@ class Youtube:
         self.l = logger.logs("Youtube")
         self.l.logger.info("Starting")
         self.initAuth()
+        config.events.onMessageSend += self.sendLiveChat
+
         #config.events.onMessageSend += self.sendLiveChat #needs to be completed
 
     def initAuth(self):
@@ -192,21 +194,27 @@ class Youtube:
         
 
         
-    async def sendLiveChat(self,msg): #sends messages to youtube live chat
-        list_chatmessages_inset = self.youtube.liveChatMessages().insert(
-            part = "snippet",
-            body = dict (
-                snippet = dict(
-                    liveChatId = self.liveChatId,
-                    type = "textMessageEvent",
-                    textMessageDetails = dict(
-                        messageText = msg
+    async def sendLiveChat(self,sndMessage): #sends messages to youtube live chat
+        print("hi2")
+        while self.serviceStarted != True:
+            await asyncio.sleep(5)
+        print("HI1")
+        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Youtube": #determines if its the right service and supposed to be here
+            print("HI")
+            list_chatmessages_inset = self.youtube.liveChatMessages().insert(
+                part = "snippet",
+                body = dict (
+                    snippet = dict(
+                        liveChatId = self.liveChatId,
+                        type = "textMessageEvent",
+                        textMessageDetails = dict(
+                            messageText = await messageFormatter.formatter(sndMessage)
+                        )
                     )
                 )
-            )
-        )  
-        list_chatmessages_inset.execute()
-        #print(list_chatmessages_inset.execute()) #debug for sending live chat messages
+            )  
+            #list_chatmessages_inset.execute()
+            print(list_chatmessages_inset.execute()) #debug for sending live chat messages
       
     async def Login(self):
 
