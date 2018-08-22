@@ -18,7 +18,7 @@ class LogFile(logging.Handler):
     def emit(self, record):#creates the log file with whats required
         try:
             self.logFile("Log.log","{0} [Thread/{1}] - {2} - {3} - {4} ".format(record.asctime,record.threadName,record.name,record.levelname,record.message))
-        except AttributeError:
+        except (AttributeError, UnicodeEncodeError) as e: #The unicode Error I need to find a better way to fix... 
             pass
 
     def logFile(self,file,msg): #creates the file with what was specified to be put into it
