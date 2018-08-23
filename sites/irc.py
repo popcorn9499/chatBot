@@ -22,12 +22,17 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
     
     async def irc_bot(self, loop): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.        
         for sKey, sVal in config.irc["Servers"].items():
-            host = sKey
-            print(type(host))
-            self.l.logger.info("{0} - Connecting".format(host)) 
-            await self.ircConnect(loop,host)
-        asyncio.sleep(3)
-        self.l.logger.info("Connected: " + host)
+            if sVal["Enabled"] == True:
+                host = sKey
+                print(type(host))
+                self.l.logger.info("{0} - Connecting".format(host)) 
+                await self.ircConnect(loop,host)
+            else:
+                asyncio.sleep(3)
+        try:#stops the crash if no irc settings r set
+            self.l.logger.info("Connected: " + host)
+        except UnboundLocalError:
+            pass
             
     async def ircConnect(self,loop,host):#handles the irc connection
         self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config.irc["Servers"][host]["Port"], loop=loop)
