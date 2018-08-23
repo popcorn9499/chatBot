@@ -3,9 +3,10 @@ from utils.EventHook import EventHook
 from utils import config
 from sites import discord
 from sites import youtube
+from sites import irc
 from utils import logger
 from modules import chatbot
-from modules import chatLog
+#from modules import chatLog
 
 async def messageTest(Message):
     print(Message.Contents)
@@ -22,7 +23,7 @@ async def messageTest(Message):
 
 chatbot = chatbot.chatbot()
 
-chatLog = chatLog.chatLog()
+#chatLog = chatLog.chatLog()
 
 
 #this is the starting point for all the bot tasks
