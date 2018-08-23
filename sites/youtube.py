@@ -195,7 +195,7 @@ class Youtube:
 
         
     async def sendLiveChat(self,sndMessage): #sends messages to youtube live chat
-        print("hi2")
+
         while self.serviceStarted != True:
             await asyncio.sleep(5)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Youtube": #determines if its the right service and supposed to be here
