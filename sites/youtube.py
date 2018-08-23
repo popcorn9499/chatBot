@@ -10,8 +10,6 @@ from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
 import time
 
-# from modules import variables
-# from modules import mainBot
 from utils import fileIO
 import sys, os
 
@@ -22,8 +20,6 @@ from utils import logger
 from utils import messageFormatter
 import asyncio
 
-
-#youtube = ""
 
 
 
@@ -36,9 +32,8 @@ class Youtube:
         self.l = logger.logs("Youtube")
         self.l.logger.info("Starting")
         self.initAuth()
+        self.msgCheckRegex = re.compile(r'(:)') #setup for if we happen to need this it should never change either way
         config.events.onMessageSend += self.sendLiveChat
-
-        #config.events.onMessageSend += self.sendLiveChat #needs to be completed
 
     def initAuth(self):
         # The CLIENT_SECRETS_FILE variable specifies the name of a file that contains
@@ -95,7 +90,6 @@ class Youtube:
     # authenticated user's channel.
 
     async def getLiveId(self): #this gets the live chat id
-        #global liveChatId,botUserID #pulls in the bots livechatid and botuserid for further saving and modifying
       
         list_streams_request = self.youtube.liveBroadcasts().list( #checks for the live chat id through this
             part="snippet", #this is what we look through to get the live chat id
@@ -119,12 +113,11 @@ class Youtube:
                     maxResults=500,
                     pageToken=self.pageToken #gives the previous token so it loads a new section of the chat
                 ).execute() #executes it so its not just some object
-                #variables.config["Bot"]["Youtube"]["pageToken"] = list_chatmessages["nextPageToken"]
                 self.pageToken = list_chatmessages["nextPageToken"] #page token for next use
             except googleapiclient.errors.HttpError:
                 continuation = False 
                 
-            msgCheckRegex = re.compile(r'(:)') #setup for if we happen to need this it should never change either way
+            
             if continuation == True:
                 for temp in list_chatmessages["items"]: #goes through all the stuff in the list messages list
                     message = temp["snippet"]["displayMessage"] #gets the display message
@@ -140,7 +133,7 @@ class Youtube:
                             await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
                         elif userID == self.botUserID: #if the userId is the bots then check the message to see if the bot sent it.
                             try:
-                                msgCheckComplete = msgCheckRegex.search(message) #checks the message against the previously created regex for ":"
+                                msgCheckComplete = self.msgCheckRegex.search(message) #checks the message against the previously created regex for ":"
                                 if msgCheckComplete.group(1) != ":": #if its this then go and send the message as normal
                                     self.l.logger.info("{0} {1}".format(username,message))
                                     await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
@@ -224,7 +217,6 @@ class Youtube:
             await self.getLiveId() 
             self.l.logger.info("Logged in")
             self.serviceStarted = True
-            #return youtube
         
     async def youtubeChatControl(self):
         self.l.logger.info("Started")
@@ -233,27 +225,12 @@ class Youtube:
                 await self.listChat()
                 await self.listLiveStreams()
                 await self.listLiveBroadcasts()
-            #j = 0
-            #for msg in variables.processedMSG: #this cycles through the array for messages unsent to irc and sends them
-                #if msg["sent"] == False and msg["sendTo"]["Bot"] == "Youtube":
-                    #self.sendLiveChat(msg["msgFormated"])#sends the message to the irc from whatever
-                    #variables.processedMSG[j]["sent"] = True
-                #j = j + 1
             await asyncio.sleep(2)
 
 
-   #  # youtube = Login()
-   #  # print("logged in to youtube")
-
-   # #y = youtubeC()
-   #  #print(y.Login())
-
-
 y = Youtube()
-# y.Login()
 
 
 loop = asyncio.get_event_loop()
-#asyncio.set_event_loop(loop)
 loop.create_task(y.Login())
 loop.create_task(y.youtubeChatControl())
