@@ -87,3 +87,11 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+client_secrets\.json
+
+sites/\.discord\.py\.swp
+
+main2\.py-oauth2\.json
+
+config/auth/discord\.json
