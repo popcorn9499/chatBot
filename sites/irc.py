@@ -18,6 +18,8 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         #variables.config = __main__.variables.config
         self.l = logger.logs("IRC")
         self.l.logger.info("Starting")
+        self.serviceStarted = True
+        config.events.onMessageSend += self.sendMSG
         self.writer = {}
         self.reader = {}
     
@@ -109,7 +111,12 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
 
                 
     
-
+    async def processMsg(self,username,message,roleList,server,channel):
+        formatOptions = {"%authorName%": username, "%channelFrom%": channel, "%serverFrom%": server, "%serviceFrom%": "irc","%message%":"message"}
+        message = await Object.ObjectLayout.message(Author=username,Contents=message,Server=server,Channel=channel,Service="irc",Roles=roleList)
+        objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
+        objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions)
+        config.events.onMessage(message=objSendMsg)
         
     
     async def _decoded_send(self, data, loop,host):
@@ -122,6 +129,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 message = ' '.join(data[3:]).strip(':').split()
                 self.l.logger.info(data[2]+ ":" + user +': '+ ' '.join(message)+ host) #,"Info")
                 msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":' '.join(message),"sent":False}
+                role = {}
+                role.update({"Normal": 0})
+                await self.processMsg(username=user,message=' '.join(message),roleList=role,server=host,channel=data[2])
                 #variables.mainMsg.append(msgStats)
         elif data[1] == 'JOIN':
             user = data[0].split('!')[0].lstrip(":")
@@ -164,8 +174,11 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 loop.stop()
                 
                 
-    async def sendMSG(self,server,channel, msg):
-        self.writer[server].write("PRIVMSG {0} :{1}".format(channel,msg).encode("utf-8") + b'\r\n')
+    async def sendMSG(self,sndMessage): #sends messages to youtube live chat
+        while self.serviceStarted != True:
+            await asyncio.sleep(5)
+        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "irc": #determines if its the right service and supposed to be here
+            self.writer[sndMessage.DeliveryDetails.Server].write("PRIVMSG {0} :{1}".format(sndMessage.DeliveryDetails.Channel,await messageFormatter.formatter(sndMessage)).encode("utf-8") + b'\r\n')
 
         
 #this starts everything for the irc client 
