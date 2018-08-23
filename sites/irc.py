@@ -28,43 +28,43 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         
         for sKey, sVal in config.irc["Servers"].items():
             host = sKey
-            print("Connecting: " + host)
+            #print("Connecting: " + host)
             print(type(host))
-            self.l.logger.info("Connecting: " + host)
+            self.l.logger.info("{0} - Connecting".format(host)) 
             await self.ircConnect(loop,host)
         asyncio.sleep(3)
-        loop.create_task(self.handleSendMsg(loop))
+        #loop.create_task(self.handleSendMsg(loop))
         self.l.logger.info("Connected: " + host)
-        print(self.reader)
-        print(self.writer)
+        #print(self.reader)
+        #print(self.writer)
             
     async def ircConnect(self,loop,host):#handles the irc connection
         self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config.irc["Servers"][host]["Port"], loop=loop)
         self.reader.update({host: self.readerBasic})
         self.writer.update({host: self.writerBasic})
-        print(self.reader)
-        print(self.writer)
-        self.l.logger.info("Reader {0} ".format(self.reader) + host) # ,"Extra Debug")
-        self.l.logger.info("Writer {0} ".format(self.writer) + host) #"Extra Debug")
+        #print(self.reader)
+        #print(self.writer)
+        self.l.logger.debug("{0} - Reader {1} ".format(host,self.reader))
+        self.l.logger.debug("{0} - Writer {1} ".format(host, self.writer))
         await asyncio.sleep(3)
         if config.irc["Servers"][host]["Password"] != "":
             self.writer[host].write(b'PASS ' + config.irc["Servers"][host]["Password"].encode('utf-8') + b'\r\n')
-            self.l.logger.info("Inputing password " + host) #,"Info")
+            self.l.logger.info("{0} - Inputing password ".format(host)) #,"Info")
 
-        self.l.logger.info("Setting user {0}+ ".format(config.irc["Servers"][host]["Nickname"]) + host) #,"Debug")
+        self.l.logger.info("{0} - Setting user {1}+ ".format(host,config.irc["Servers"][host]["Nickname"]))
 
         
         self.writer[host].write(b'NICK ' + config.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
-        self.l.logger.info("Setting user {0}".format(config.irc["Servers"][host]["Nickname"]) + host) #,"Extra Info")
+        self.l.logger.info("{0} - Setting user {1}".format(host,config.irc["Servers"][host]["Nickname"]))
         self.writer[host].write(b'USER ' + config.irc["Servers"][host]["Nickname"].encode('utf-8') + b' B hi :' + config.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
         await asyncio.sleep(3)
-        self.l.logger.info("Joining channels"+ host) # ,"Info")
+        self.l.logger.info("{0} - Joining channels".format(host))
         for key, val in config.irc["Servers"][host]["Channel"].items():
             print(key)
             self.writer[host].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
-            self.l.logger.info("Joining channel {0}".format(key) + host) #,"Info")
+            self.l.logger.info("{0} - Joining channel {1}".format(host,key))
         await asyncio.sleep(3)
-        self.l.logger.info("Initiating IRC Reader" + host)# "Debug")
+        self.l.logger.info("{0} - Initiating IRC Reader".format(host))
         loop.create_task(self.handleMsg(loop,host)) 
         
     async def handleSendMsg(self,loop):
@@ -127,7 +127,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             m = re.search(self.messagepattern, data[0])
             if m:
                 message = ' '.join(data[3:]).strip(':').split()
-                self.l.logger.info(data[2]+ ":" + user +': '+ ' '.join(message)+ host) #,"Info")
+                self.l.logger.info("{0} - ".format(host) + data[2]+ ":" + user +': '+ ' '.join(message))
                 msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":' '.join(message),"sent":False}
                 role = {}
                 role.update({"Normal": 0})
@@ -136,13 +136,13 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         elif data[1] == 'JOIN':
             user = data[0].split('!')[0].lstrip(":")
             #temp
-            self.l.logger.info(user+" joined" + host) #,"Info")
+            self.l.logger.info("{0} - ".format(host)  + user+" joined")
             msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":"{0} joined the channel".format(user),"sent":False}
             #variables.mainMsg.append(msgStats)
             x = 1
         elif data[1] == 'PART' or data[1] == 'QUIT':
             user = data[0].split('!')[0].lstrip(":")
-            self.l.logger.info(user+" left" + host) #"Info")
+            self.l.logger.info("{0} - ".format(host) + user+" left")
             msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":"{0} left the channel ({1})".format(user,data[3]),"sent":False}
             #variables.mainMsg.append(msgStats)
             #temp
@@ -151,14 +151,14 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             #temp
             x = 1
         elif data[1] == 'KICK':
-            print('[Twitch] ', 'Twitch has requested that I reconnect, This is currently unsupported.')
-            self.l.logger.info("I was kicked" + host) #,"Info")
+            #print('[Twitch] ', 'Twitch has requested that I reconnect, This is currently unsupported.')
+            self.l.logger.info("{0} - ".format(host) + "I was kicked")
             self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
             asyncio.sleep(10)
             await self.ircConnect(loop,host)
             loop.stop()
         elif data[1] == 'RECONNECT':
-            self.l.logger.info("Reconnecting" + host) #,"Info")
+            self.l.logger.info("{0} - ".format(host) + "Reconnecting")
             self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
             asyncio.sleep(10)
             await self.ircConnect(loop,host)
@@ -167,8 +167,8 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         elif data[0] == "ERROR":
             if ' '.join([data[1],data[2]]) == ":Closing link:":
                 self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
-                print("[Twitch] Lost Connection or disconnected: %s" % ' '.join(data[4:]))
-                self.l.logger.info("Lost connection" + host) #,"Info")
+                #print("[Twitch] Lost Connection or disconnected: %s" % ' '.join(data[4:]))
+                self.l.logger.info("{0} - ".format(host) + "Lost connection")
                 asyncio.sleep(10)
                 await self.ircConnect(loop,host)
                 loop.stop()
