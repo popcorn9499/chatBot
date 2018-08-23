@@ -198,9 +198,7 @@ class Youtube:
         print("hi2")
         while self.serviceStarted != True:
             await asyncio.sleep(5)
-        print("HI1")
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Youtube": #determines if its the right service and supposed to be here
-            print("HI")
             list_chatmessages_inset = self.youtube.liveChatMessages().insert(
                 part = "snippet",
                 body = dict (
