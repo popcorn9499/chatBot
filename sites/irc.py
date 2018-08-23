@@ -53,9 +53,10 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         await asyncio.sleep(3)
         self.l.logger.info("{0} - Joining channels".format(host))
         for key, val in config.irc["Servers"][host]["Channel"].items():
-            print(key)
-            self.writer[host].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
-            self.l.logger.info("{0} - Joining channel {1}".format(host,key))
+            if val["Enabled"] == True:
+                print(key)
+                self.writer[host].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
+                self.l.logger.info("{0} - Joining channel {1}".format(host,key))
         await asyncio.sleep(3)
         self.l.logger.info("{0} - Initiating IRC Reader".format(host))
         loop.create_task(self.handleMsg(loop,host)) 
@@ -155,8 +156,10 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
 #this starts everything for the irc client 
 ##possibly could of put all this in a class and been done with it?
 def ircStart():
-    loop = asyncio.get_event_loop()
-    loop.create_task(irc().irc_bot(loop))
+    if config.irc["Enabled"] == True:
+        loop = asyncio.get_event_loop()
+        loop.create_task(irc().irc_bot(loop))
+
 
 
 # def ircCheck():
