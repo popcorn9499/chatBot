@@ -59,28 +59,29 @@ class Discord:
 
     @client.event
     async def on_message(message): #waits for the discord message event and pulls it somewhere
-        if discordStarted == True:
-            l.logger.debug(message.author.name + message.content)
-            if str(message.author.id) != clientID:
-                l.logger.debug(message.author.name)
-                attachments = "" #gets the attachments so we dont loose that
-                for i in message.attachments:
-                    attachments += i["url"]
-                roleList={}
-                for roles in message.author.roles: #gets the authors roles and saves that to a list
-                    roleList.update({str(roles.name):int(roles.position)})
-                l.logger.info(roleList)
-                formatOptions = {"%authorName%": message.author.name, "%channelFrom%": message.channel.name, "%serverFrom%": message.server.name, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
-                messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
-                message = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
-                objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
-                objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions)
-                config.events.onMessage(message=objSendMsg)
+        while discordStarted != True:
+            await asyncio.sleep(0.2)
+        l.logger.debug(message.author.name + message.content)
+        if str(message.author.id) != clientID:
+            l.logger.debug(message.author.name)
+            attachments = "" #gets the attachments so we dont loose that
+            for i in message.attachments:
+                attachments += i["url"]
+            roleList={}
+            for roles in message.author.roles: #gets the authors roles and saves that to a list
+                roleList.update({str(roles.name):int(roles.position)})
+            l.logger.info(roleList)
+            formatOptions = {"%authorName%": message.author.name, "%channelFrom%": message.channel.name, "%serverFrom%": message.server.name, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
+            messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
+            message = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
+            objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
+            objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions)
+            config.events.onMessage(message=objSendMsg)
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
         global config, discordInfo
         while discordStarted != True:
-            await asyncio.sleep(5)
+            await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             await client.send_message(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel], await messageFormatter.formatter(sndMessage)) #sends the message to the channel specified in the beginning
 
