@@ -28,7 +28,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 self.l.logger.info("{0} - Connecting".format(host)) 
                 await self.ircConnect(loop,host)
             else:
-                asyncio.sleep(3)
+                await asyncio.sleep(3)
         try:#stops the crash if no irc settings r set
             self.l.logger.info("Connected: " + host)
         except UnboundLocalError:
@@ -126,13 +126,13 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         elif data[1] == 'KICK':
             self.l.logger.info("{0} - ".format(host) + "I was kicked")
             self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
-            asyncio.sleep(10)
+            await asyncio.sleep(10)
             await self.ircConnect(loop,host)
             loop.stop()
         elif data[1] == 'RECONNECT':
             self.l.logger.info("{0} - ".format(host) + "Reconnecting")
             self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
-            asyncio.sleep(10)
+            await asyncio.sleep(10)
             await self.ircConnect(loop,host)
             loop.stop()
 
@@ -141,14 +141,14 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
                 #print("[Twitch] Lost Connection or disconnected: %s" % ' '.join(data[4:]))
                 self.l.logger.info("{0} - ".format(host) + "Lost connection")
-                asyncio.sleep(10)
+                await asyncio.sleep(10)
                 await self.ircConnect(loop,host)
                 loop.stop()
                 
                 
     async def sendMSG(self,sndMessage): #sends messages to youtube live chat
         while self.serviceStarted != True:
-            await asyncio.sleep(5)
+            await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "irc": #determines if its the right service and supposed to be here
             self.writer[sndMessage.DeliveryDetails.Server].write("PRIVMSG {0} :{1}".format(sndMessage.DeliveryDetails.Channel,await messageFormatter.formatter(sndMessage)).encode("utf-8") + b'\r\n')
 
