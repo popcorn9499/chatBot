@@ -1,3 +1,3 @@
 {
-    "Format": "[%authorName%]: %message%"
+    "Format": "%serviceFrom% %roles% [%authorName%]: %message%"
 }

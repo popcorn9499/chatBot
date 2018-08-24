@@ -69,8 +69,8 @@ class Discord:
                 roleList={}
                 for roles in message.author.roles: #gets the authors roles and saves that to a list
                     roleList.update({str(roles.name):int(roles.position)})
-                l.logger.debug(roleList)
-                formatOptions = {"%authorName%": message.author.name, "%channelFrom%": message.channel.name, "%serverFrom%": message.server.name, "%serviceFrom%": "Discord","%message%":"message"}
+                l.logger.info(roleList)
+                formatOptions = {"%authorName%": message.author.name, "%channelFrom%": message.channel.name, "%serverFrom%": message.server.name, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
                 messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
                 message = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
                 objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")

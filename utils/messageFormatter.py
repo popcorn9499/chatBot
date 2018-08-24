@@ -14,10 +14,24 @@ async def formatter(unformatMsg):
         items = await removeChar(":",items)
         if items == "%message%":
             formatting = formatting.replace(items,unformatMsg.Message.Contents)
+        elif items == "%roles%":
+            role = await findRole(unformatMsg.FormattingOptions[items])
+            formatting = formatting.replace(items,role[0])
         else:
             formatting = formatting.replace(items,unformatMsg.FormattingOptions[items])
     l.logger.info("{0}".format(formatting))
     return formatting
+
+async def findRole(roles):
+    roleName = "ehhh"
+    roleNum = -666
+    for roleNa,roleNu in roles.items():
+        if roleNu >= roleNum:
+            roleName=roleNa
+            roleNum=roleNu
+
+    return [roleName,roleNum]
+
 
 async def removeChar(char,string):
     return string.replace(char,"")
