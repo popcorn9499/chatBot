@@ -222,9 +222,13 @@ class Youtube:
         self.l.logger.info("Started")
         while True:  
             if self.serviceStarted == True:  
-                await self.listChat()
-                await self.listLiveStreams()
-                await self.listLiveBroadcasts()
+                try:
+                    await self.listChat()
+                    await self.listLiveStreams()
+                    await self.listLiveBroadcasts()
+                except googleapiclient.errors.HttpError:
+                    youtube = self.Login()
+                    self.l.logger.info('Connection Error reconnecting')
             await asyncio.sleep(2)
 
 
