@@ -167,22 +167,29 @@ class Youtube:
         return roles 
         
     async def listLiveStreams(self):       
-        x = list_streams_request = self.youtube.liveStreams().list(
-            part="id,snippet",
-            mine=True,
-            maxResults=50
-        ).execute()
-        fileIO.fileSave("youtubeliveStreamsJson.json", x)
+        try:
+            x = list_streams_request = self.youtube.liveStreams().list(
+                part="id,snippet",
+                mine=True,
+                maxResults=50
+            ).execute()
+            fileIO.fileSave("youtubeliveStreamsJson.json", x)
+        except googleapiclient.errors.HttpError:
+            youtube = self.Login()
+            self.l.logger.info('Connection Error reconnecting')
         
         
     async def listLiveBroadcasts(self):
-
-        x = self.youtube.liveBroadcasts().list(
-        broadcastStatus="all",
-        part="id,snippet",
-        maxResults=50
-      ).execute()
-        fileIO.fileSave("youtubeliveBroadcastsJson.json", x)    
+        try:
+            x = self.youtube.liveBroadcasts().list(
+            broadcastStatus="all",
+            part="id,snippet",
+            maxResults=50
+          ).execute()
+            fileIO.fileSave("youtubeliveBroadcastsJson.json", x)
+        except googleapiclient.errors.HttpError:
+            youtube = self.Login()
+            self.l.logger.info('Connection Error reconnecting')
 
         
 
@@ -222,13 +229,13 @@ class Youtube:
         self.l.logger.info("Started")
         while True:  
             if self.serviceStarted == True:  
-                try:
-                    await self.listChat()
-                    await self.listLiveStreams()
-                    await self.listLiveBroadcasts()
-                except googleapiclient.errors.HttpError:
-                    youtube = self.Login()
-                    self.l.logger.info('Connection Error reconnecting')
+                #try:
+                await self.listChat()
+                await self.listLiveStreams()
+                await self.listLiveBroadcasts()
+                #except googleapiclient.errors.HttpError:
+                    #youtube = self.Login()
+                    #self.l.logger.info('Connection Error reconnecting')
             await asyncio.sleep(2)
 
 
