@@ -95,3 +95,15 @@ sites/\.discord\.py\.swp
 main2\.py-oauth2\.json
 
 config/auth/discord\.json
+
+youtubeliveBroadcastsJson\.json
+
+youtubeliveStreamsJson\.json
+
+youtubeMsgJson\.json
+
+config/auth/irc\.json
+
+config-test\.json
+
+testL\.py
