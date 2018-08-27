@@ -11,10 +11,10 @@ class chatbot:
     def __init__(self):
         self.l = logger.logs("Commands")
         self.l.logger.info("Starting")
-        config.events.onMessage += self.command1
+        config.events.onMessage += self.commandCheckExist
         self.l.logger.info("Started")
 
-    async def command1(self,message):
+    async def commandCheckExist(self,message):
         rolesAllowed = ["Owner","Mod","Normal"]
         commandInfo1 = {"CommandType":"Message","Command":"!hi","CommandDetails":"Yes this should work!!","rolesAllowed":rolesAllowed}
         commands = [commandInfo1]
@@ -22,14 +22,27 @@ class chatbot:
             self.l.logger.info("Recieved")
             for command in commands:
                 if message.Message.Contents.startswith(command["Command"]) == True:
-                    if command["CommandType"] == "Message": 
-                        for key, val in message.Message.Roles.items():
-                            for keyAllowed in rolesAllowed:
-                                if key == keyAllowed:
-                                    self.l.logger.info(command["CommandDetails"])
-                                    botRoles= {"":0}
-                                    await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
-                            print("{0}: {1}".format(key,val))
+                    await self.commandTypeCheck(message=message,command=command)
+                    
+    
+    async def commandTypeCheck(self,message,command):
+        if command["CommandType"] == "Message": 
+            for key, val in message.Message.Roles.items():
+                for keyAllowed in command["rolesAllowed"]:
+                    if key == keyAllowed:
+                        await self.commandMessage(message=message,command=command)
+
+                print("{0}: {1}".format(key,val))
+                
+
+
+
+    async def commandMessage(self,message,command):
+        self.l.logger.info(command["CommandDetails"])
+        botRoles= {"":0}
+        await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
+
+
     
 
     async def processMsg(self,username,message,roleList,server,channel,service):
