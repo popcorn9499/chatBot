@@ -174,7 +174,7 @@ class Youtube:
                 maxResults=50
             ).execute()
             fileIO.fileSave("youtubeliveStreamsJson.json", x)
-        except googleapiclient.errors.HttpError:
+        except:
             youtube = self.Login()
             self.l.logger.info('Connection Error reconnecting')
         
@@ -187,7 +187,7 @@ class Youtube:
             maxResults=50
           ).execute()
             fileIO.fileSave("youtubeliveBroadcastsJson.json", x)
-        except googleapiclient.errors.HttpError:
+        except:
             youtube = self.Login()
             self.l.logger.info('Connection Error reconnecting')
 
