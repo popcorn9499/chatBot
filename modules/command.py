@@ -28,6 +28,12 @@ class chatbot:
     async def commandTypeCheck(self,message,command):
         if command["CommandType"] == "Message" and await self.commandRoleChecker(message=message,command=command) == True: 
             await self.commandMessage(message=message,command=command)
+        elif command["CommandType"] == "FileRead" and await self.commandRoleChecker(message=message,command=command) == True: 
+            await self.commandFileRead(message=message,command=command)
+        elif command["CommandType"] == "CloseBot" and await self.commandRoleChecker(message=message,command=command) == True: 
+            await self.commandClose(message=message,command=command)
+        elif command["CommandType"] == "ReloadModules" and await self.commandRoleChecker(message=message,command=command) == True: 
+            await self.commandReloadModules(message=message,command=command)
                 
 
     async def commandRoleChecker(self,message,command):
@@ -43,6 +49,26 @@ class chatbot:
         self.l.logger.info(command["CommandDetails"])
         botRoles= {"":0}
         await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
+
+
+
+    async def commandFileRead(self,message,command):
+        self.l.logger.info(command["CommandDetails"])
+        botRoles= {"":0}
+        await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
+
+
+    async def commandClose(self,message,command):
+        self.l.logger.info(command["CommandDetails"])
+        botRoles= {"":0}
+        await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
+
+    async def commandReloadModules(self,message,command):
+        self.l.logger.info(command["CommandDetails"])
+        botRoles= {"":0}
+        await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
+
+
 
 
     
