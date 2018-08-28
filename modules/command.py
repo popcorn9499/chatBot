@@ -16,7 +16,7 @@ class chatbot:
 
     async def commandCheckExist(self,message):
         rolesAllowed = ["Owner","Mod","Normal"]
-        commandInfo1 = {"CommandType":"Message","Command":"!hi","CommandDetails":"Yes this should work!!","rolesAllowed":rolesAllowed}
+        commandInfo1 = {"CommandType":"Message","Command":"!hi","CommandDetails":"You Thought Wrong!!","rolesAllowed":rolesAllowed}
         commands = [commandInfo1]
         if message.Message.Contents.startswith("!") == True:
             self.l.logger.info("Recieved")
@@ -26,15 +26,17 @@ class chatbot:
                     
     
     async def commandTypeCheck(self,message,command):
-        if command["CommandType"] == "Message": 
-            for key, val in message.Message.Roles.items():
-                for keyAllowed in command["rolesAllowed"]:
-                    if key == keyAllowed:
-                        await self.commandMessage(message=message,command=command)
-
-                print("{0}: {1}".format(key,val))
+        if command["CommandType"] == "Message" and await self.commandRoleChecker(message=message,command=command) == True: 
+            await self.commandMessage(message=message,command=command)
                 
 
+    async def commandRoleChecker(self,message,command):
+        for key, val in message.Message.Roles.items():
+            for keyAllowed in command["rolesAllowed"]:
+                if key == keyAllowed:
+                    return True
+        return False
+                        
 
 
     async def commandMessage(self,message,command):
