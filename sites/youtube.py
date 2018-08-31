@@ -143,7 +143,7 @@ class Youtube:
                                 await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
         except ConnectionResetError:
             x = 1
-            youtube = self.Login()
+            youtube = await self.Login()
             self.l.logger.info('Connection Error reconnecting')
             
     async def processMsg(self,username,message,roleList):
@@ -175,7 +175,7 @@ class Youtube:
             ).execute()
             fileIO.fileSave("youtubeliveStreamsJson.json", x)
         except:
-            youtube = self.Login()
+            youtube = await self.Login()
             self.l.logger.info('Connection Error reconnecting')
         
         
@@ -188,7 +188,7 @@ class Youtube:
           ).execute()
             fileIO.fileSave("youtubeliveBroadcastsJson.json", x)
         except:
-            youtube = self.Login()
+            youtube = await self.Login()
             self.l.logger.info('Connection Error reconnecting')
 
         
