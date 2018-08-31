@@ -7,6 +7,7 @@ from sites import irc
 from utils import logger
 from modules import chatbot
 from modules import chatLog
+from modules import command
 
 async def messageTest(Message):
     print(Message.Contents)

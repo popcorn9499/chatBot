@@ -3,7 +3,10 @@ from utils import Object
 import asyncio
 import time
 import datetime
+import os
 from utils import logger
+from utils import fileIO
+
 
 
 
@@ -13,16 +16,29 @@ class chatbot:
         self.l.logger.info("Starting")
         config.events.onMessage += self.commandCheckExist
         self.l.logger.info("Started")
+        self.commands = []
+        self.loadCommands()
+
+    def loadCommands(self):
+        for dirname, dirnames,filenames in os.walk('.{0}config{0}command'.format(os.sep)):
+            for filename in filenames:
+                print("{1}{0}{2}".format(os.sep,dirname,filename))
+                self.commands.append(fileIO.fileLoad("{1}{0}{2}".format(os.sep,dirname,filename)))
+
+
+
 
     async def commandCheckExist(self,message):
         rolesAllowed = ["Owner","Mod","Normal"]
-        commandInfo1 = {"CommandType":"Message","Command":"!hi","CommandDetails":"You Thought Wrong!!","rolesAllowed":rolesAllowed}
+        commandInfo1 = {"CommandType":"Message","Command":"!hi","CommandDetails":"You Thought Wrong!!","RolesAllowed":rolesAllowed}
         commands = [commandInfo1]
         if message.Message.Contents.startswith("!") == True:
             self.l.logger.info("Recieved")
-            for command in commands:
+            for command in self.commands:
                 if message.Message.Contents.startswith(command["Command"]) == True:
                     await self.commandTypeCheck(message=message,command=command)
+                    
+
                     
     
     async def commandTypeCheck(self,message,command):
@@ -38,7 +54,7 @@ class chatbot:
 
     async def commandRoleChecker(self,message,command):
         for key, val in message.Message.Roles.items():
-            for keyAllowed in command["rolesAllowed"]:
+            for keyAllowed in command["RolesAllowed"]:
                 if key == keyAllowed:
                     return True
         return False
@@ -49,6 +65,7 @@ class chatbot:
         self.l.logger.info(command["CommandDetails"])
         botRoles= {"":0}
         await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
+
 
 
 
