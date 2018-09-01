@@ -15,12 +15,20 @@ class chatbot:
         self.l = logger.logs("Commands")
         self.l.logger.info("Starting")
         config.events.onMessage += self.commandCheckExist
-        self.l.logger.info("Started")
         self.commands = []
+        self.commandsDir = '.{0}config{0}command'.format(os.sep)
+        self.checkCommandFolder()
         self.loadCommands()
+        self.l.logger.info("Started")
+
+    def checkCommandFolder(self):
+        if os.path.isdir(self.commandsDir) == False:
+            self.l.logger.info("Commands Folder Does Not Exist")
+            self.l.logger.info("Creating...")
+            os.makedirs(self.commandsDir)
 
     def loadCommands(self):
-        for dirname, dirnames,filenames in os.walk('.{0}config{0}command'.format(os.sep)):
+        for dirname, dirnames,filenames in os.walk(self.commandsDir):
             for filename in filenames:
                 print("{1}{0}{2}".format(os.sep,dirname,filename))
                 self.commands.append(fileIO.fileLoad("{1}{0}{2}".format(os.sep,dirname,filename)))
