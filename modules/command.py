@@ -29,9 +29,6 @@ class chatbot:
 
 
     async def commandCheckExist(self,message):
-        rolesAllowed = ["Owner","Mod","Normal"]
-        commandInfo1 = {"CommandType":"Message","Command":"!hi","CommandDetails":"You Thought Wrong!!","RolesAllowed":rolesAllowed}
-        commands = [commandInfo1]
         if message.Message.Contents.startswith("!") == True:
             self.l.logger.info("Recieved")
             for command in self.commands:
@@ -72,17 +69,20 @@ class chatbot:
     async def commandFileRead(self,message,command):
         self.l.logger.info(command["CommandDetails"])
         botRoles= {"":0}
-        await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
+        f = open(command["CommandDetails"], 'r')#opens file
+        await self.processMsg(message=f.read(),username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
 
 
     async def commandClose(self,message,command):
         self.l.logger.info(command["CommandDetails"])
         botRoles= {"":0}
+        self.l.logger.info("Not Implemented")
         await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
 
     async def commandReloadModules(self,message,command):
         self.l.logger.info(command["CommandDetails"])
         botRoles= {"":0}
+        self.l.logger.info("Not Implemented")
         await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
 
 
