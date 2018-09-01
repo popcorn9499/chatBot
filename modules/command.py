@@ -71,7 +71,7 @@ class chatbot:
         botRoles= {"":0}
         f = open(command["CommandDetails"], 'r')#opens file
         await self.processMsg(message=f.read(),username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
-
+        f.close()
 
     async def commandClose(self,message,command):
         self.l.logger.info(command["CommandDetails"])
