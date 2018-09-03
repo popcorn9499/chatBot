@@ -8,9 +8,21 @@ from utils import logger
 from utils import fileIO
 
 
+#Commands to add
+#-Get Viewer Count?
+#-Set Stream Title (Twitch Youtube)
+#-Set Stream Game (Twitch Youtube?)
+#-mute user (irc wouldnt work sadly. Twitch should..)
+#-Unmute user (IRC /|\)
+#-Increment File
+#-Time Live
+#-Ban User
+#-Kick User
+#-Help
 
 
-class chatbot:
+
+class Commands:
     def __init__(self):
         self.l = logger.logs("Commands")
         self.l.logger.info("Starting")
@@ -65,14 +77,13 @@ class chatbot:
         return False
                         
 
-
     async def commandMessage(self,message,command):
         self.l.logger.info(command["CommandDetails"])
         botRoles= {"":0}
         await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
 
 
-
+    
 
     async def commandFileRead(self,message,command):
         self.l.logger.info(command["CommandDetails"])
@@ -109,4 +120,4 @@ class chatbot:
 
 
 
-chat = chatbot()
+chat = Commands()
