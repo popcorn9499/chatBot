@@ -67,6 +67,8 @@ class Commands:
             await self.commandClose(message=message,command=command)
         elif command["CommandType"] == "ReloadModules" and await self.commandRoleChecker(message=message,command=command) == True: 
             await self.commandReloadModules(message=message,command=command)
+        elif command["CommandType"] == "Help" and await self.commandRoleChecker(message=message,command=command) == True: 
+            await self.commandHelp(message=message,command=command)
                 
 
     async def commandRoleChecker(self,message,command):
@@ -77,13 +79,23 @@ class Commands:
         return False
                         
 
+    async def commandHelp(self,message,command):
+        commandOutput = "``` \r\n"
+        commandOutput = "{0}READDDD \r\n".format(command)
+        for com in self.commands:
+            commandOutput = "{0} \r\n {1}: {2}".format(commandOutput,com["Command"], com["HelpDetails"])
+        commandOutput = "{0} \r\n ```".format(commandOutput)
+        botRoles= {"":0}
+        await self.processMsg(message=commandOutput,username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
+
+
     async def commandMessage(self,message,command):
         self.l.logger.info(command["CommandDetails"])
         botRoles= {"":0}
         await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
 
 
-    
+
 
     async def commandFileRead(self,message,command):
         self.l.logger.info(command["CommandDetails"])
