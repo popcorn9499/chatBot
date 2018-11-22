@@ -5,6 +5,7 @@ from sites import discord
 from sites import youtube
 from sites import irc
 from utils import logger
+from utils import deleteMsg
 from modules import chatbot
 from modules import chatLog
 from modules import command

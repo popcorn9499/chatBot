@@ -5,17 +5,17 @@ class Object():
 
 class ObjectLayout:
 
-    async def message(Contents,Author,Server,Channel,Service,Roles):
+    def message(Contents,Author,Server,Channel,Service,Roles):
         messageObj = Object({"Contents":Contents,"Author":Author,"Server":Server,"Channel":Channel,"Service":Service,"Roles":Roles})
         #print(messageObj.__dict__)
         return messageObj
     
-    async def DeliveryDetails(Module,ModuleTo,Service,Server,Channel):
+    def DeliveryDetails(Module,ModuleTo,Service,Server,Channel):
         DeliveryDetailsObj = Object({"Module":Module,"ModuleTo":ModuleTo,"Service": Service,"Server": Server, "Channel": Channel})
         return DeliveryDetailsObj
 
-    async def sendMsgDeliveryDetails(Message,DeliveryDetails,FormattingOptions):
-        sendMsgDeliveryDetails = Object({"Message": Message, "DeliveryDetails":DeliveryDetails,"FormattingOptions":FormattingOptions})
+    def sendMsgDeliveryDetails(Message,DeliveryDetails,FormattingOptions,messageUnchanged):
+        sendMsgDeliveryDetails = Object({"Message": Message, "DeliveryDetails":DeliveryDetails,"FormattingOptions":FormattingOptions,"messageUnchanged":messageUnchanged})
         return sendMsgDeliveryDetails
         
 

@@ -69,6 +69,8 @@ class Commands:
             await self.commandReloadModules(message=message,command=command)
         elif command["CommandType"] == "Help" and await self.commandRoleChecker(message=message,command=command) == True: 
             await self.commandHelp(message=message,command=command)
+        elif command["CommandType"] == "DeleteByMsgDetails" and await self.commandRoleChecker(message=message,command=command) == True: 
+            await self.commandHelp(message=message,command=command)
                 
 
     async def commandRoleChecker(self,message,command):
@@ -81,7 +83,7 @@ class Commands:
 
     async def commandHelp(self,message,command):
         commandOutput = "``` \r\n"
-        commandOutput = "{0}READDDD \r\n".format(command)
+        #commandOutput = "{0}READDDD \r\n".format(command)
         for com in self.commands:
             commandOutput = "{0} \r\n {1}: {2}".format(commandOutput,com["Command"], com["HelpDetails"])
         commandOutput = "{0} \r\n ```".format(commandOutput)
@@ -93,8 +95,6 @@ class Commands:
         self.l.logger.info(command["CommandDetails"])
         botRoles= {"":0}
         await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
-
-
 
 
     async def commandFileRead(self,message,command):
@@ -116,6 +116,9 @@ class Commands:
         self.l.logger.info("Not Implemented")
         await self.processMsg(message=command["CommandDetails"],username="Bot",channel=message.Message.Channel,server=message.Message.Server,service=message.Message.Service,roleList=botRoles)
 
+    async def commandDeleteMsgByDetails(self,message,command):
+        msgSplit = message.Message.Contents.split(" ")
+        
 
 
 
@@ -125,7 +128,7 @@ class Commands:
         formatOptions = {"%authorName%": username, "%channelFrom%": channel, "%serverFrom%": server, "%serviceFrom%": service,"%message%":"message","%roles%":roleList}
         message = await Object.ObjectLayout.message(Author=username,Contents=message,Server=server,Channel=channel,Service=service,Roles=roleList)
         objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Command",ModuleTo="Site",Service=service,Server=server,Channel=channel)
-        objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions)
+        objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged="None")
         config.events.onMessageSend(sndMessage=objSendMsg)     
 
 
