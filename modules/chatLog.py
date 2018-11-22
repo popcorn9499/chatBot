@@ -20,14 +20,14 @@ class chatLog:
         self.l.logger.debug(message.Message.__dict__)
         if message.DeliveryDetails.Module == "Site":
             for key ,val in config.chatLogRules.items():
-                objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="ChatLog",ModuleTo="Site",Service=val["Service"], Server=val["Server"],Channel=val["Channel"]) #prepares the delivery location
-                await self.sendMessage(message=message.Message,objDeliveryDetails=objDeliveryDetails, FormattingOptions=message.FormattingOptions)
+                objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="ChatLog",ModuleTo="Site",Service=val["Service"], Server=val["Server"],Channel=val["Channel"]) #prepares the delivery location
+                await self.sendMessage(message=message.Message,objDeliveryDetails=objDeliveryDetails, FormattingOptions=message.FormattingOptions,messageUnchanged=message.messageUnchanged)
             pass
 
 
-    async def sendMessage(self,message,objDeliveryDetails,FormattingOptions): #sends the message
+    async def sendMessage(self,message,objDeliveryDetails,FormattingOptions,messageUnchanged): #sends the message
         formatterOptions = {""}
-        objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails,FormattingOptions=FormattingOptions) #prepares the delivery object and sends the message send event
+        objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails,FormattingOptions=FormattingOptions,messageUnchanged=messageUnchanged) #prepares the delivery object and sends the message send event
         config.events.onMessageSend(sndMessage=objSendMsg)
 
 

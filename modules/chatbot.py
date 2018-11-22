@@ -17,16 +17,16 @@ class chatbot:
     async def sortMessage(self,message): #sorts messages sending themto the correct locations
         self.l.logger.debug(message.__dict__) #more or less debug code
         formatOptions = message.FormattingOptions
-        message = message.Message
+        msg = message.Message
         for key ,val in config.chatbot.items(): #cycles through the config of options
-            if message.Service == val["From"]["Service"]: #decides weather this is the correct message matching it to the config
-                if message.Server == val["From"]["Server"]:
-                    if message.Channel == val["From"]["Channel"]:
+            if msg.Service == val["From"]["Service"]: #decides weather this is the correct message matching it to the config
+                if msg.Server == val["From"]["Server"]:
+                    if msg.Channel == val["From"]["Channel"]:
                         self.l.logger.debug('Sent Message')
                         objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Chatbot",ModuleTo=val["To"]["Module"],Service=val["To"]["Service"], Server=val["To"]["Server"],Channel=val["To"]["Channel"]) #prepares the delivery location
                         ServiceIcon = await self.serviceIdentifier(fromService=message.Service,fromServer=message.Server,fromChannel=message.Channel,toService=val["To"]["Service"],toServer=val["To"]["Server"],toChannel=val["To"]["Channel"],message=message.Contents) #sees if it needs to be identified
                         formatOptions.update({"%serviceIcon%": ServiceIcon}) #Adds more formatting options
-                        await self.sendMessage(message=message,objDeliveryDetails=objDeliveryDetails,FormattingOptions=formatOptions) #sends the message
+                        await self.sendMessage(message=msg,objDeliveryDetails=objDeliveryDetails,FormattingOptions=formatOptions,messageUnchanged=message)#.messageUnchanged) #sends the message
 
                         
 
@@ -40,8 +40,8 @@ class chatbot:
 
 
 
-    async def sendMessage(self,message,objDeliveryDetails,FormattingOptions): #sends the message
-        objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails,FormattingOptions=FormattingOptions) #prepares the delivery object and sends the message send event
+    async def sendMessage(self,message,objDeliveryDetails,FormattingOptions,messageUnchanged): #sends the message
+        objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails,FormattingOptions=FormattingOptions,messageUnchanged=message) #prepares the delivery object and sends the message send event
         config.events.onMessageSend(sndMessage=objSendMsg)
 
 

@@ -21,8 +21,11 @@ class Discord:
     def __init__(self):
         pass
         config.events.onMessageSend += self.discordSendMsg
+        config.events.deleteMessage += self.delete_message
         
-        
+    
+    async def delete_message(self,message):
+        await client.delete_message(message)
 
 
     @client.event
@@ -71,12 +74,14 @@ class Discord:
             for roles in message.author.roles: #gets the authors roles and saves that to a list
                 roleList.update({str(roles.name):int(roles.position)})
             l.logger.info(roleList)
+            #await client.delete_message(message)
             formatOptions = {"%authorName%": message.author.name, "%channelFrom%": message.channel.name, "%serverFrom%": message.server.name, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
             messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
-            message = await Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
-            objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
-            objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions)
+            msg = Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
+            objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
+            objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=msg, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged=message)
             config.events.onMessage(message=objSendMsg)
+
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
         global config, discordInfo
