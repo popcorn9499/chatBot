@@ -6,7 +6,7 @@ import datetime
 import os
 from utils import logger
 from utils import fileIO
-
+from utils.EventHook import EventHook
 
 #Commands to add
 #-Get Viewer Count?
@@ -27,11 +27,31 @@ class Commands:
         self.l = logger.logs("Commands")
         self.l.logger.info("Starting")
         config.events.onMessage += self.commandCheckExist
+        config.events.addCommandType = EventHook()
+        config.events.addCommandType += self.addCommandTypes
         self.commands = []
+        self.commandTypeList = {}
         self.commandsDir = '.{0}config{0}command'.format(os.sep)
         self.checkCommandFolder()
         self.loadCommands()
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.addBasicCommands())
         self.l.logger.info("Started")
+    
+    async def addBasicCommands(self):
+        config.events.addCommandType(commandType="Help",commandHandler=self.commandHelp)
+        config.events.addCommandType(commandType="Message",commandHandler=self.commandMessage)
+        config.events.addCommandType(commandType="FileRead",commandHandler=self.commandFileRead)
+        config.events.addCommandType(commandType="CloseBot",commandHandler=self.commandClose)
+        config.events.addCommandType(commandType="ReloadModules",commandHandler=self.commandClose)
+        config.events.addCommandType(commandType="DeleteByMsgDetails",commandHandler=self.commandClose)
+
+
+
+    async def addCommandTypes(self,commandType,commandHandler):
+        print(commandType)
+        self.commandTypeList.update({commandType:EventHook()})
+        self.commandTypeList[commandType] += commandHandler
 
     def checkCommandFolder(self):
         if os.path.isdir(self.commandsDir) == False:
@@ -59,18 +79,10 @@ class Commands:
                     
     
     async def commandTypeCheck(self,message,command):
-        if command["CommandType"] == "Message" and await self.commandRoleChecker(message=message,command=command) == True: 
-            await self.commandMessage(message=message,command=command)
-        elif command["CommandType"] == "FileRead" and await self.commandRoleChecker(message=message,command=command) == True: 
-            await self.commandFileRead(message=message,command=command)
-        elif command["CommandType"] == "CloseBot" and await self.commandRoleChecker(message=message,command=command) == True: 
-            await self.commandClose(message=message,command=command)
-        elif command["CommandType"] == "ReloadModules" and await self.commandRoleChecker(message=message,command=command) == True: 
-            await self.commandReloadModules(message=message,command=command)
-        elif command["CommandType"] == "Help" and await self.commandRoleChecker(message=message,command=command) == True: 
-            await self.commandHelp(message=message,command=command)
-        elif command["CommandType"] == "DeleteByMsgDetails" and await self.commandRoleChecker(message=message,command=command) == True: 
-            await self.commandHelp(message=message,command=command)
+        for key,val in self.commandTypeList.items():
+            if (command["CommandType"] == key) & (await self.commandRoleChecker(message=message,command=command) == True):
+                self.commandTypeList[key](message=message,command=command)
+       
                 
 
     async def commandRoleChecker(self,message,command):
