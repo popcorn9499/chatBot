@@ -12,13 +12,17 @@ async def formatter(unformatMsg):
         items = await removeChar("[",items)
         items = await removeChar("]",items)
         items = await removeChar(":",items)
-        if items == "%message%":
-            formatting = formatting.replace(items,unformatMsg.Message.Contents)
-        elif items == "%roles%":
-            role = await findRole(unformatMsg.FormattingOptions[items])
-            formatting = formatting.replace(items,role[0])
-        else:
-            formatting = formatting.replace(items,unformatMsg.FormattingOptions[items])
+        try:
+            if items == "%message%":
+                formatting = formatting.replace(items,unformatMsg.Message.Contents)
+            elif items == "%roles%":
+                role = await findRole(unformatMsg.FormattingOptions[items])
+                formatting = formatting.replace(items,role[0])
+            else:
+                print(unformatMsg.FormattingOptions)
+                formatting = formatting.replace(items,unformatMsg.FormattingOptions[items])
+        except KeyError: #prevents format stryings that dont exist from crashing the formatter
+            pass
     l.logger.info("{0}".format(formatting))
     return formatting
 
