@@ -147,10 +147,10 @@ class Youtube:
             self.l.logger.info('Connection Error reconnecting')
             
     async def processMsg(self,username,message,roleList):
-        formatOptions = {"%authorName%": username, "%channelFrom%": "Popcorn9499", "%serverFrom%": "Youtube", "%serviceFrom%": "youtube","%message%":"message","%roles%":roleList}
-        message = await Object.ObjectLayout.message(Author=username,Contents=message,Server="Youtube",Channel="Popcorn9499",Service="Youtube",Roles=roleList)
-        objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
-        objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged="None")
+        formatOptions = {"%authorName%": username, "%channelFrom%": "Youtube", "%serverFrom%": "Youtube", "%serviceFrom%": "youtube","%message%":"message","%roles%":roleList}
+        message = Object.ObjectLayout.message(Author=username,Contents=message,Server="Youtube",Channel="Youtube",Service="Youtube",Roles=roleList)
+        objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
+        objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged="None")
         config.events.onMessage(message=objSendMsg)
 
 
