@@ -23,8 +23,8 @@ class chatbot:
                 if msg.Server == val["From"]["Server"]:
                     if msg.Channel == val["From"]["Channel"]:
                         self.l.logger.debug('Sent Message')
-                        objDeliveryDetails = await Object.ObjectLayout.DeliveryDetails(Module="Chatbot",ModuleTo=val["To"]["Module"],Service=val["To"]["Service"], Server=val["To"]["Server"],Channel=val["To"]["Channel"]) #prepares the delivery location
-                        ServiceIcon = await self.serviceIdentifier(fromService=message.Service,fromServer=message.Server,fromChannel=message.Channel,toService=val["To"]["Service"],toServer=val["To"]["Server"],toChannel=val["To"]["Channel"],message=message.Contents) #sees if it needs to be identified
+                        objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Chatbot",ModuleTo=val["To"]["Module"],Service=val["To"]["Service"], Server=val["To"]["Server"],Channel=val["To"]["Channel"]) #prepares the delivery location
+                        ServiceIcon = self.serviceIdentifier(fromService=msg.Service,fromServer=msg.Server,fromChannel=msg.Channel,toService=val["To"]["Service"],toServer=val["To"]["Server"],toChannel=val["To"]["Channel"],message=msg.Contents) #sees if it needs to be identified
                         formatOptions.update({"%serviceIcon%": ServiceIcon}) #Adds more formatting options
                         await self.sendMessage(message=msg,objDeliveryDetails=objDeliveryDetails,FormattingOptions=formatOptions,messageUnchanged=message)#.messageUnchanged) #sends the message
 
@@ -41,7 +41,7 @@ class chatbot:
 
 
     async def sendMessage(self,message,objDeliveryDetails,FormattingOptions,messageUnchanged): #sends the message
-        objSendMsg = await Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails,FormattingOptions=FormattingOptions,messageUnchanged=message) #prepares the delivery object and sends the message send event
+        objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails,FormattingOptions=FormattingOptions,messageUnchanged=message) #prepares the delivery object and sends the message send event
         config.events.onMessageSend(sndMessage=objSendMsg)
 
 
