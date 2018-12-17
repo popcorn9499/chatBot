@@ -6,7 +6,8 @@ import time
 import datetime
 from utils import logger
 from utils import messageFormatter
-
+from utils import fileIO
+import os
 
 
 client = discord.Client() #sets this to just client for reasons cuz y not? (didnt have to be done like this honestly could of been just running discord.Client().)
@@ -19,10 +20,11 @@ l.logger.info("Starting")
 
 class Discord:
     def __init__(self):
-        pass
+        config.c.discordToken = fileIO.loadConf("config{0}auth{0}discord.json")["Token"]
         config.events.onMessageSend += self.discordSendMsg
         config.events.deleteMessage += self.delete_message
-        
+        fileIO.checkFolder("config{0}auth{0}".format(os.sep),"auth",l)
+        fileIO.checkFile("config-example{0}auth{0}discord.json".format(os.sep),"config{0}auth{0}discord.json".format(os.sep),"discord.json",l)
     
     async def delete_message(self,message):
         await client.delete_message(message)
