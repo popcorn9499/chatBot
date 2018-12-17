@@ -29,5 +29,5 @@ def checkFile(examplePath,filePath,fileName,logger):
     if (os.path.isfile(filePath) == False):
         logger.logger.info("{0} File Does Not Exist".format(fileName))
         logger.logger.info("Creating...")
-        data = fileIO.fileLoad(examplePath)
-        fileIO.fileSave(filePath,data)
+        data = fileLoad(examplePath)
+        fileSave(filePath,data)
