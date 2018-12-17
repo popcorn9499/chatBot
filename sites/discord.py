@@ -20,6 +20,8 @@ l.logger.info("Starting")
 
 class Discord:
     def __init__(self):
+        fileIO.checkFolder("config{0}auth{0}".format(os.sep),"auth",l)
+        fileIO.checkFile("config-example{0}auth{0}discord.json".format(os.sep),"config{0}auth{0}discord.json".format(os.sep),"discord.json",l)
         config.c.discordToken = fileIO.loadConf("config{0}auth{0}discord.json")["Token"]
         config.events.onMessageSend += self.discordSendMsg
         config.events.deleteMessage += self.delete_message
