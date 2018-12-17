@@ -30,7 +30,7 @@ chatLog = chatLog.chatLog()
 
 #this is the starting point for all the bot tasks
 discordP = discord.Discord()
-discordP.start(config.discordToken)
+discordP.start(config.c.discordToken)
 
 
 
