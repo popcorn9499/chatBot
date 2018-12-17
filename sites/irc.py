@@ -4,6 +4,7 @@ import re
 from utils import config
 from utils import Object
 from utils import logger
+from utils import fileIO
 from utils import messageFormatter
 
 import time
@@ -13,6 +14,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
     def __init__(self):
         self.messagepattern = re.compile(r"^:(.{1,50})!")
         #variables.config = __main__.variables.config
+        fileIO.checkFolder("config{0}auth{0}".format(os.sep),"auth",l)
+        fileIO.checkFile("config-example{0}auth{0}irc.json".format(os.sep),"config{0}auth{0}irc.json".format(os.sep),"irc.json",l)
+        config.c.irc = fileIO.loadConf("config{0}auth{0}irc.json")
         self.l = logger.logs("IRC")
         self.l.logger.info("Starting")
         self.serviceStarted = True
@@ -21,7 +25,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         self.reader = {}
     
     async def irc_bot(self, loop): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.        
-        for sKey, sVal in config.irc["Servers"].items():
+        for sKey, sVal in config.c.irc["Servers"].items():
             if sVal["Enabled"] == True:
                 host = sKey
                 print(type(host))
@@ -35,7 +39,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             pass
             
     async def ircConnect(self,loop,host):#handles the irc connection
-        self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config.irc["Servers"][host]["Port"], loop=loop)
+        self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config.c.irc["Servers"][host]["Port"], loop=loop)
         self.reader.update({host: self.readerBasic})
         self.writer.update({host: self.writerBasic})
         #print(self.reader)
@@ -43,16 +47,16 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         self.l.logger.debug("{0} - Reader {1} ".format(host,self.reader))
         self.l.logger.debug("{0} - Writer {1} ".format(host, self.writer))
         await asyncio.sleep(3)
-        if config.irc["Servers"][host]["Password"] != "":
-            self.writer[host].write(b'PASS ' + config.irc["Servers"][host]["Password"].encode('utf-8') + b'\r\n')
+        if config.c.irc["Servers"][host]["Password"] != "":
+            self.writer[host].write(b'PASS ' + config.c.irc["Servers"][host]["Password"].encode('utf-8') + b'\r\n')
             self.l.logger.info("{0} - Inputing password ".format(host)) #,"Info")
-        self.l.logger.info("{0} - Setting user {1}+ ".format(host,config.irc["Servers"][host]["Nickname"]))
-        self.writer[host].write(b'NICK ' + config.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
-        self.l.logger.info("{0} - Setting user {1}".format(host,config.irc["Servers"][host]["Nickname"]))
-        self.writer[host].write(b'USER ' + config.irc["Servers"][host]["Nickname"].encode('utf-8') + b' B hi :' + config.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
+        self.l.logger.info("{0} - Setting user {1}+ ".format(host,config.c.irc["Servers"][host]["Nickname"]))
+        self.writer[host].write(b'NICK ' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
+        self.l.logger.info("{0} - Setting user {1}".format(host,config.c.irc["Servers"][host]["Nickname"]))
+        self.writer[host].write(b'USER ' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b' B hi :' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
         await asyncio.sleep(3)
         self.l.logger.info("{0} - Joining channels".format(host))
-        for key, val in config.irc["Servers"][host]["Channel"].items():
+        for key, val in config.c.irc["Servers"][host]["Channel"].items():
             if val["Enabled"] == True:
                 print(key)
                 self.writer[host].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
@@ -156,9 +160,10 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
 #this starts everything for the irc client 
 ##possibly could of put all this in a class and been done with it?
 def ircStart():
-    if config.irc["Enabled"] == True:
+    IRC = irc()
+    if config.c.irc["Enabled"] == True:
         loop = asyncio.get_event_loop()
-        loop.create_task(irc().irc_bot(loop))
+        loop.create_task(IRC.irc_bot(loop))
 
 
 
