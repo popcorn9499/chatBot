@@ -4,7 +4,9 @@ from utils import fileIO
 events = Events()
 x = 1
 
-
+class config():
+    def __init__(self):
+        pass
 
 
 #runtime created
@@ -16,11 +18,11 @@ discordToken = None
 
 
 
+c = config()
+#
 
-discordToken = fileIO.loadConf("config{0}auth{0}discord.json")["Token"]
 
-
-irc = fileIO.loadConf("config{0}auth{0}irc.json")
+#
 
 
 chatbot = fileIO.loadConf("config{0}chatbot{0}chatbot.json")
