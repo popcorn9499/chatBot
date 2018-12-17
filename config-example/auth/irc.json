@@ -1,0 +1,29 @@
+{
+    "Enabled": false,
+    "Servers": {
+        "irc.chat.twitch.tv": {
+            "Channel": {
+                "#popcorn9499": {
+                    "Enabled": false
+                }
+            },
+            "Commands": {},
+            "Enabled": false,
+            "Nickname": "popcorn9499",
+            "Password": "",
+            "Port": "6667"
+        },
+        "irc.popicraft.net": {
+            "Channel": {
+                "#test": {
+                    "Enabled": false
+                }
+            },
+            "Commands": {},
+            "Enabled": true,
+            "Nickname": "DiscordBot____Test",
+            "Password": "",
+            "Port": "6667"
+        }
+    }
+}

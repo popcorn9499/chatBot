@@ -6,7 +6,8 @@ import time
 import datetime
 from utils import logger
 from utils import messageFormatter
-
+from utils import fileIO
+import os
 
 
 client = discord.Client() #sets this to just client for reasons cuz y not? (didnt have to be done like this honestly could of been just running discord.Client().)
@@ -19,11 +20,13 @@ l.logger.info("Starting")
 
 class Discord:
     def __init__(self):
-        pass
+        fileIO.checkFolder("config{0}auth{0}".format(os.sep),"auth",l)
+        fileIO.checkFile("config-example{0}auth{0}discord.json".format(os.sep),"config{0}auth{0}discord.json".format(os.sep),"discord.json",l)
+        config.c.discordToken = fileIO.loadConf("config{0}auth{0}discord.json")["Token"]
+        config.c.discordEnabled = fileIO.loadConf("config{0}auth{0}discord.json")["Enabled"]
         config.events.onMessageSend += self.discordSendMsg
         config.events.deleteMessage += self.delete_message
-        
-    
+   
     async def delete_message(self,message):
         await client.delete_message(message)
 
@@ -91,20 +94,21 @@ class Discord:
             await client.send_message(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel], await messageFormatter.formatter(sndMessage)) #sends the message to the channel specified in the beginning
 
     def start(self,token):
-        while True:
-            loop = asyncio.get_event_loop()
-            try:
-                loop.run_until_complete(client.start(token))
-            except (discord.ConnectionClosed, discord.GatewayNotFound) as error:
-                loop.run_until_complete(client.logout())
-                loop.close()
-                start(token)
-                l.logger.info("Client Connection Lost")
-                # cancel all tasks lingering
-            except KeyboardInterrupt:
-                loop.run_until_complete(client.logout())
-            finally:
-                l.logger.info("Client Closed")
-                loop.close()
-            l.logger.info("Reconnecting")
+        if config.c.discordEnabled: #allows discord to not be launched
+            while True:
+                loop = asyncio.get_event_loop()
+                try:
+                    loop.run_until_complete(client.start(token))
+                except (discord.ConnectionClosed, discord.GatewayNotFound) as error:
+                    loop.run_until_complete(client.logout())
+                    loop.close()
+                    start(token)
+                    l.logger.info("Client Connection Lost")
+                    # cancel all tasks lingering
+                except KeyboardInterrupt:
+                    loop.run_until_complete(client.logout())
+                finally:
+                    l.logger.info("Client Closed")
+                    loop.close()
+                l.logger.info("Reconnecting")
 
