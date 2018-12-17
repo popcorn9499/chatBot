@@ -10,7 +10,7 @@ from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
 import time
 
-from utils import fileIO
+
 import sys, os
 
 
@@ -18,6 +18,7 @@ from utils import config
 from utils import Object
 from utils import logger
 from utils import messageFormatter
+from utils import fileIO
 import asyncio
 
 
@@ -29,11 +30,26 @@ class Youtube:
         self.pageToken = ""
         self.youtube = ""
         self.serviceStarted = False
+        self.secretsFilePath = "config{0}auth{0}client_secrets.json".format(os.sep)
+        self.oauthFilePath = "config{0}auth{0}oauth.json".format(os.sep)
         self.l = logger.logs("Youtube")
-        self.l.logger.info("Starting")
-        self.initAuth()
-        self.msgCheckRegex = re.compile(r'(:)') #setup for if we happen to need this it should never change either way
-        config.events.onMessageSend += self.sendLiveChat
+        fileIO.checkFolder("config{0}auth{0}".format(os.sep),"auth",self.l)
+        fileIO.checkFile("config-example{0}auth{0}youtube.json".format(os.sep),"config{0}auth{0}youtube.json".format(os.sep),"youtube.json",self.l)
+        self.enabled = fileIO.loadConf("config{0}auth{0}youtube.json")["Enabled"]
+        if (self.enabled):
+            oauthExist = self.checkFile(self.oauthFilePath,"oauth.json",self.l)
+            secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
+            if (oauthExist & secretsExist):
+                self.l.logger.info("Starting")
+                self.initAuth()
+                self.msgCheckRegex = re.compile(r'(:)') #setup for if we happen to need this it should never change either way
+                config.events.onMessageSend += self.sendLiveChat
+            else:
+                self.l.logger.info("Please make sure the oauth and client secret files exist")
+                sys.exit()
+
+    def checkFile(self,filePath,fileName,logger):
+        return (os.path.isfile(filePath))
 
     def initAuth(self):
         # The CLIENT_SECRETS_FILE variable specifies the name of a file that contains
@@ -46,7 +62,7 @@ class Youtube:
         #   https://developers.google.com/youtube/v3/guides/authentication
         # For more information about the client_secrets.json file format, see:
         #   https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
-        self.CLIENT_SECRETS_FILE = "client_secrets.json"
+        self.CLIENT_SECRETS_FILE = self.secretsFilePath
 
         # This OAuth 2.0 access scope allows for full read/write access to the
         # authenticated user's account.
@@ -77,7 +93,7 @@ class Youtube:
         scope=self.YOUTUBE_READ_WRITE_SCOPE,
         message=self.MISSING_CLIENT_SECRETS_MESSAGE)
 
-      storage = Storage("%s-oauth2.json" % sys.argv[0])
+      storage = Storage(self.oauthFilePath)
       credentials = storage.get()
 
       if credentials is None or credentials.invalid:
@@ -215,7 +231,6 @@ class Youtube:
             print(list_chatmessages_inset.execute()) #debug for sending live chat messages
       
     async def Login(self):
-
         if "__main__" == "__main__":
             self.l.logger.info("Logging In")
             args = argparser.parse_args()
@@ -241,7 +256,7 @@ class Youtube:
 
 y = Youtube()
 
-
-loop = asyncio.get_event_loop()
-loop.create_task(y.Login())
-loop.create_task(y.youtubeChatControl())
+if (y.enabled):
+    loop = asyncio.get_event_loop()
+    loop.create_task(y.Login())
+    loop.create_task(y.youtubeChatControl())
