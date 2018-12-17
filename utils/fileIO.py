@@ -18,3 +18,16 @@ def fileLoad(fileName):#loads files
 def loadConf(file):
     file = fileLoad(file.format(os.sep))
     return file
+
+def checkFolder(folderPath,folderName,logger):
+    if os.path.isdir(folderPath) == False:
+        logger.logger.info("{0} Folder Does Not Exist".format(folderName))
+        logger.logger.info("Creating...")
+        os.makedirs(folderPath)
+
+def checkFile(examplePath,filePath,fileName,logger):
+    if (os.path.isfile(filePath) == False):
+        logger.logger.info("{0} File Does Not Exist".format(fileName))
+        logger.logger.info("Creating...")
+        data = fileIO.fileLoad(examplePath)
+        fileIO.fileSave(filePath,data)
