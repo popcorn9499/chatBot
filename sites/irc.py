@@ -6,7 +6,7 @@ from utils import Object
 from utils import logger
 from utils import fileIO
 from utils import messageFormatter
-
+import os
 import time
 
 ##this is the event loop for the irc client
@@ -14,10 +14,11 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
     def __init__(self):
         self.messagepattern = re.compile(r"^:(.{1,50})!")
         #variables.config = __main__.variables.config
-        fileIO.checkFolder("config{0}auth{0}".format(os.sep),"auth",l)
-        fileIO.checkFile("config-example{0}auth{0}irc.json".format(os.sep),"config{0}auth{0}irc.json".format(os.sep),"irc.json",l)
-        config.c.irc = fileIO.loadConf("config{0}auth{0}irc.json")
         self.l = logger.logs("IRC")
+        fileIO.checkFolder("config{0}auth{0}".format(os.sep),"auth",self.l)
+        fileIO.checkFile("config-example{0}auth{0}irc.json".format(os.sep),"config{0}auth{0}irc.json".format(os.sep),"irc.json",self.l)
+        config.c.irc = fileIO.loadConf("config{0}auth{0}irc.json")
+        
         self.l.logger.info("Starting")
         self.serviceStarted = True
         config.events.onMessageSend += self.sendMSG
