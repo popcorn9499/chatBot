@@ -37,9 +37,8 @@ class Youtube:
         fileIO.checkFile("config-example{0}auth{0}youtube.json".format(os.sep),"config{0}auth{0}youtube.json".format(os.sep),"youtube.json",self.l)
         self.enabled = fileIO.loadConf("config{0}auth{0}youtube.json")["Enabled"]
         if (self.enabled):
-            oauthExist = self.checkFile(self.oauthFilePath,"oauth.json",self.l)
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
-            if (oauthExist & secretsExist):
+            if (secretsExist):
                 self.l.logger.info("Starting")
                 self.initAuth()
                 self.msgCheckRegex = re.compile(r'(:)') #setup for if we happen to need this it should never change either way
