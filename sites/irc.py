@@ -155,7 +155,10 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         while self.serviceStarted != True:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "irc": #determines if its the right service and supposed to be here
-            self.writer[sndMessage.DeliveryDetails.Server].write("PRIVMSG {0} :{1}".format(sndMessage.DeliveryDetails.Channel,await messageFormatter.formatter(sndMessage)).encode("utf-8") + b'\r\n')
+            #print(await sndMessage.DeliveryDetails.Channel,messageFormatter.formatter(sndMessage))
+            msg = await messageFormatter.formatter(sndMessage)
+            #print(sndMessage.DeliveryDetails.Server)
+            self.writer[sndMessage.DeliveryDetails.Server].write("PRIVMSG {0} :{1}".format(sndMessage.DeliveryDetails.Channel,msg).encode("utf-8") + b'\r\n')
 
         
 #this starts everything for the irc client 
