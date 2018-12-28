@@ -36,6 +36,7 @@ class Youtube:
         fileIO.checkFolder("config{0}auth{0}".format(os.sep),"auth",self.l)
         fileIO.checkFile("config-example{0}auth{0}youtube.json".format(os.sep),"config{0}auth{0}youtube.json".format(os.sep),"youtube.json",self.l)
         self.enabled = fileIO.loadConf("config{0}auth{0}youtube.json")["Enabled"]
+        self.pageToken = fileIO.loadConf("config{0}auth{0}youtube.json")["pageToken"]
         if (self.enabled):
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
             if (secretsExist):
@@ -241,12 +242,19 @@ class Youtube:
         
     async def youtubeChatControl(self):
         self.l.logger.info("Started")
+        counter = 0
         while True:  
             if self.serviceStarted == True:  
                 #try:
                 await self.listChat()
                 await self.listLiveStreams()
                 await self.listLiveBroadcasts()
+                if counter == 20:
+                    filePath = "config{0}auth{0}youtube.json".format(os.sep)
+                    data = {"Enabled": self.enabled, "pageToken": self.pageToken}
+                    fileIO.fileSave(filePath,data)
+                    counter=0
+                counter+=1
                 #except googleapiclient.errors.HttpError:
                     #youtube = self.Login()
                     #self.l.logger.info('Connection Error reconnecting')
