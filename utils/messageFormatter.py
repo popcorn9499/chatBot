@@ -5,9 +5,11 @@ from utils import fileIO
 
 l = logger.logs("Messages")
 
-async def formatter(unformatMsg):
-    formatting = "%authorName% %message%"
-    formatting = fileIO.loadConf("config{0}ChatFormatting{0}default.json")["Format"]
+async def formatter(unformatMsg,formattingOptions="default.json",formatType="File"):
+    if (formatType == "File"):
+        formatting = fileIO.loadConf("config{0}ChatFormatting{0}"+formattingOptions)["Format"]
+    elif (formatType == "Other"):
+        formatting = formattingOptions
     for items in formatting.split(" "): #cycles through all the items and replaces the code name with the contents the message should have
         items = await removeChar("[",items)
         items = await removeChar("]",items)
