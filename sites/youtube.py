@@ -222,7 +222,7 @@ class Youtube:
                         liveChatId = self.liveChatId,
                         type = "textMessageEvent",
                         textMessageDetails = dict(
-                            messageText = await messageFormatter.formatter(sndMessage)
+                            messageText = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
                         )
                     )
                 )

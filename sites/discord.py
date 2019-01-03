@@ -91,7 +91,7 @@ class Discord:
         while discordStarted != True:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
-            await client.send_message(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel], await messageFormatter.formatter(sndMessage)) #sends the message to the channel specified in the beginning
+            await client.send_message(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel], await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
 
     def start(self,token):
         if config.c.discordEnabled: #allows discord to not be launched
