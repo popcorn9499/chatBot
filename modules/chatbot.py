@@ -43,7 +43,7 @@ class chatbot:
                 if val["To"]["Server"] == toServer and val["From"]["Server"] == fromServer:
                     if val["To"]["Channel"] == toChannel and val["From"]["Channel"] == fromChannel:
                         return "{0}".format(val["Format"])#formats the message potentially
-        return message #returns unformatted message if all else fails
+        return "" #returns nothing if all else fails
 
 
 
