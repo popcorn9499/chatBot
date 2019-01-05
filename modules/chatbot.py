@@ -22,11 +22,18 @@ class chatbot:
             if msg.Service == val["From"]["Service"]: #decides weather this is the correct message matching it to the config
                 if msg.Server == val["From"]["Server"]:
                     if msg.Channel == val["From"]["Channel"]:
+                        try:
+                            formatType = "Other"
+                            formattingSettings = val["Formatting"]
+                        except KeyError:
+                            formatType = "File"
+                            formattingSettings = "default.json"
+
                         self.l.logger.debug('Sent Message')
                         objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Chatbot",ModuleTo=val["To"]["Module"],Service=val["To"]["Service"], Server=val["To"]["Server"],Channel=val["To"]["Channel"]) #prepares the delivery location
                         ServiceIcon = await self.serviceIdentifier(fromService=msg.Service,fromServer=msg.Server,fromChannel=msg.Channel,toService=val["To"]["Service"],toServer=val["To"]["Server"],toChannel=val["To"]["Channel"],message=msg.Contents) #sees if it needs to be identified
                         formatOptions.update({"%serviceIcon%": ServiceIcon}) #Adds more formatting options
-                        await self.sendMessage(message=msg,objDeliveryDetails=objDeliveryDetails,FormattingOptions=formatOptions,formattingSettings="%serviceIcon% %roles% [%authorName%]: %message%",formatType="Other",messageUnchanged=message)#.messageUnchanged) #sends the message
+                        await self.sendMessage(message=msg,objDeliveryDetails=objDeliveryDetails,FormattingOptions=formatOptions,formattingSettings=formattingSettings,formatType=formatType,messageUnchanged=message)#.messageUnchanged) #sends the message
 
                         
 
