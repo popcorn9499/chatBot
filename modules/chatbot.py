@@ -26,7 +26,7 @@ class chatbot:
                         objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Chatbot",ModuleTo=val["To"]["Module"],Service=val["To"]["Service"], Server=val["To"]["Server"],Channel=val["To"]["Channel"]) #prepares the delivery location
                         ServiceIcon = await self.serviceIdentifier(fromService=msg.Service,fromServer=msg.Server,fromChannel=msg.Channel,toService=val["To"]["Service"],toServer=val["To"]["Server"],toChannel=val["To"]["Channel"],message=msg.Contents) #sees if it needs to be identified
                         formatOptions.update({"%serviceIcon%": ServiceIcon}) #Adds more formatting options
-                        await self.sendMessage(message=msg,objDeliveryDetails=objDeliveryDetails,FormattingOptions=formatOptions,messageUnchanged=message)#.messageUnchanged) #sends the message
+                        await self.sendMessage(message=msg,objDeliveryDetails=objDeliveryDetails,FormattingOptions=formatOptions,formattingSettings="%serviceIcon% %roles% [%authorName%]: %message%",formatType="Other",messageUnchanged=message)#.messageUnchanged) #sends the message
 
                         
 
@@ -40,8 +40,8 @@ class chatbot:
 
 
 
-    async def sendMessage(self,message,objDeliveryDetails,FormattingOptions,messageUnchanged): #sends the message
-        objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails,FormattingOptions=FormattingOptions,messageUnchanged=message) #prepares the delivery object and sends the message send event
+    async def sendMessage(self,message,objDeliveryDetails,FormattingOptions,formattingSettings,formatType,messageUnchanged): #sends the message
+        objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails,FormattingOptions=FormattingOptions,formattingSettings=formattingSettings,formatType=formatType,messageUnchanged=message) #prepares the delivery object and sends the message send event
         config.events.onMessageSend(sndMessage=objSendMsg)
 
 
