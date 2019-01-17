@@ -148,4 +148,4 @@ class Commands:
 
 
 
-chat = Commands()
+commandChat = Commands()
