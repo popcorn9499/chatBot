@@ -60,3 +60,6 @@ class chatbot:
                     if val["To"]["Channel"] == toChannel and val["From"]["Channel"] == fromChannel:
                         return "{0} {1}".format(val["Format"],message)#formats the message potentially
         return message #returns unformatted message if all else fails
+
+
+        chatbot = chatbot()

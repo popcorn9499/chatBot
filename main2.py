@@ -23,9 +23,9 @@ async def messageTest(Message):
 
 # print(config.x)
 
-chatbot = chatbot.chatbot()
 
-chatLog = chatLog.chatLog()
+
+
 
 
 #this is the starting point for all the bot tasks
