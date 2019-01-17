@@ -31,3 +31,4 @@ class chatLog:
         config.events.onMessageSend(sndMessage=objSendMsg)
 
 
+chatLog = chatLog()
