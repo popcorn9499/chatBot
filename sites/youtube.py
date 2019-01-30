@@ -131,6 +131,7 @@ class Youtube:
                 ).execute() #executes it so its not just some object
                 self.pageToken = list_chatmessages["nextPageToken"] #page token for next use
             except googleapiclient.errors.HttpError:
+                self.l.logger.info("Some Google API Error Occured")
                 continuation = False 
                 
             
