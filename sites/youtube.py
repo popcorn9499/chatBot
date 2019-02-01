@@ -133,7 +133,7 @@ class Youtube:
             except googleapiclient.errors.HttpError:
                 self.l.logger.info("Some Google API Error Occured")
                 continuation = False 
-                
+            
             
             if continuation == True:
                 for temp in list_chatmessages["items"]: #goes through all the stuff in the list messages list
@@ -248,13 +248,14 @@ class Youtube:
             if self.serviceStarted == True:  
                 #try:
                 await self.listChat()
-                await self.listLiveStreams()
-                await self.listLiveBroadcasts()
+                #await self.listLiveStreams()
+                #await self.listLiveBroadcasts()
                 if counter == 20:
                     filePath = "config{0}auth{0}youtube.json".format(os.sep)
                     data = {"Enabled": self.enabled, "pageToken": self.pageToken}
                     fileIO.fileSave(filePath,data)
                     counter=0
+                    self.l.logger.info("Saving")
                 counter+=1
                 #except googleapiclient.errors.HttpError:
                     #youtube = self.Login()
