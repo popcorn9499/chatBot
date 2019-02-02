@@ -18,8 +18,9 @@ class messageFilter:
     async def filterMessage(self,message):
         contents = message.Message.Contents
         for i in self.filter:
-            if (contents.find(i) == -1)
-                return None
+            if (contents.find(i) != -1):
+                return True
+        return False
 
 
 messageFilter = messageFilter()
