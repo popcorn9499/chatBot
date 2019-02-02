@@ -16,11 +16,15 @@ class messageFilter:
         pass
 
     async def filterMessage(self,message):
-        contents = message.Message.Contents
+        contents = message.Contents
         for i in self.filter:
             if (contents.find(i) != -1):
+                #should send a log potentially if config setup for that
+                #should also probably delete the message from the previous service as well as not let it through. whatever is calling this
                 return True
         return False
+
+    
 
 
 messageFilter = messageFilter()
