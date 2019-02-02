@@ -4,6 +4,7 @@ import asyncio
 import time
 import datetime
 from utils import logger
+from modules import messageFilter
 
 
 
@@ -19,7 +20,11 @@ class chatbot:
         formatOptions = message.FormattingOptions
         msg = message.Message
         for key ,val in config.chatbot.items(): #cycles through the config of options
-            if msg.Service == val["From"]["Service"]: #decides weather this is the correct message matching it to the config
+            #message filtering
+            if (messageFilter.messageFilter.filterMessage(msg)):#exits abruptly if message is bad
+                break
+            
+            if msg.Service == val["From"]["Service"]: #decides weather this is the correct message is to be filtered out.
                 if msg.Server == val["From"]["Server"]:
                     if msg.Channel == val["From"]["Channel"]:
                         try:
