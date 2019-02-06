@@ -46,7 +46,7 @@ class Youtube:
                 config.events.onMessageSend += self.sendLiveChat
             else:
                 self.l.logger.info("Please make sure the oauth and client secret files exist")
-                sys.exit()
+                #sys.exit()
 
     def checkFile(self,filePath,fileName,logger):
         return (os.path.isfile(filePath))
