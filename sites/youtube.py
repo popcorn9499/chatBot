@@ -161,6 +161,18 @@ class Youtube:
             youtube = await self.Login()
             self.l.logger.info('Connection Error reconnecting')
 
+    async def weedMsg(self,userID,message):
+        # False means its a safe message
+        # true means it should be weeded out
+        msgCheckList = ["[B]"]
+        if userID == self.userID:
+            for i in msgCheckList:
+                if (message.find(i) == -1):
+                    return False
+                return True
+        else:s
+            return False
+
 
     async def processMsg(self,username,message,roleList):
         formatOptions = {"%authorName%": username, "%channelFrom%": "Youtube", "%serverFrom%": "Youtube", "%serviceFrom%": "youtube","%message%":"message","%roles%":roleList}
