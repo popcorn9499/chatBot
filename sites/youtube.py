@@ -144,18 +144,22 @@ class Youtube:
                         fileIO.fileSave("youtubeMsgJson.json", temp)
                         self.l.logger.debug(userID)
                         self.l.logger.debug(self.botUserID)
-                        if userID != self.botUserID:
+                        if (not  await self.weedMsg(userId,message)):
                             self.l.logger.info("{0} {1}".format(username,message))
                             await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
-                        elif userID == self.botUserID: #if the userId is the bots then check the message to see if the bot sent it.
-                            try:
-                                if (message.find("[B]")==-1): #Checks the message against this to see if it was sent by the bot or a user
-                                    self.l.logger.info("{0} {1}".format(username,message))
-                                    await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
+ 
+                        # if userID != self.botUserID:
+                        #     self.l.logger.info("{0} {1}".format(username,message))
+                        #     await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
+                        # elif userID == self.botUserID: #if the userId is the bots then check the message to see if the bot sent it.
+                        #     try:
+                        #         if (message.find("[B]")==-1): #Checks the message against this to see if it was sent by the bot or a user
+                        #             self.l.logger.info("{0} {1}".format(username,message))
+                        #             await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
 
-                            except AttributeError as error:
-                                self.l.logger.info("{0} {1}".format(username,message))
-                                await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
+                        #     except AttributeError as error:
+                        #         self.l.logger.info("{0} {1}".format(username,message))
+                        #         await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
         except ConnectionResetError:
             x = 1
             youtube = await self.Login()
@@ -170,7 +174,7 @@ class Youtube:
                 if (message.find(i) == -1):
                     return False
                 return True
-        else:s
+        else:
             return False
 
 
