@@ -42,7 +42,6 @@ class Youtube:
             if (secretsExist):
                 self.l.logger.info("Starting")
                 self.initAuth()
-                self.msgCheckRegex = re.compile(r'(:)') #setup for if we happen to need this it should never change either way
                 config.events.onMessageSend += self.sendLiveChat
             else:
                 self.l.logger.info("Please make sure the oauth and client secret files exist")
@@ -150,8 +149,7 @@ class Youtube:
                             await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
                         elif userID == self.botUserID: #if the userId is the bots then check the message to see if the bot sent it.
                             try:
-                                msgCheckComplete = self.msgCheckRegex.search(message) #checks the message against the previously created regex for ":"
-                                if msgCheckComplete.group(1) != ":": #if its this then go and send the message as normal
+                                if (message.find("[B]")==-1): #Checks the message against this to see if it was sent by the bot or a user
                                     self.l.logger.info("{0} {1}".format(username,message))
                                     await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
 
@@ -162,7 +160,8 @@ class Youtube:
             x = 1
             youtube = await self.Login()
             self.l.logger.info('Connection Error reconnecting')
-            
+
+
     async def processMsg(self,username,message,roleList):
         formatOptions = {"%authorName%": username, "%channelFrom%": "Youtube", "%serverFrom%": "Youtube", "%serviceFrom%": "youtube","%message%":"message","%roles%":roleList}
         message = Object.ObjectLayout.message(Author=username,Contents=message,Server="Youtube",Channel="Youtube",Service="Youtube",Roles=roleList)
