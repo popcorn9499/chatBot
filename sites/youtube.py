@@ -39,6 +39,7 @@ class Youtube:
         self.pageToken = fileIO.loadConf("config{0}auth{0}youtube.json")["pageToken"]
         if (self.enabled):
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
+            self.msgCheckList = fileIO.loadConf("config{0}auth{0}youtube.json")["selfMsgFilter"]
             if (secretsExist):
                 self.l.logger.info("Starting")
                 self.initAuth()
@@ -168,9 +169,9 @@ class Youtube:
     async def weedMsg(self,userID,message):
         # False means its a safe message
         # true means it should be weeded out
-        msgCheckList = ["[B]"]
+        
         if userID == self.userID:
-            for i in msgCheckList:
+            for i in self.msgCheckList:
                 if (message.find(i) == -1):
                     return False
                 return True
