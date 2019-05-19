@@ -1,9 +1,9 @@
 from utils.Events import Events
 from utils.EventHook import EventHook
 # from utils import config
-from sites import discord
-from sites import youtube
-from sites import irc
+# from sites import discord
+# from sites import youtube
+# from sites import irc
 # from utils import logger
 # from utils import deleteMsg
 # from modules import console #move the location of this please... it must start closer to the beginning....
@@ -13,7 +13,7 @@ from sites import irc
 
 import utils
 import modules
-# import sites
+import sites
 
 
 
@@ -35,8 +35,8 @@ async def messageTest(Message):
 
 
 #this is the starting point for all the bot tasks
-discordP = discord.Discord()
-discordP.start(config.c.discordToken)
+discordP = sites.discord.Discord()
+discordP.start(utils.config.c.discordToken)
 
 
 
