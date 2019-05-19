@@ -1,6 +1,27 @@
 import logging
 import time
+from utils import config
 import os
+
+class loggerHandlers:
+    def __init__(self):
+        config.events.newLogger += self.add
+        self.loggerInstances = []
+        self.loggerHandlers = []
+
+    def add(self,logger):
+        self.loggerInstances.append(logger)
+        for handlers in self.loggerHandlers:
+            self._add_handler(handlers,logger)
+
+    def add_Logging_Handler(self,handler):
+        self.loggerHandlers.append(handler)
+        for logger in self.loggerInstances:
+            self._add_handler(handler,logger)
+
+    def _add_handler(self,handler,loggerInst):
+        loggerInst.logger.addHandler(handler)
+
 
 class logs:
     def __init__(self,name): #creates the logger object
@@ -10,11 +31,9 @@ class logs:
         terminal.setLevel(logging.INFO)#sets the debug level
         terminal.setFormatter(formatter)
         self.logger.setLevel(logging.DEBUG)
-        self.logger.addHandler(terminal) #adds the console handler
+        self.logger.addHandler(terminal) #adds the console handlerth
         self.logger.addHandler(LogFile())#adds the log file handler
-    
-    def add_handler(self,handler):
-        self.logger.addHandler(handler)
+
 
 
 class LogFile(logging.Handler):
@@ -32,3 +51,5 @@ class LogFile(logging.Handler):
         with open(file, 'a') as f:#'a' allows us to append a new line to the file
             f.write(msg + "\r\n") #writes the line to the file
 
+
+loggerHandlers = loggerHandlers()
