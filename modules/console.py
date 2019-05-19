@@ -1,3 +1,6 @@
+#this module is intended to give a console to your bot when it loads. 
+#It may miss some early boot process stuff as it loads a little later in the boot process
+
 from utils import config
 from utils import Object
 import asyncio
@@ -10,14 +13,14 @@ import logging
 import time
 import os
 
-print("console")
+
+
 
 class console(logging.Handler):
     def __init__(self):
         super().__init__()
 
     def emit(self, record):#creates the log file with whats required
-        print("Emitting")
         try:
             loop  = asyncio.get_event_loop() #this should handle taking a sync task and converting it to async more or less..
             loop.create_task(self.sendMessage("Log.log {0} [Thread/{1}] - {2} - {3} - {4} ".format(record.asctime,record.threadName,record.name,record.levelname,record.message)))
