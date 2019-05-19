@@ -9,17 +9,18 @@ class loggerHandlers:
         self.loggerInstances = []
         self.loggerHandlers = []
 
-    def add(self,logger):
+    async def add(self,logger):
+        logger.info("Adding logging handler" )
         self.loggerInstances.append(logger)
         for handlers in self.loggerHandlers:
             self._add_handler(handlers,logger)
 
-    def add_Logging_Handler(self,handler):
+    async def add_Logging_Handler(self,handler):
         self.loggerHandlers.append(handler)
         for logger in self.loggerInstances:
             self._add_handler(handler,logger)
 
-    def _add_handler(self,handler,loggerInst):
+    async def _add_handler(self,handler,loggerInst):
         loggerInst.logger.addHandler(handler)
 
 
@@ -33,6 +34,7 @@ class logs:
         self.logger.setLevel(logging.DEBUG)
         self.logger.addHandler(terminal) #adds the console handlerth
         self.logger.addHandler(LogFile())#adds the log file handler
+        config.events.newLogger(self.logger)
 
 
 
