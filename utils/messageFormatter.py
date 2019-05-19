@@ -8,7 +8,7 @@ l = logger.logs("Messages")
 async def formatter(unformatMsg,formattingOptions="default.json",formatType="File"):
     if (formatType == "File"):
         formatting = fileIO.loadConf("config{0}ChatFormatting{0}"+formattingOptions)["Format"]
-    elif (formatType == "Other"):
+    elif (formatType == "Other") or (formatType == "MutedOther"):
         formatting = formattingOptions
     for items in formatting.split(" "): #cycles through all the items and replaces the code name with the contents the message should have
         items = await removeChar("[",items)
@@ -25,7 +25,8 @@ async def formatter(unformatMsg,formattingOptions="default.json",formatType="Fil
                 formatting = formatting.replace(items,unformatMsg.FormattingOptions[items])
         except KeyError: #prevents format stryings that dont exist from crashing the formatter
             pass
-    l.logger.info("{0}".format(formatting))
+    if (formatType == "MutedOther"):
+        l.logger.info("{0}".format(formatting))
     return formatting
 
 async def findRole(roles):
