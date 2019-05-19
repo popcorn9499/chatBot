@@ -25,7 +25,7 @@ async def formatter(unformatMsg,formattingOptions="default.json",formatType="Fil
                 formatting = formatting.replace(items,unformatMsg.FormattingOptions[items])
         except KeyError: #prevents format stryings that dont exist from crashing the formatter
             pass
-    if (formatType == "MutedOther"):
+    if (formatType != "MutedOther"):
         l.logger.info("{0}".format(formatting))
     return formatting
 
