@@ -12,6 +12,9 @@ class logs:
         self.logger.setLevel(logging.DEBUG)
         self.logger.addHandler(terminal) #adds the console handler
         self.logger.addHandler(LogFile())#adds the log file handler
+    
+    def add_handler(self,handler):
+        self.logger.addHandler(handler)
 
 
 class LogFile(logging.Handler):
