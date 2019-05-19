@@ -28,7 +28,7 @@ class Discord:
         config.events.deleteMessage += self.delete_message
    
     async def delete_message(self,message):
-        await client.delete_message(message)
+        await client.delete(message)
 
 
     @client.event
@@ -43,22 +43,19 @@ class Discord:
         membersList = {}
         discordMembers = {}
         discordRoles = {}
-        for server in client.servers: #this portion gets all the info for all the channels and servers the bot is in
-            for members in server.members:
+        for guilds in client.guilds: #this portion gets all the info for all the channels and servers the bot is in
+            for members in guilds.members:
                 membersList.update({str(members): members})
-            discordMembers.update({str(server.name):membersList})
+            discordMembers.update({str(guilds.name):membersList})
             l.logger.debug(discordMembers)
-            for roles in server.roles:
+            for roles in guilds.roles:
                 rolesList.update({str(roles.name):{"Number":int(roles.position),"Data": roles}})
-                if roles.name == "Mod":
-                    pass
-                    #variables.tempRole = roles
-            discordRoles.update({str(server.name):rolesList})
+            discordRoles.update({str(guilds.name):rolesList})
             l.logger.debug(discordRoles)
-            config.discordServerInfo.update({str(server): {"asdasdhskajhdkjashdlk":"channel info"}})#maybe set a check for that channel
-            for channel in server.channels: #get channels and add them to the list to store for later
-                disc = {str(channel.name): channel}
-                config.discordServerInfo[str(server)].update(disc)
+            config.discordServerInfo.update({str(guilds): {"asdasdhskajhdkjashdlk":"channel info"}})#maybe set a check for that channel
+            for channel in guilds.channels: #get channels and add them to the list to store for later
+                disc = {str(channel.name): channel.id}
+                config.discordServerInfo[str(guilds)].update(disc)
             discordStarted = True
             l.logger.info("Started")
 
@@ -78,21 +75,22 @@ class Discord:
                 roleList.update({str(roles.name):int(roles.position)})
             l.logger.info(roleList)
             #await client.delete_message(message)
-            formatOptions = {"%authorName%": message.author.name, "%channelFrom%": message.channel.name, "%serverFrom%": message.server.name, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
+            formatOptions = {"%authorName%": message.author.name, "%channelFrom%": message.channel.name, "%serverFrom%": message.guild.name, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
             messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
-            msg = Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.server.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
+            msg = Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.guild.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
             objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
             objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=msg, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged=message)
             config.events.onMessage(message=objSendMsg)
 
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
-        global config, discordInfo
+        global config
         while discordStarted != True:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
-            await client.send_message(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel], await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
-
+            channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
+            await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
+            
     def start(self,token):
         if config.c.discordEnabled: #allows discord to not be launched
             while True:

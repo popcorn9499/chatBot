@@ -107,3 +107,13 @@ config/auth/irc\.json
 config-test\.json
 
 testL\.py
+
+config/auth/
+
+oauth\.json
+
+test\.txt
+
+test\.py
+
+msgTest\.py

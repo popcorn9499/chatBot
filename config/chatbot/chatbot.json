@@ -1,16 +1,18 @@
 {
-    "thing1":{
+    "thing2":{
         "From":{
+            "Channel": "Youtube",
+            "Service": "Youtube",
+            "Server": "Youtube",
+            "Module": "Site"
+            
+        },
+        "To":{
             "Channel": "test",
             "Service": "Discord",
             "Server": "Popicraft Network",
             "Module": "Site"
         },
-        "To":{
-            "Channel": "test2",
-            "Service": "Discord",
-            "Server": "Popicraft Network",
-            "Module": "Site"
-        }
+        "Formatting": "%serviceIcon% %roles% [%authorName%]: %message%"    
     }
 }

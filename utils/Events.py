@@ -13,6 +13,7 @@ class Events(object):
         self.onMemberUpdate = EventHook()
         self.onMessageSend = EventHook()
         self.deleteMessage = EventHook()
+        self.newLogger = EventHook()
 
 
 

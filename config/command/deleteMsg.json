@@ -1,0 +1,7 @@
+{
+    "CommandType":"DeleteByMsgDetails",
+    "Command": "!delete",
+    "CommandDetails": "You Thought Wrong!!",
+    "RolesAllowed": ["Owner","Mod"],
+    "HelpDetails": "Undefined"
+}
