@@ -1,14 +1,21 @@
 from utils.Events import Events
 from utils.EventHook import EventHook
-from utils import config
-from sites import discord
-from sites import youtube
-from sites import irc
-from utils import logger
-from utils import deleteMsg
-from modules import chatbot
-from modules import chatLog
-from modules import command
+# from utils import config
+# from sites import discord
+# from sites import youtube
+# from sites import irc
+# from utils import logger
+# from utils import deleteMsg
+# from modules import console #move the location of this please... it must start closer to the beginning....
+# from modules import chatbot
+# from modules import chatLog
+# from modules import command
+
+import utils
+import modules
+import sites
+
+
 
 async def messageTest(Message):
     print(Message.Contents)
@@ -27,10 +34,9 @@ async def messageTest(Message):
 
 
 
-
 #this is the starting point for all the bot tasks
-discordP = discord.Discord()
-discordP.start(config.c.discordToken)
+discordP = sites.discord.Discord()
+discordP.start(utils.config.c.discordToken)
 
 
 

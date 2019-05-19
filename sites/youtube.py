@@ -39,14 +39,14 @@ class Youtube:
         self.pageToken = fileIO.loadConf("config{0}auth{0}youtube.json")["pageToken"]
         if (self.enabled):
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
+            self.msgCheckList = fileIO.loadConf("config{0}auth{0}youtube.json")["selfMsgFilter"]
             if (secretsExist):
                 self.l.logger.info("Starting")
                 self.initAuth()
-                self.msgCheckRegex = re.compile(r'(:)') #setup for if we happen to need this it should never change either way
                 config.events.onMessageSend += self.sendLiveChat
             else:
                 self.l.logger.info("Please make sure the oauth and client secret files exist")
-                sys.exit()
+                #sys.exit()
 
     def checkFile(self,filePath,fileName,logger):
         return (os.path.isfile(filePath))
@@ -133,7 +133,7 @@ class Youtube:
             except googleapiclient.errors.HttpError:
                 self.l.logger.info("Some Google API Error Occured")
                 continuation = False 
-                
+            
             
             if continuation == True:
                 for temp in list_chatmessages["items"]: #goes through all the stuff in the list messages list
@@ -145,24 +145,40 @@ class Youtube:
                         fileIO.fileSave("youtubeMsgJson.json", temp)
                         self.l.logger.debug(userID)
                         self.l.logger.debug(self.botUserID)
-                        if userID != self.botUserID:
+                        if (not  await self.weedMsg(userId,message)):
                             self.l.logger.info("{0} {1}".format(username,message))
                             await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
-                        elif userID == self.botUserID: #if the userId is the bots then check the message to see if the bot sent it.
-                            try:
-                                msgCheckComplete = self.msgCheckRegex.search(message) #checks the message against the previously created regex for ":"
-                                if msgCheckComplete.group(1) != ":": #if its this then go and send the message as normal
-                                    self.l.logger.info("{0} {1}".format(username,message))
-                                    await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
+ 
+                        # if userID != self.botUserID:
+                        #     self.l.logger.info("{0} {1}".format(username,message))
+                        #     await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
+                        # elif userID == self.botUserID: #if the userId is the bots then check the message to see if the bot sent it.
+                        #     try:
+                        #         if (message.find("[B]")==-1): #Checks the message against this to see if it was sent by the bot or a user
+                        #             self.l.logger.info("{0} {1}".format(username,message))
+                        #             await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
 
-                            except AttributeError as error:
-                                self.l.logger.info("{0} {1}".format(username,message))
-                                await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
+                        #     except AttributeError as error:
+                        #         self.l.logger.info("{0} {1}".format(username,message))
+                        #         await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
         except ConnectionResetError:
             x = 1
             youtube = await self.Login()
             self.l.logger.info('Connection Error reconnecting')
-            
+
+    async def weedMsg(self,userID,message):
+        # False means its a safe message
+        # true means it should be weeded out
+        
+        if userID == self.userID:
+            for i in self.msgCheckList:
+                if (message.find(i) == -1):
+                    return False
+                return True
+        else:
+            return False
+
+
     async def processMsg(self,username,message,roleList):
         formatOptions = {"%authorName%": username, "%channelFrom%": "Youtube", "%serverFrom%": "Youtube", "%serviceFrom%": "youtube","%message%":"message","%roles%":roleList}
         message = Object.ObjectLayout.message(Author=username,Contents=message,Server="Youtube",Channel="Youtube",Service="Youtube",Roles=roleList)
@@ -229,7 +245,7 @@ class Youtube:
                 )
             )  
             #list_chatmessages_inset.execute()
-            print(list_chatmessages_inset.execute()) #debug for sending live chat messages
+            #print(list_chatmessages_inset.execute()) #debug for sending live chat messages
       
     async def Login(self):
         if "__main__" == "__main__":
@@ -248,13 +264,14 @@ class Youtube:
             if self.serviceStarted == True:  
                 #try:
                 await self.listChat()
-                await self.listLiveStreams()
-                await self.listLiveBroadcasts()
+                #await self.listLiveStreams()
+                #await self.listLiveBroadcasts()
                 if counter == 20:
                     filePath = "config{0}auth{0}youtube.json".format(os.sep)
                     data = {"Enabled": self.enabled, "pageToken": self.pageToken}
                     fileIO.fileSave(filePath,data)
                     counter=0
+                    self.l.logger.info("Saving")
                 counter+=1
                 #except googleapiclient.errors.HttpError:
                     #youtube = self.Login()
