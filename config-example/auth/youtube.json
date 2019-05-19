@@ -1,4 +1,7 @@
 {
     "Enabled": true,
-    "pageToken": ""
+    "pageToken": "",
+    "selfMsgFilter": [
+        "[B]"
+    ]
 }
