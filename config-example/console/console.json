@@ -1,0 +1,10 @@
+{
+    "Consoles": [
+        {
+            "Service": "Discord",
+            "Server": "Popicraft Network",
+            "Channel": "console-test",
+            "Formatting": "%message%"
+        }
+    ]
+}
