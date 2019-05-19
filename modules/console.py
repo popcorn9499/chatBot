@@ -1,3 +1,6 @@
+#this module is intended to give a console to your bot when it loads. 
+#It may miss some early boot process stuff as it loads a little later in the boot process
+
 from utils import config
 from utils import Object
 import asyncio
@@ -10,7 +13,8 @@ import logging
 import time
 import os
 
-print("console")
+
+
 
 class console(logging.Handler):
     def __init__(self):
