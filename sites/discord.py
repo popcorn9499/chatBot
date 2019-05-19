@@ -28,7 +28,7 @@ class Discord:
         config.events.deleteMessage += self.delete_message
    
     async def delete_message(self,message):
-        await client.delete_message(message)
+        await client.delete(message)
 
 
     @client.event
@@ -87,14 +87,13 @@ class Discord:
 
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
-        global config, discordInfo
+        global config
         while discordStarted != True:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
             await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
-            #await client.send_message(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel], await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
-
+            
     def start(self,token):
         if config.c.discordEnabled: #allows discord to not be launched
             while True:
