@@ -21,7 +21,7 @@ class chatbot:
         msg = message.Message
         for key ,val in config.chatbot.items(): #cycles through the config of options
             #message filtering
-            if (messageFilter.messageFilter.filterMessage(msg)):#exits abruptly if message is bad
+            if (await messageFilter.messageFilter.filterMessage(msg)):#exits abruptly if message is bad
                 break
             
             if msg.Service == val["From"]["Service"]: #decides weather this is the correct message is to be filtered out.
