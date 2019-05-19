@@ -50,9 +50,6 @@ class Discord:
             l.logger.debug(discordMembers)
             for roles in guilds.roles:
                 rolesList.update({str(roles.name):{"Number":int(roles.position),"Data": roles}})
-                if roles.name == "Mod":
-                    pass
-                    #variables.tempRole = roles
             discordRoles.update({str(guilds.name):rolesList})
             l.logger.debug(discordRoles)
             config.discordServerInfo.update({str(guilds): {"asdasdhskajhdkjashdlk":"channel info"}})#maybe set a check for that channel
