@@ -97,7 +97,7 @@ class Discord:
                 loop = asyncio.get_event_loop()
                 try:
                     loop.run_until_complete(client.start(token))
-                except (discord.ConnectionClosed, discord.GatewayNotFound,discord.HTTPException,discord.ClientException,discord.DiscordException) as error:
+                except (discord.ConnectionClosed, discord.GatewayNotFound,discord.HTTPException,discord.ClientException) as error:
                     loop.run_until_complete(client.logout())
                     loop.close()
                     start(token)
