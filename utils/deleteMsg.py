@@ -18,7 +18,7 @@ class deleteService:
     async def addMessage(self,message):
         time = '{0:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now())
         x = {"Message":message,"Time": time,"messageBasic":message.messageUnchanged}
-        self.l.logger.info(x)
+        self.l.logger.debug(x)
         self.msgLibrary.append(x)
         #config.events.deleteMessage(message.messageUnchanged)
 
@@ -48,7 +48,7 @@ class deleteService:
 
 
 
-deleteServ = deleteService()
+# deleteServ = deleteService()
 
 
 
