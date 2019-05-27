@@ -35,7 +35,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             else:
                 await asyncio.sleep(3)
         try:#stops the crash if no irc settings r set
-            self.l.logger.info("Connected: " + host)
+            self.l.logger.info("Connected: " + host)#wtf is this ment for anymore?
         except UnboundLocalError:
             pass
             
