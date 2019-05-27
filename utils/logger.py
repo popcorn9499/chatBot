@@ -35,7 +35,7 @@ class logs:
         terminal = logging.StreamHandler()
         terminal.setLevel(logging.INFO)#sets the debug level
         terminal.setFormatter(formatter)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.INFO)
         self.logger.addHandler(terminal) #adds the console handlerth
         self.logger.addHandler(LogFile())#adds the log file handler
         loggerHandlers.add(self.logger)
