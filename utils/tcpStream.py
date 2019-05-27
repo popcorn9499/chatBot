@@ -22,11 +22,12 @@ class tcpServer():
         while True: #handles reconnects the
             try:
                 self.server = await asyncio.start_server(self.connectionHandler, self.ipAddress, self.port )
+                async with self.server:
+                    await self.server.serve_forever()
             except:
+                self.server.close()
                 pass
         
-        async with self.server:
-            await self.server.serve_forever()
 
     async def readerCallBackAdder(self,callback):
         self.readerCallBack.append(callback)
