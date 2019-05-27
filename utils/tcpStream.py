@@ -17,9 +17,13 @@ class tcpServer():
         self.readerCallBack = []
 
     
-    async def manager(self):
+    async def manager(self): #manages the async connection server 
         print("Starting tcp server")
-        self.server = await asyncio.start_server(self.connectionHandler, self.ipAddress, self.port )
+        while True: #handles reconnects the
+            try:
+                self.server = await asyncio.start_server(self.connectionHandler, self.ipAddress, self.port )
+            except:
+                pass
         
         async with self.server:
             await self.server.serve_forever()
@@ -39,7 +43,6 @@ class tcpServer():
                 #dateBytes = data.encode('utf-16-le')#.strip(codecs.BOM_UTF16)
                 self.writer.write(data.encode('utf-16-le'))
                 await self.writer.drain()
-
             else:
                 print("data not convertable")
         except ConnectionResetError:
