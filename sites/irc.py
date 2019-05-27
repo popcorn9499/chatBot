@@ -69,7 +69,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
        
             
     async def handleMsg(self,loop,host):
-        info_pattern = re.compile(r'00[1234]|37[526]|CAP')
+        #info_pattern = re.compile(r'00[1234]|37[526]|CAP')
         await asyncio.sleep(1)
         while True:
             if host in self.reader:
