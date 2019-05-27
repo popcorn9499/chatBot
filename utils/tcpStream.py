@@ -38,12 +38,11 @@ class tcpServer():
         self.writer = writer
         await self.read()
 
-    async def write(self,data):
+    async def write(self,data):#handles writing data to the connection
         dataBytes = None
-        try:
+        try: #prevents any errors from crashing the task
             if (type(data) == str):
-                #dateBytes = data.encode('utf-16-le')#.strip(codecs.BOM_UTF16)
-                self.writer.write(data.encode('utf-16-le'))
+                self.writer.write(data.encode('utf-16-le').strip(codecs.BOM_UTF16))
                 await self.writer.drain()
             else:
                 print("data not convertable")
@@ -51,12 +50,11 @@ class tcpServer():
             pass
 
     async def read(self): #reads data out of the connection asyncly
-        print("READER")
-        while True:
+        while True: #continuously reads data out of the connection sending callbacks to the handlers to handle said data
             try:
                 dataBytes = await self.reader.readuntil('aaaa'.encode('utf-16-le').strip(codecs.BOM_UTF16)) #gets the data
                 data=dataBytes.decode('utf-16-le')
-                if (data != ""):                
+                if (data != ""): #prevents empty strings
                     loop = asyncio.get_event_loop()                
                     for callback in self.readerCallBack: #handles creating events for when data comes in to handle the data coming in and out
                         loop.create_task(callback(data))
