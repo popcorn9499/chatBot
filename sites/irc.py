@@ -35,7 +35,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             else:
                 await asyncio.sleep(3)
         try:#stops the crash if no irc settings r set
-            self.l.logger.info("Connected: " + host)
+            self.l.logger.info("Connected: " + host)#wtf is this ment for anymore?
         except UnboundLocalError:
             pass
             
@@ -77,7 +77,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                     data = (await self.reader[host].readuntil(b'\n')).decode("utf-8")
                     data = data.rstrip()
                     data = data.split()
-                    self.l.logger.info(' '.join(data) + host) #,"Extra Debug")
+                    self.l.logger.debug(' '.join(data) + host) #,"Extra Debug")
                     if data[0].startswith('@'): 
                         data.pop(0)
                     if data == []:

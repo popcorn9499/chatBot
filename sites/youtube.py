@@ -114,8 +114,8 @@ class Youtube:
         ).execute() #executes it so its not just some object
         self.liveChatId = list_streams_request["items"][0]["snippet"]["liveChatId"]#sifts through the output to get the live chat id and saves it
         self.botUserID = list_streams_request["items"][1]["snippet"]["channelId"] #saves the bots channel user id that we will use as a identifier
-        self.l.logger.info("liveID {0}".format(self.liveChatId)) #print the live chat id
-        self.l.logger.info("BotID" + str(self.botUserID))
+        self.l.logger.debug("liveID {0}".format(self.liveChatId)) #print the live chat id
+        self.l.logger.debug("BotID" + str(self.botUserID))
       
      
       
@@ -271,7 +271,7 @@ class Youtube:
                     data = {"Enabled": self.enabled, "pageToken": self.pageToken}
                     fileIO.fileSave(filePath,data)
                     counter=0
-                    self.l.logger.info("Saving")
+                    self.l.logger.debug("Saving")
                 counter+=1
                 #except googleapiclient.errors.HttpError:
                     #youtube = self.Login()
