@@ -97,11 +97,12 @@ class Discord:
                 loop = asyncio.get_event_loop()
                 try:
                     loop.run_until_complete(client.start(token))
-                except (discord.ConnectionClosed, discord.GatewayNotFound) as error:
+                except (discord.ConnectionClosed, discord.GatewayNotFound,discord.HTTPException,discord.ClientException,discord.DiscordException) as error:
                     loop.run_until_complete(client.logout())
                     loop.close()
                     start(token)
                     l.logger.info("Client Connection Lost")
+                    l.logger.debug("Some error occured: " + error)
                     # cancel all tasks lingering
                 except KeyboardInterrupt:
                     loop.run_until_complete(client.logout())
