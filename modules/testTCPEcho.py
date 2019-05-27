@@ -10,7 +10,7 @@ class echoTest:
         loop.create_task(self.start())
 
     async def start(self):
-        msg = 1
+        msg = 2
         await asyncio.sleep(10)
         while True:
             try:
@@ -18,11 +18,11 @@ class echoTest:
                 if (self.tcpThing.writer != None):
                     print("sending")
                     await self.tcpThing.write(str(msg) + " hi")
-                msg += 1
-                
+                msg = msg*2
+                    
             except Exception as e:
-                 print(e)
-            await asyncio.sleep(1)
+                print(e)
+            await asyncio.sleep(2)
 
     async def readerDetails(self,output):
         print(output)
