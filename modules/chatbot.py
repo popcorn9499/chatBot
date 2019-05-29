@@ -72,15 +72,4 @@ class chatbot:
         objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails,FormattingOptions=FormattingOptions,formattingSettings=formattingSettings,formatType=formatType,messageUnchanged=message) #prepares the delivery object and sends the message send event
         config.events.onMessageSend(sndMessage=objSendMsg)
 
-
-    #work to remove this stuff eventually
-    async def serviceIdentifierOld(self,fromService,fromServer,fromChannel,toService,toServer,toChannel,message): #adds a smaller easier identifier to the messages
-        for key ,val in config.chatbot.items(): #cycles through everything to eventually possibly find a match
-            if val["To"]["Service"] == toService and val["From"]["Service"] == fromService:
-                if val["To"]["Server"] == toServer and val["From"]["Server"] == fromServer:
-                    if val["To"]["Channel"] == toChannel and val["From"]["Channel"] == fromChannel:
-                        return "{0} {1}".format(val["Identifier"],message)#formats the message potentially
-        return message #returns unformatted message if all else fails
-
-
 chatbot = chatbot()
