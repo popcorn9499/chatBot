@@ -70,17 +70,34 @@ class Discord:
             attachments = "" #gets the attachments so we dont loose that
             for i in message.attachments:
                 attachments += i["url"]
+            messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
             roleList={}
-            for roles in message.author.roles: #gets the authors roles and saves that to a list
-                roleList.update({str(roles.name):int(roles.position)})
+            try: 
+                for roles in message.author.roles: #gets the authors roles and saves that to a list
+                    roleList.update({str(roles.name):int(roles.position)})
+            except AttributeError:
+                l.logger.info("{0}: {1} ".format(message.author.name,messageContents))
             l.logger.info(roleList)
             #await client.delete_message(message)
-            formatOptions = {"%authorName%": message.author.name, "%channelFrom%": message.channel.name, "%serverFrom%": message.guild.name, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
-            messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
-            msg = Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=message.guild.name,Channel=message.channel.name,Service="Discord",Roles=roleList)
+            channelName = ""
+            serverName = ""
+            if (isinstance(message.channel, discord.channel.TextChannel)):
+                channelName = message.channel.name
+                serverName = message.guild.name
+            elif (isinstance(message.channel, discord.channel.DMChannel)):
+                channelName = "#{0}".format(message.author.name)
+                serverName = "DM"
+            elif (isinstance(message.channel, discord.channel.GroupChannel)):
+                channelName = message.channel.name
+                serverName = "GroupDM"
+
+            formatOptions = {"%authorName%": message.author.name, "%channelFrom%": channelName, "%serverFrom%": serverName, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
+            msg = Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList)
             objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
             objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=msg, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged=message)
             config.events.onMessage(message=objSendMsg)
+        else:
+            l.logger.info("Why am i recieving my own messages???")
 
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord

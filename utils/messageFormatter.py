@@ -30,7 +30,7 @@ async def formatter(unformatMsg,formattingOptions="default.json",formatType="Fil
     return formatting
 
 async def findRole(roles):
-    roleName = "ehhh"
+    roleName = ""
     roleNum = -666
     for roleNa,roleNu in roles.items():
         if roleNu >= roleNum:
