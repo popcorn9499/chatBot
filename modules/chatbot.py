@@ -4,7 +4,9 @@ import asyncio
 import time
 import datetime
 from utils import logger
+from utils import fileIO
 from modules import messageFilter
+import os
 
 
 
@@ -14,12 +16,26 @@ class chatbot:
         self.l.logger.info("Starting")
         config.events.onMessage += self.sortMessage
         self.l.logger.info("Started")
+        fileIO.checkFolder("config{0}chatbot{0}".format(os.sep),"chatbot",self.l)
+        fileIO.checkFile("config-example{0}chatbot{0}chatbot.json".format(os.sep),"config{0}chatbot{0}chatbot.json".format(os.sep),"chatbot.json",self.l)
+        self.chatbot =  fileIO.loadConf("config{0}chatbot{0}chatbot.json")
+        
+        self.legacyConverts()
+
+    def legacyConverts(self):#converts tags from legacy portions of the code or removes them if unnessisary
+        try:
+            self.chatbotIdentifier = fileIO.loadConf("config{0}chatbot{0}chatbotIdentifier.json")
+            self.chatbot["Identifier"] = self.chatbotIdentifier.pop("Format")
+            filename = "config{0}chatbot{0}chatbotIdentifier.json".format(os.sep)
+            fileIO.fileSave(filename,self.chatbotIdentifier)
+        except:
+            pass
 
     async def sortMessage(self,message): #sorts messages sending themto the correct locations
         self.l.logger.debug(message.__dict__) #more or less debug code
         formatOptions = message.FormattingOptions
         msg = message.Message
-        for key ,val in config.chatbot.items(): #cycles through the config of options
+        for key ,val in self.chatbot.items(): #cycles through the config of options
             #message filtering
             if (await messageFilter.messageFilter.filterMessage(msg)):#exits abruptly if message is bad
                 break
@@ -43,11 +59,11 @@ class chatbot:
                         
 
     async def serviceIdentifier(self,fromService,fromServer,fromChannel,toService,toServer,toChannel,message): #adds a smaller easier identifier to the messages
-        for key ,val in config.chatbotIdentifier.items(): #cycles through everything to eventually possibly find a match
+        for key ,val in self.chatbot.items(): #cycles through everything to eventually possibly find a match
             if val["To"]["Service"] == toService and val["From"]["Service"] == fromService:
                 if val["To"]["Server"] == toServer and val["From"]["Server"] == fromServer:
                     if val["To"]["Channel"] == toChannel and val["From"]["Channel"] == fromChannel:
-                        return "{0}".format(val["Format"])#formats the message potentially
+                        return "{0}".format(val["Identifier"])#formats the message potentially
         return "" #returns nothing if all else fails
 
 
@@ -55,16 +71,5 @@ class chatbot:
     async def sendMessage(self,message,objDeliveryDetails,FormattingOptions,formattingSettings,formatType,messageUnchanged): #sends the message
         objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails,FormattingOptions=FormattingOptions,formattingSettings=formattingSettings,formatType=formatType,messageUnchanged=message) #prepares the delivery object and sends the message send event
         config.events.onMessageSend(sndMessage=objSendMsg)
-
-
-    #work to remove this stuff eventually
-    async def serviceIdentifierOld(self,fromService,fromServer,fromChannel,toService,toServer,toChannel,message): #adds a smaller easier identifier to the messages
-        for key ,val in config.chatbotIdentifier.items(): #cycles through everything to eventually possibly find a match
-            if val["To"]["Service"] == toService and val["From"]["Service"] == fromService:
-                if val["To"]["Server"] == toServer and val["From"]["Server"] == fromServer:
-                    if val["To"]["Channel"] == toChannel and val["From"]["Channel"] == fromChannel:
-                        return "{0} {1}".format(val["Format"],message)#formats the message potentially
-        return message #returns unformatted message if all else fails
-
 
 chatbot = chatbot()
