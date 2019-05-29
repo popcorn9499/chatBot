@@ -145,7 +145,7 @@ class Youtube:
                         fileIO.fileSave("youtubeMsgJson.json", temp)
                         self.l.logger.debug(userID)
                         self.l.logger.debug(self.botUserID)
-                        if (not  await self.weedMsg(userId,message)):
+                        if (userID != self.botUserID):#await self.weedMsg(userId,message)):
                             self.l.logger.info("{0} {1}".format(username,message))
                             await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
  
