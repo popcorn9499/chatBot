@@ -244,7 +244,7 @@ class Youtube:
                     )
                 )
             )  
-            #list_chatmessages_inset.execute()
+            list_chatmessages_inset.execute()
             #print(list_chatmessages_inset.execute()) #debug for sending live chat messages
       
     async def Login(self):
