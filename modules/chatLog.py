@@ -16,7 +16,7 @@ class chatLog:
         self.l.logger.info("Started")
         fileIO.checkFolder("config{0}chatLog{0}".format(os.sep),"logRules",self.l)
         fileIO.checkFile("config-example{0}chatLog{0}logRules.json".format(os.sep),"config{0}chatLog{0}logRules.json".format(os.sep),"logRules.json",self.l)
-        self.hatLogRules = fileIO.loadConf("config{0}chatLog{0}logRules.json")
+        self.chatLogRules = fileIO.loadConf("config{0}chatLog{0}logRules.json")
         
     async def logMessage(self,message):
         self.l.logger.debug("Logging")
