@@ -97,7 +97,7 @@ class Discord:
             objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=msg, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged=message)
             config.events.onMessage(message=objSendMsg)
         else:
-            l.logger.info("Why am i recieving my own messages???")
+            l.logger.debug("Why am i recieving my own messages???")
 
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
