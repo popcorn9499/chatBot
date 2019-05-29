@@ -22,7 +22,7 @@ c = config()
 
 
 
-chatLogRules = fileIO.loadConf("config{0}chatLog{0}logRules.json")
+
 
 
 
