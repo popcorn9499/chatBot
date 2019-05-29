@@ -35,7 +35,7 @@ class chatbot:
         self.l.logger.debug(message.__dict__) #more or less debug code
         formatOptions = message.FormattingOptions
         msg = message.Message
-        for key ,val in config.chatbot.items(): #cycles through the config of options
+        for key ,val in self.chatbot.items(): #cycles through the config of options
             #message filtering
             if (await messageFilter.messageFilter.filterMessage(msg)):#exits abruptly if message is bad
                 break
@@ -59,7 +59,7 @@ class chatbot:
                         
 
     async def serviceIdentifier(self,fromService,fromServer,fromChannel,toService,toServer,toChannel,message): #adds a smaller easier identifier to the messages
-        for key ,val in config.chatbot.items(): #cycles through everything to eventually possibly find a match
+        for key ,val in self.chatbot.items(): #cycles through everything to eventually possibly find a match
             if val["To"]["Service"] == toService and val["From"]["Service"] == fromService:
                 if val["To"]["Server"] == toServer and val["From"]["Server"] == fromServer:
                     if val["To"]["Channel"] == toChannel and val["From"]["Channel"] == fromChannel:
