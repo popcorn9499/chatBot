@@ -4,7 +4,9 @@ import asyncio
 import time
 import datetime
 from utils import logger
+from utils import fileIO
 from modules import messageFilter
+import os
 
 
 
@@ -14,6 +16,18 @@ class chatbot:
         self.l.logger.info("Starting")
         config.events.onMessage += self.sortMessage
         self.l.logger.info("Started")
+        self.chatbot =  fileIO.loadConf("config{0}chatbot{0}chatbot.json")
+        
+        self.legacyConverts()
+
+    def legacyConverts(self):#converts tags from legacy portions of the code or removes them if unnessisary
+        try:
+            self.chatbotIdentifier = fileIO.loadConf("config{0}chatbot{0}chatbotIdentifier.json")
+            self.chatbot["Identifier"] = self.chatbotIdentifier.pop("Format")
+            filename = "config{0}chatbot{0}chatbotIdentifier.json".format(os.sep)
+            fileIO.fileSave(filename,self.chatbotIdentifier)
+        except:
+            pass
 
     async def sortMessage(self,message): #sorts messages sending themto the correct locations
         self.l.logger.debug(message.__dict__) #more or less debug code
@@ -43,11 +57,11 @@ class chatbot:
                         
 
     async def serviceIdentifier(self,fromService,fromServer,fromChannel,toService,toServer,toChannel,message): #adds a smaller easier identifier to the messages
-        for key ,val in config.chatbotIdentifier.items(): #cycles through everything to eventually possibly find a match
+        for key ,val in config.chatbot.items(): #cycles through everything to eventually possibly find a match
             if val["To"]["Service"] == toService and val["From"]["Service"] == fromService:
                 if val["To"]["Server"] == toServer and val["From"]["Server"] == fromServer:
                     if val["To"]["Channel"] == toChannel and val["From"]["Channel"] == fromChannel:
-                        return "{0}".format(val["Format"])#formats the message potentially
+                        return "{0}".format(val["Identifier"])#formats the message potentially
         return "" #returns nothing if all else fails
 
 
@@ -59,11 +73,11 @@ class chatbot:
 
     #work to remove this stuff eventually
     async def serviceIdentifierOld(self,fromService,fromServer,fromChannel,toService,toServer,toChannel,message): #adds a smaller easier identifier to the messages
-        for key ,val in config.chatbotIdentifier.items(): #cycles through everything to eventually possibly find a match
+        for key ,val in config.chatbot.items(): #cycles through everything to eventually possibly find a match
             if val["To"]["Service"] == toService and val["From"]["Service"] == fromService:
                 if val["To"]["Server"] == toServer and val["From"]["Server"] == fromServer:
                     if val["To"]["Channel"] == toChannel and val["From"]["Channel"] == fromChannel:
-                        return "{0} {1}".format(val["Format"],message)#formats the message potentially
+                        return "{0} {1}".format(val["Identifier"],message)#formats the message potentially
         return message #returns unformatted message if all else fails
 
 
