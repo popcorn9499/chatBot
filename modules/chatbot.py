@@ -16,6 +16,8 @@ class chatbot:
         self.l.logger.info("Starting")
         config.events.onMessage += self.sortMessage
         self.l.logger.info("Started")
+        fileIO.checkFolder("config{0}chatbot{0}".format(os.sep),"chatbot",self.l)
+        fileIO.checkFile("config-example{0}chatbot{0}chatbot.json".format(os.sep),"config{0}chatbot{0}chatbot.json".format(os.sep),"chatbot.json",self.l)
         self.chatbot =  fileIO.loadConf("config{0}chatbot{0}chatbot.json")
         
         self.legacyConverts()
