@@ -268,7 +268,7 @@ class Youtube:
                 #await self.listLiveBroadcasts()
                 if counter == 20:
                     filePath = "config{0}auth{0}youtube.json".format(os.sep)
-                    data = {"Enabled": self.enabled, "pageToken": self.pageToken}
+                    data = {"Enabled": self.enabled, "pageToken": self.pageToken, "selfMsgFilter": self.msgCheckList}
                     fileIO.fileSave(filePath,data)
                     counter=0
                     self.l.logger.debug("Saving")
