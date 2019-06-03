@@ -69,7 +69,7 @@ class Discord:
             l.logger.debug(message.author.name)
             attachments = "" #gets the attachments so we dont loose that
             for i in message.attachments:
-                attachments += i["url"]
+                attachments += i.url + " "
             messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
             roleList={}
             try: 
