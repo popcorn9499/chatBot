@@ -90,6 +90,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                     else:
                         print(data)
                         await self._decoded_send(data, loop,host)
+                except ConnectionResetError:
+                    self.ircConnect(loop,host)
+                    break
                 except asyncio.streams.IncompleteReadError:
                     pass
             else:
