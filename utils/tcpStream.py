@@ -3,6 +3,7 @@ from utils import logger
 import struct
 import codecs
 import sys
+import traceback
 
 
 class tcpServer():
@@ -67,6 +68,7 @@ class tcpServer():
             except Exception as e: #filter out any potential crashes
                 print("exception")
                 print(e)
+                print(traceback.format_exc())
                 pass
             await asyncio.sleep(0.01)
 
