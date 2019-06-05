@@ -51,7 +51,7 @@ class tcpServer():
             else:
                 print("data not convertable")
         except ConnectionResetError:
-            pass
+            print("Error connection died")
 
     async def read(self): #reads data out of the connection asyncly
         while True: #continuously reads data out of the connection sending callbacks to the handlers to handle said data
