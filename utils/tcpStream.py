@@ -46,7 +46,9 @@ class tcpServer():
         dataBytes = None
         try: #prevents any errors from crashing the task
             if (type(data) == str):
-                self.writer.write(data.encode('utf-16-le').strip(codecs.BOM_UTF16))
+                data = data + "\r\n"
+                self.writer.write(data.encode())
+                print("Data Sent")
                 await self.writer.drain()
             else:
                 print("data not convertable")
