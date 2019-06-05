@@ -58,10 +58,13 @@ class tcpServer():
     async def read(self): #reads data out of the connection asyncly
         while True: #continuously reads data out of the connection sending callbacks to the handlers to handle said data
             try:
-                dataBytes = await self.reader.readuntil('weDone'.encode('utf-16-le').strip(codecs.BOM_UTF16)) #gets the data
-                data=dataBytes.decode('utf-16-le')
+                dataBytes = await self.reader.readuntil('\r\n'.encode()) #gets the data
+                data=dataBytes.decode()
+                print("DATAAA")
                 if (data != ""): #prevents empty strings
-                    loop = asyncio.get_event_loop()                
+                    loop = asyncio.get_event_loop()
+                    data = data.replace("\r\n","")
+                    print("got data")                
                     for callback in self.readerCallBack: #handles creating events for when data comes in to handle the data coming in and out
                         loop.create_task(callback(data))
             except ConnectionResetError: #handles errors on connect resets
