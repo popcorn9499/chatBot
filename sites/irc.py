@@ -70,7 +70,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                         self.l.logger.info("{0} - Joining channel {1}".format(host,key))
                 await asyncio.sleep(3)
                 self.l.logger.info("{0} - Initiating IRC Reader".format(host))
-                self.msgHandlerTasks.append({host: loop.create_task(self.handleMsg(loop,host))}) 
+                self.msgHandlerTasks.update({host: loop.create_task(self.handleMsg(loop,host))}) 
             except Exception as e:
                 self.l.logger.info(e)
             await asyncio.sleep(10) #retry timeout
