@@ -65,6 +65,9 @@ class tcpServer():
             except ConnectionResetError: #handles errors on connect resets
                 print("Connection Disconnect")
                 break
+
+            except asyncio.streams.IncompleteReadError: #consider too many read errors killing the connection
+                pass 
             except Exception as e: #filter out any potential crashes
                 print("exception")
                 print(e)
