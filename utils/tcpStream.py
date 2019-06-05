@@ -32,6 +32,9 @@ class tcpServer():
     async def readerCallBackAdder(self,callback): #allows the user to add a callback handle
         self.readerCallBack.append(callback)
 
+    async def readerCallbackRemover(self,callback):
+        self.readerCallBack.remove(callback)
+
     async def connectionHandler(self, reader, writer): #handles connections for a single connection.    
         #this will only allow for one connection for port at this current time. may change in the future
         self.reader = reader
@@ -52,7 +55,7 @@ class tcpServer():
     async def read(self): #reads data out of the connection asyncly
         while True: #continuously reads data out of the connection sending callbacks to the handlers to handle said data
             try:
-                dataBytes = await self.reader.readuntil('aaaa'.encode('utf-16-le').strip(codecs.BOM_UTF16)) #gets the data
+                dataBytes = await self.reader.readuntil('weDone'.encode('utf-16-le').strip(codecs.BOM_UTF16)) #gets the data
                 data=dataBytes.decode('utf-16-le')
                 if (data != ""): #prevents empty strings
                     loop = asyncio.get_event_loop()                
