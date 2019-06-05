@@ -33,11 +33,9 @@ class tcpServer():
     async def readerCallBackAdder(self,callback): #allows the user to add a callback handle
         self.readerCallBack.append(callback)
 
-    async def readerCallbackRemover(self,callback):
-        self.readerCallBack.remove(callback)
-
     async def connectionHandler(self, reader, writer): #handles connections for a single connection.    
         #this will only allow for one connection for port at this current time. may change in the future
+        print("ServerStarted")
         self.reader = reader
         self.writer = writer
         await self.read()
