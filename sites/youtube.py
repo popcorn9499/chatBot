@@ -21,6 +21,8 @@ from utils import messageFormatter
 from utils import fileIO
 import asyncio
 
+import datetime
+
 
 
 
@@ -152,7 +154,7 @@ class Youtube:
                         else: #check if the message was sent by the bot or not
                             msgFound = False
                             for oldMsg in self.msgCheckList:
-                                if oldMsg == message:
+                                if oldMsg["Message"] == message:
                                     msgFound = True
                             if not msgFound: #if message not sent by bot then send it
                                 self.l.logger.info("{0} {1}".format(username,message))
@@ -178,6 +180,8 @@ class Youtube:
     async def weedMsg(self,userID,message):
         # False means its a safe message
         # true means it should be weeded out
+
+        ##This isnt really needed anymore
         
         if userID == self.userID:
             for i in self.msgCheckList:
@@ -186,6 +190,13 @@ class Youtube:
                 return True
         else:
             return False
+
+
+    async def clearMsgList(self):
+        oldTime = datetime.time.now() - datetime.timedelta(minutes=15)
+        for msg in self.msgCheckList:
+            if self.msgCheckList["time"] < oldTime:
+                self.msgCheckList.remove(msg)
 
 
     async def processMsg(self,username,message,roleList):
@@ -241,7 +252,9 @@ class Youtube:
         while self.serviceStarted != True:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Youtube": #determines if its the right service and supposed to be here
-            self.msgCheckList.append(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #keeps track of old messages so that we can check and not listen to these
+            msg = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
+            time = datetime.datetime.now()
+            self.msgCheckList.append({"Time":time, "Message":msg}) #keeps track of old messages so that we can check and not listen to these
             list_chatmessages_inset = self.youtube.liveChatMessages().insert(
                 part = "snippet",
                 body = dict (
@@ -249,7 +262,7 @@ class Youtube:
                         liveChatId = self.liveChatId,
                         type = "textMessageEvent",
                         textMessageDetails = dict(
-                            messageText = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
+                            messageText = msg
                         )
                     )
                 )
@@ -282,6 +295,8 @@ class Youtube:
                     fileIO.fileSave(filePath,data)
                     counter=0
                     self.l.logger.debug("Saving")
+
+                    self.clearMsgList()
                 counter+=1
                 #except googleapiclient.errors.HttpError:
                     #youtube = self.Login()
