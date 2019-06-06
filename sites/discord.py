@@ -81,18 +81,25 @@ class Discord:
             #await client.delete_message(message)
             channelName = ""
             serverName = ""
+            authorName = ""
             if (isinstance(message.channel, discord.channel.TextChannel)):
                 channelName = message.channel.name
                 serverName = message.guild.name
+                if message.author.nick != None:
+                    authorName = message.author.nick
+                else:
+                    authorName = message.author.name
             elif (isinstance(message.channel, discord.channel.DMChannel)):
                 channelName = "#{0}".format(message.author.name)
                 serverName = "DM"
+                authorName =message.author.name
             elif (isinstance(message.channel, discord.channel.GroupChannel)):
                 channelName = message.channel.name
                 serverName = "GroupDM"
+                authorName =message.author.name
 
-            formatOptions = {"%authorName%": message.author.name, "%channelFrom%": channelName, "%serverFrom%": serverName, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
-            msg = Object.ObjectLayout.message(Author=message.author.name,Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList)
+            formatOptions = {"%authorName%": authorName, "%channelFrom%": channelName, "%serverFrom%": serverName, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
+            msg = Object.ObjectLayout.message(Author=authorName,Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList)
             objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
             objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=msg, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged=message)
             config.events.onMessage(message=objSendMsg)

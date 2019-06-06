@@ -3,6 +3,7 @@ from utils import logger
 import struct
 import codecs
 import sys
+import traceback
 
 
 class tcpServer():
@@ -34,6 +35,7 @@ class tcpServer():
 
     async def connectionHandler(self, reader, writer): #handles connections for a single connection.    
         #this will only allow for one connection for port at this current time. may change in the future
+        print("ServerStarted")
         self.reader = reader
         self.writer = writer
         await self.read()
@@ -42,28 +44,37 @@ class tcpServer():
         dataBytes = None
         try: #prevents any errors from crashing the task
             if (type(data) == str):
-                self.writer.write(data.encode('utf-16-le').strip(codecs.BOM_UTF16))
+                data = data + "\r\n"
+                self.writer.write(data.encode())
+                print("Data Sent")
                 await self.writer.drain()
             else:
                 print("data not convertable")
         except ConnectionResetError:
-            pass
+            print("Error connection died")
 
     async def read(self): #reads data out of the connection asyncly
         while True: #continuously reads data out of the connection sending callbacks to the handlers to handle said data
             try:
-                dataBytes = await self.reader.readuntil('aaaa'.encode('utf-16-le').strip(codecs.BOM_UTF16)) #gets the data
-                data=dataBytes.decode('utf-16-le')
+                dataBytes = await self.reader.readuntil('\r\n'.encode()) #gets the data
+                data=dataBytes.decode()
+                print("DATAAA")
                 if (data != ""): #prevents empty strings
-                    loop = asyncio.get_event_loop()                
+                    loop = asyncio.get_event_loop()
+                    data = data.replace("\r\n","")
+                    print("got data")                
                     for callback in self.readerCallBack: #handles creating events for when data comes in to handle the data coming in and out
                         loop.create_task(callback(data))
             except ConnectionResetError: #handles errors on connect resets
                 print("Connection Disconnect")
                 break
+
+            except asyncio.streams.IncompleteReadError: #consider too many read errors killing the connection
+                pass 
             except Exception as e: #filter out any potential crashes
                 print("exception")
                 print(e)
+                print(traceback.format_exc())
                 pass
             await asyncio.sleep(0.01)
 
