@@ -37,6 +37,7 @@ class Youtube:
         fileIO.checkFile("config-example{0}auth{0}youtube.json".format(os.sep),"config{0}auth{0}youtube.json".format(os.sep),"youtube.json",self.l)
         self.enabled = fileIO.loadConf("config{0}auth{0}youtube.json")["Enabled"]
         self.pageToken = fileIO.loadConf("config{0}auth{0}youtube.json")["pageToken"]
+        self.olgMessageList = [] #keeps track of old messages to filter out
         if (self.enabled):
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
             self.msgCheckList = fileIO.loadConf("config{0}auth{0}youtube.json")["selfMsgFilter"]
@@ -148,7 +149,15 @@ class Youtube:
                         if (userID != self.botUserID):#await self.weedMsg(userId,message)):
                             self.l.logger.info("{0} {1}".format(username,message))
                             await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
- 
+                        else: #check if the message was sent by the bot or not
+                            msgFound = False
+                            for oldMsg in self.msgCheckList:
+                                if oldMsg == message:
+                                    msgFound = True
+                            if not msgFound: #if message not sent by bot then send it
+                                self.l.logger.info("{0} {1}".format(username,message))
+                                await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
+                            
                         # if userID != self.botUserID:
                         #     self.l.logger.info("{0} {1}".format(username,message))
                         #     await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
@@ -228,10 +237,11 @@ class Youtube:
 
         
     async def sendLiveChat(self,sndMessage): #sends messages to youtube live chat
-
+        
         while self.serviceStarted != True:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Youtube": #determines if its the right service and supposed to be here
+            self.msgCheckList.append(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #keeps track of old messages so that we can check and not listen to these
             list_chatmessages_inset = self.youtube.liveChatMessages().insert(
                 part = "snippet",
                 body = dict (
