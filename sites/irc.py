@@ -24,6 +24,8 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         config.events.onMessageSend += self.sendMSG
         self.writer = {}
         self.reader = {}
+
+        self.msgHandlerTasks = {}
     
     async def irc_bot(self, loop): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.        
         for sKey, sVal in config.c.irc["Servers"].items():
@@ -38,39 +40,61 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             self.l.logger.info("Connected: " + host)#wtf is this ment for anymore?
         except UnboundLocalError:
             pass
+
+        
             
     async def ircConnect(self,loop,host):#handles the irc connection
-        self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config.c.irc["Servers"][host]["Port"], loop=loop)
-        self.reader.update({host: self.readerBasic})
-        self.writer.update({host: self.writerBasic})
-        #print(self.reader)
-        #print(self.writer)
-        self.l.logger.debug("{0} - Reader {1} ".format(host,self.reader))
-        self.l.logger.debug("{0} - Writer {1} ".format(host, self.writer))
-        await asyncio.sleep(3)
-        if config.c.irc["Servers"][host]["Password"] != "":
-            self.writer[host].write(b'PASS ' + config.c.irc["Servers"][host]["Password"].encode('utf-8') + b'\r\n')
-            self.l.logger.info("{0} - Inputing password ".format(host)) #,"Info")
-        self.l.logger.info("{0} - Setting user {1}+ ".format(host,config.c.irc["Servers"][host]["Nickname"]))
-        self.writer[host].write(b'NICK ' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
-        self.l.logger.info("{0} - Setting user {1}".format(host,config.c.irc["Servers"][host]["Nickname"]))
-        self.writer[host].write(b'USER ' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b' B hi :' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
-        await asyncio.sleep(3)
-        self.l.logger.info("{0} - Joining channels".format(host))
-        for key, val in config.c.irc["Servers"][host]["Channel"].items():
-            if val["Enabled"] == True:
-                print(key)
-                self.writer[host].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
-                self.l.logger.info("{0} - Joining channel {1}".format(host,key))
-        await asyncio.sleep(3)
-        self.l.logger.info("{0} - Initiating IRC Reader".format(host))
-        loop.create_task(self.handleMsg(loop,host)) 
+        while True:
+            try:
+                self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config.c.irc["Servers"][host]["Port"], loop=loop)
+                self.reader.update({host: self.readerBasic})
+                self.writer.update({host: self.writerBasic})
+                #print(self.reader)
+                #print(self.writer)
+                self.l.logger.debug("{0} - Reader {1} ".format(host,self.reader))
+                self.l.logger.debug("{0} - Writer {1} ".format(host, self.writer))
+                await asyncio.sleep(3)
+                if config.c.irc["Servers"][host]["Password"] != "":
+                    self.writer[host].write(b'PASS ' + config.c.irc["Servers"][host]["Password"].encode('utf-8') + b'\r\n')
+                    self.l.logger.info("{0} - Inputing password ".format(host)) #,"Info")
+                self.l.logger.info("{0} - Setting user {1}+ ".format(host,config.c.irc["Servers"][host]["Nickname"]))
+                self.writer[host].write(b'NICK ' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
+                self.l.logger.info("{0} - Setting user {1}".format(host,config.c.irc["Servers"][host]["Nickname"]))
+                self.writer[host].write(b'USER ' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b' B hi :' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
+                await asyncio.sleep(3)
+                self.l.logger.info("{0} - Joining channels".format(host))
+                for key, val in config.c.irc["Servers"][host]["Channel"].items():
+                    if val["Enabled"] == True:
+                        print(key)
+                        self.writer[host].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
+                        self.l.logger.info("{0} - Joining channel {1}".format(host,key))
+                await asyncio.sleep(3)
+                self.l.logger.info("{0} - Initiating IRC Reader".format(host))
+                self.msgHandlerTasks.update({host: loop.create_task(self.handleMsg(loop,host))}) 
+            except Exception as e:
+                self.l.logger.info(e)
+            await asyncio.sleep(10) #retry timeout
+        
+
+
+    async def keepAlive(self,loop,host):
+        while True:
+            try:
+                self.writer[host].write("PING {0} ".format(host).encode("utf-8") + b'\r\n')
+            except ConnectionResetError:
+                self.msgHandlerTasks[host].cancel() #kills the handler task to recreate the entire connection again
+                await self.ircConnect(loop,host)
+                break
+            except asyncio.streams.IncompleteReadError:
+                pass
+            await asyncio.sleep(60)
                    
        
             
     async def handleMsg(self,loop,host):
         #info_pattern = re.compile(r'00[1234]|37[526]|CAP')
         await asyncio.sleep(1)
+        loop.create_task(self.keepAlive(loop,host)) #creates the keep alive task
         while True:
             if host in self.reader:
                 try:
@@ -83,6 +107,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                     if data == []:
                         pass
                     elif data[0] == 'PING':
+                        print(data)
                         self.writer[host].write(b'PONG %s\r\n' % data[1].encode("utf-8"))
                     # elif data[0] == ':user1.irc.popicraft.net' or data[0] ==':irc.popicraft.net' or info_pattern.match(data[1]):
                         # print('[Twitch] ', ' '.join(data))
@@ -91,7 +116,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                         print(data)
                         await self._decoded_send(data, loop,host)
                 except ConnectionResetError:
-                    self.ircConnect(loop,host)
+                    #self.ircConnect(loop,host)
                     break
                 except asyncio.streams.IncompleteReadError:
                     pass
