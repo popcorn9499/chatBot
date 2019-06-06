@@ -153,7 +153,7 @@ class Youtube:
                             await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
                         else: #check if the message was sent by the bot or not
                             msgFound = False
-                            for oldMsg in self.msgCheckList:
+                            for oldMsg in self.olgMessageList:
                                 if oldMsg["Message"] == message:
                                     msgFound = True
                             if not msgFound: #if message not sent by bot then send it
@@ -193,10 +193,10 @@ class Youtube:
 
 
     async def clearMsgList(self):
-        oldTime = datetime.time.now() - datetime.timedelta(minutes=15)
-        for msg in self.msgCheckList:
-            if self.msgCheckList["time"] < oldTime:
-                self.msgCheckList.remove(msg)
+        oldTime = datetime.datetime.now() - datetime.timedelta(minutes=15)
+        for msg in self.olgMessageList:
+            if msg["Time"] < oldTime:
+                self.olgMessageList.remove(msg)
 
 
     async def processMsg(self,username,message,roleList):
@@ -254,7 +254,7 @@ class Youtube:
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Youtube": #determines if its the right service and supposed to be here
             msg = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             time = datetime.datetime.now()
-            self.msgCheckList.append({"Time":time, "Message":msg}) #keeps track of old messages so that we can check and not listen to these
+            self.olgMessageList.append({"Time":time, "Message":msg}) #keeps track of old messages so that we can check and not listen to these
             list_chatmessages_inset = self.youtube.liveChatMessages().insert(
                 part = "snippet",
                 body = dict (
@@ -289,6 +289,7 @@ class Youtube:
                 await self.listChat()
                 #await self.listLiveStreams()
                 #await self.listLiveBroadcasts()
+                await self.clearMsgList()
                 if counter == 20:
                     filePath = "config{0}auth{0}youtube.json".format(os.sep)
                     data = {"Enabled": self.enabled, "pageToken": self.pageToken, "selfMsgFilter": self.msgCheckList}
@@ -296,7 +297,7 @@ class Youtube:
                     counter=0
                     self.l.logger.debug("Saving")
 
-                    self.clearMsgList()
+                    
                 counter+=1
                 #except googleapiclient.errors.HttpError:
                     #youtube = self.Login()
