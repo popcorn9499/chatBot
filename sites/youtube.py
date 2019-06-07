@@ -39,7 +39,7 @@ class Youtube:
         fileIO.checkFile("config-example{0}auth{0}youtube.json".format(os.sep),"config{0}auth{0}youtube.json".format(os.sep),"youtube.json",self.l)
         self.enabled = fileIO.loadConf("config{0}auth{0}youtube.json")["Enabled"]
         self.pageToken = fileIO.loadConf("config{0}auth{0}youtube.json")["pageToken"]
-        self.oldMessageList = [] #keeps track of old messages to filter out
+        self.olgMessageList = [] #keeps track of old messages to filter out
         if (self.enabled):
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
             self.msgCheckList = fileIO.loadConf("config{0}auth{0}youtube.json")["selfMsgFilter"]
@@ -153,7 +153,7 @@ class Youtube:
                             await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
                         else: #check if the message was sent by the bot or not
                             msgFound = False
-                            for oldMsg in self.oldMessageList:
+                            for oldMsg in self.olgMessageList:
                                 if oldMsg["Message"] == message:
                                     msgFound = True
                             if not msgFound: #if message not sent by bot then send it
@@ -194,9 +194,9 @@ class Youtube:
 
     async def clearMsgList(self):
         oldTime = datetime.datetime.now() - datetime.timedelta(minutes=15)
-        for msg in self.oldMessageList:
+        for msg in self.olgMessageList:
             if msg["Time"] < oldTime:
-                self.oldMessageList.remove(msg)
+                self.olgMessageList.remove(msg)
 
 
     async def processMsg(self,username,message,roleList):
@@ -254,7 +254,7 @@ class Youtube:
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Youtube": #determines if its the right service and supposed to be here
             msg = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             time = datetime.datetime.now()
-            self.oldMessageList.append({"Time":time, "Message":msg}) #keeps track of old messages so that we can check and not listen to these
+            self.olgMessageList.append({"Time":time, "Message":msg}) #keeps track of old messages so that we can check and not listen to these
             list_chatmessages_inset = self.youtube.liveChatMessages().insert(
                 part = "snippet",
                 body = dict (
