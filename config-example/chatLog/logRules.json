@@ -1,9 +1,17 @@
 {
     "1": {
         "Channel": "test2",
-        "Enabled": true,
+        "Enabled": false,
         "Formatting": "{0} {1} {2} {3} {4}",
         "Server": "Popicraft Network",
-        "Service": "Discord"
+        "Service": "Discord",
+        "IgnoreList": [
+            {
+                "Service": "Discord",
+                "Server": "Popicraft Network",
+                "Channel": "Console"
+            }
+        ]
+
     }
 }
