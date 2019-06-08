@@ -6,6 +6,7 @@ from utils import fileIO
 l = logger.logs("Messages")
 
 async def formatter(unformatMsg,formattingOptions="default.json",formatType="File"):
+    fileIO.checkFolder("config{0}ChatFormatting{0}".format(os.sep),"ChatFormatting",None)
     if (formatType == "File"):
         formatting = fileIO.loadConf("config{0}ChatFormatting{0}"+formattingOptions)["Format"]
     elif (formatType == "Other") or (formatType == "MutedOther"):
