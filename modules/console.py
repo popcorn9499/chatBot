@@ -23,10 +23,10 @@ class console(logging.Handler):
         fileIO.checkFolder("config{0}console{0}".format(os.sep),"console",self.l)
         fileIO.checkFile("config-example{0}console{0}console.json".format(os.sep),"config{0}console{0}console.json".format(os.sep),"console.json",self.l)
         file = fileIO.loadConf("config{0}console{0}console.json")
-
+        
         self.consoleOutputs = file["Consoles"]
 
-
+        
         super().__init__()
 
     def emit(self, record):#creates the log file with whats required
@@ -54,5 +54,15 @@ class console(logging.Handler):
         
      
 
-logger.loggerHandlers.add_Logging_Handler(console())
-print("Attaching console")
+l = logger.logs("Console")
+fileIO.checkFolder("config{0}console{0}".format(os.sep),"console",l)
+fileIO.checkFile("config-example{0}console{0}console.json".format(os.sep),"config{0}console{0}console.json".format(os.sep),"console.json",l)
+file = fileIO.loadConf("config{0}console{0}console.json")
+
+if (not 'Enabled' in file):
+    file.update({"Enabled": False})
+    fileIO.fileSave("config{0}console{0}console.json".format(os.sep), file)
+
+if file["Enabled"] == True:
+    logger.loggerHandlers.add_Logging_Handler(console())
+    print("Attaching console")
