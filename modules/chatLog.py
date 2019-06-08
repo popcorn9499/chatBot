@@ -24,10 +24,18 @@ class chatLog:
         self.l.logger.debug(message.Message.__dict__)
         if message.DeliveryDetails.Module == "Site":
             for key ,val in self.chatLogRules.items():
-                objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="ChatLog",ModuleTo="Site",Service=val["Service"], Server=val["Server"],Channel=val["Channel"]) #prepares the delivery location
-                await self.sendMessage(message=message.Message,objDeliveryDetails=objDeliveryDetails, FormattingOptions=message.FormattingOptions,messageUnchanged=message.messageUnchanged)
-            pass
+                if await self.ifEnabled(key,val):
+                    objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="ChatLog",ModuleTo="Site",Service=val["Service"], Server=val["Server"],Channel=val["Channel"]) #prepares the delivery location
+                    await self.sendMessage(message=message.Message,objDeliveryDetails=objDeliveryDetails, FormattingOptions=message.FormattingOptions,messageUnchanged=message.messageUnchanged)
 
+
+    async def ifEnabled(self,key,val): #checks if the logging is enabled. also adds the option if it doesn't already exist
+        self.l.logger.info("Checking if enabled")
+        if not 'Enabled' in val:
+            self.l.logger.info("Missing")
+            self.chatLogRules[key].update({"Enabled": True})
+            fileIO.fileSave("config{0}chatLog{0}logRules.json".format(os.sep),self.chatLogRules)
+        return val["Enabled"]
 
     async def sendMessage(self,message,objDeliveryDetails,FormattingOptions,messageUnchanged): #sends the message
         formatterOptions = {""}
