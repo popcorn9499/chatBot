@@ -22,7 +22,8 @@ class tcpServer():
         print("Starting tcp server")
         while True: #handles reloads the server
             try:
-                self.server = await asyncio.start_server(self.connectionHandler, self.ipAddress, self.port )
+                loop = asyncio.get_event_loop()
+                self.server = await asyncio.start_server(self.connectionHandler, self.ipAddress, self.port,loop=loop)
                 async with self.server:
                     await self.server.serve_forever()
             except:
