@@ -32,8 +32,8 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             if sVal["Enabled"] == True:
                 host = sKey
                 print(type(host))
-                self.l.logger.info("{0} - Connecting".format(host)) 
-                await self.ircConnect(loop,host)
+                self.l.logger.info("{0} - Connecting".format(host))
+                loop.create_task(self.ircConnect(loop,host))
             else:
                 await asyncio.sleep(3)
         try:#stops the crash if no irc settings r set
