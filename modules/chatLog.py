@@ -25,7 +25,7 @@ class chatLog:
         if message.DeliveryDetails.Module == "Site":
             for key ,val in self.chatLogRules.items():
                 isEnabled = await self.ifEnabled(key,val)            
-                isIgnored = await self.checkIgnoreList(message.Message.Server,message.Message.Channel, message.Message.Service)
+                isIgnored = await self.checkIgnoreList(message.Message.Server,message.Message.Channel, message.Message.Service,val)
                 if isEnabled and not isIgnored:
                     objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="ChatLog",ModuleTo="Site",Service=val["Service"], Server=val["Server"],Channel=val["Channel"]) #prepares the delivery location
                     await self.sendMessage(message=message.Message,objDeliveryDetails=objDeliveryDetails, FormattingOptions=message.FormattingOptions,messageUnchanged=message.messageUnchanged)
