@@ -20,7 +20,11 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         config.c.irc = fileIO.loadConf("config{0}auth{0}irc.json")
         
         self.l.logger.info("Starting")
-        self.serviceStarted = True
+        #self.serviceStarted = False
+        self.serviceStarted = {}
+        for sKey, sVal in config.c.irc["Servers"].items():
+            if sVal["Enabled"] == True:
+                self.serviceStarted.update({sKey:False})
         config.events.onMessageSend += self.sendMSG
         self.writer = {}
         self.reader = {}
@@ -70,7 +74,8 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                         self.l.logger.info("{0} - Joining channel {1}".format(host,key))
                 await asyncio.sleep(3)
                 self.l.logger.info("{0} - Initiating IRC Reader".format(host))
-                self.msgHandlerTasks.update({host: loop.create_task(self.handleMsg(loop,host))}) 
+                self.msgHandlerTasks.update({host: loop.create_task(self.handleMsg(loop,host))})
+                self.serviceStarted[host] = True 
                 while not self.msgHandlerTasks[host].done():
                     await asyncio.sleep(5)
             except Exception as e:
@@ -183,7 +188,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 
                 
     async def sendMSG(self,sndMessage): #sends messages to youtube live chat
-        while self.serviceStarted != True:
+        while self.serviceStarted[sndMessage.DeliveryDetails.Server] != True:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "irc": #determines if its the right service and supposed to be here
             #print(await sndMessage.DeliveryDetails.Channel,messageFormatter.formatter(sndMessage))
