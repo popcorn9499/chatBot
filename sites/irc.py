@@ -82,12 +82,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
     async def keepAlive(self,loop,host):
         while True:
             try:
-                self.l.logger.info("Pinging {0} from user {1}".format(host,config.c.irc["Servers"][host]["Nickname"]))
                 self.writer[host].write("PING {0} ".format(host).encode("utf-8") + b'\r\n')
             except ConnectionResetError:
                 self.msgHandlerTasks[host].cancel() #kills the handler task to recreate the entire connection again
-                self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
-                await asyncio.sleep(10)
                 await self.ircConnect(loop,host)
                 break
             except asyncio.streams.IncompleteReadError:
