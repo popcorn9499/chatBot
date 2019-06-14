@@ -41,6 +41,7 @@ class Youtube:
         self.enabled = fileIO.loadConf("config{0}auth{0}youtube.json")["Enabled"]
         self.pageToken = fileIO.loadConf("config{0}auth{0}youtube.json")["pageToken"]
         self.oldMessageList = [] #keeps track of old messages to filter out
+        self.messageFrequency = 0
         if (self.enabled):
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
             self.msgCheckList = fileIO.loadConf("config{0}auth{0}youtube.json")["selfMsgFilter"]
@@ -139,7 +140,7 @@ class Youtube:
                 youtube = self.Login()
                 continuation = False 
             
-            
+            amount = 0
             if continuation == True:
                 for temp in list_chatmessages["items"]: #goes through all the stuff in the list messages list
                     message = temp["snippet"]["displayMessage"] #gets the display message
@@ -153,6 +154,7 @@ class Youtube:
                         if (userID != self.botUserID):#await self.weedMsg(userId,message)):
                             self.l.logger.info("{0} {1}".format(username,message))
                             await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
+                            amount = amount + 1
                         else: #check if the message was sent by the bot or not
                             msgFound = False
                             for oldMsg in self.oldMessageList:
@@ -161,6 +163,7 @@ class Youtube:
                             if not msgFound: #if message not sent by bot then send it
                                 self.l.logger.info("{0} {1}".format(username,message))
                                 await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
+                                amount = amount + 1
                             
                         # if userID != self.botUserID:
                         #     self.l.logger.info("{0} {1}".format(username,message))
@@ -174,6 +177,7 @@ class Youtube:
                         #     except AttributeError as error:
                         #         self.l.logger.info("{0} {1}".format(username,message))
                         #         await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
+            self.messageFrequency = amount
         except ConnectionResetError:
             x = 1
             youtube = await self.Login()
@@ -304,7 +308,13 @@ class Youtube:
                 #except googleapiclient.errors.HttpError:
                     #youtube = self.Login()
                     #self.l.logger.info('Connection Error reconnecting')
-            await asyncio.sleep(2)
+            if self.messageFrequency == 0: #this should prevent overuse of the google api quota slowing down the bot during times of low use and speeding it up during times of high use
+                await asyncio.sleep(20)
+            elif self.messageFrequency == 1:
+                await asyncio.sleep(5)
+            elif self.messageFrequency > 1:
+
+                await asyncio.sleep(1)
 
 
 y = Youtube()
