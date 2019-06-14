@@ -130,7 +130,7 @@ class Youtube:
                 list_chatmessages = self.youtube.liveChatMessages().list( #lists the chat messages
                     part="id,snippet,authorDetails", #gets the author details needed and the snippet all of which giving me the message and username
                     liveChatId=self.liveChatId,
-                    maxResults=500,
+                    maxResults=20,
                     pageToken=self.pageToken #gives the previous token so it loads a new section of the chat
                 ).execute() #executes it so its not just some object
                 self.pageToken = list_chatmessages["nextPageToken"] #page token for next use
