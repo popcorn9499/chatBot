@@ -188,9 +188,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 
                 
     async def sendMSG(self,sndMessage): #sends messages to youtube live chat
-        while self.serviceStarted[sndMessage.DeliveryDetails.Server] != True:
-            await asyncio.sleep(0.2)
-        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "irc": #determines if its the right service and supposed to be here
+        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "irc": #determines if its the right service and supposed to be here 
+            while self.serviceStarted[sndMessage.DeliveryDetails.Server] != True:
+                await asyncio.sleep(0.2)
             #print(await sndMessage.DeliveryDetails.Channel,messageFormatter.formatter(sndMessage))
             msg = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             #print(sndMessage.DeliveryDetails.Server)
