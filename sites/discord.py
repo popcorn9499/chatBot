@@ -99,7 +99,7 @@ class Discord:
                 authorName =message.author.name
 
             formatOptions = {"%authorName%": authorName, "%channelFrom%": channelName, "%serverFrom%": serverName, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
-            msg = Object.ObjectLayout.message(Author=authorName,Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList)
+            msg = Object.ObjectLayout.message(Author=authorName,User=str(message.author),Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList)
             objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
             objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=msg, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged=message)
             config.events.onMessage(message=objSendMsg)
