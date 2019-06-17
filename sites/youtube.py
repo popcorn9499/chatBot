@@ -296,7 +296,7 @@ class Youtube:
                 #await self.listLiveStreams()
                 #await self.listLiveBroadcasts()
                 await self.clearMsgList()
-                if counter == 20:
+                if counter == 5:
                     filePath = "config{0}auth{0}youtube.json".format(os.sep)
                     data = {"Enabled": self.enabled, "pageToken": self.pageToken, "selfMsgFilter": self.msgCheckList}
                     fileIO.fileSave(filePath,data)
@@ -313,7 +313,6 @@ class Youtube:
             elif self.messageFrequency == 1:
                 await asyncio.sleep(5)
             elif self.messageFrequency > 1:
-
                 await asyncio.sleep(1)
 
 
