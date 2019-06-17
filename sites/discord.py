@@ -82,6 +82,7 @@ class Discord:
             channelName = ""
             serverName = ""
             authorName = ""
+            profilePic = message.author.avatar_url
             if (isinstance(message.channel, discord.channel.TextChannel)):
                 channelName = message.channel.name
                 serverName = message.guild.name
@@ -99,7 +100,7 @@ class Discord:
                 authorName =message.author.name
 
             formatOptions = {"%authorName%": authorName, "%channelFrom%": channelName, "%serverFrom%": serverName, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
-            msg = Object.ObjectLayout.message(Author=authorName,User=str(message.author),Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList)
+            msg = Object.ObjectLayout.message(Author=authorName,User=str(message.author),Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList,profilePicture=profilePic)
             objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
             objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=msg, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged=message)
             config.events.onMessage(message=objSendMsg)
