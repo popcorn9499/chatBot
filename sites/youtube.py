@@ -146,6 +146,7 @@ class Youtube:
                     message = temp["snippet"]["displayMessage"] #gets the display message
                     username = temp["authorDetails"]["displayName"] #gets the users name
                     userID = temp["authorDetails"]["channelId"]
+                    profilePic = temp["authorDetails"]["profileImageUrl"]
                     if message != "" and username != "": #this makes sure that the message and username slot arent empty before putting this to the discord chat        
                         self.l.logger.debug(temp)
                         fileIO.fileSave("youtubeMsgJson.json", temp)
@@ -153,7 +154,7 @@ class Youtube:
                         self.l.logger.debug(self.botUserID)
                         if (userID != self.botUserID):#await self.weedMsg(userId,message)):
                             self.l.logger.info("{0} {1}".format(username,message))
-                            await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
+                            await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]),profilePicture=profilePic)
                             amount = amount + 1
                         else: #check if the message was sent by the bot or not
                             msgFound = False
@@ -162,7 +163,7 @@ class Youtube:
                                     msgFound = True
                             if not msgFound: #if message not sent by bot then send it
                                 self.l.logger.info("{0} {1}".format(username,message))
-                                await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]))
+                                await self.processMsg(username=username,message=message,roleList=await self.youtubeRoles(temp["authorDetails"]),profilePicture=profilePic)
                                 amount = amount + 1
                             
                         # if userID != self.botUserID:
@@ -205,9 +206,9 @@ class Youtube:
                 self.oldMessageList.remove(msg)
 
 
-    async def processMsg(self,username,message,roleList):
+    async def processMsg(self,username,message,roleList,profilePicture):
         formatOptions = {"%authorName%": username, "%channelFrom%": "Youtube", "%serverFrom%": "Youtube", "%serviceFrom%": "youtube","%message%":"message","%roles%":roleList}
-        message = Object.ObjectLayout.message(Author=username,Contents=message,Server="Youtube",Channel="Youtube",Service="Youtube",Roles=roleList)
+        message = Object.ObjectLayout.message(Author=username,Contents=message,Server="Youtube",Channel="Youtube",Service="Youtube",Roles=roleList,profilePicture=profilePicture)
         objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
         objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged="None")
         config.events.onMessage(message=objSendMsg)
@@ -296,7 +297,7 @@ class Youtube:
                 #await self.listLiveStreams()
                 #await self.listLiveBroadcasts()
                 await self.clearMsgList()
-                if counter == 20:
+                if counter == 5:
                     filePath = "config{0}auth{0}youtube.json".format(os.sep)
                     data = {"Enabled": self.enabled, "pageToken": self.pageToken, "selfMsgFilter": self.msgCheckList}
                     fileIO.fileSave(filePath,data)
@@ -313,7 +314,6 @@ class Youtube:
             elif self.messageFrequency == 1:
                 await asyncio.sleep(5)
             elif self.messageFrequency > 1:
-
                 await asyncio.sleep(1)
 
 

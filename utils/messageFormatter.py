@@ -22,13 +22,24 @@ async def formatter(unformatMsg,formattingOptions="default.json",formatType="Fil
                 role = await findRole(unformatMsg.FormattingOptions[items])
                 formatting = formatting.replace(items,role[0])
             else:
-                print(unformatMsg.FormattingOptions)
+                print(await checkMessage(unformatMsg.FormattingOptions))
                 formatting = formatting.replace(items,unformatMsg.FormattingOptions[items])
         except KeyError: #prevents format stryings that dont exist from crashing the formatter
             pass
     if (formatType != "MutedOther"):
         l.logger.info("{0}".format(formatting))
     return formatting
+
+async def checkMessage(string):
+        output = ""
+        for x in string:
+            try:
+                x.encode('cp1252')
+                output = output+x
+            except:
+                pass
+        print(output)
+        return output
 
 async def findRole(roles):
     roleName = ""
