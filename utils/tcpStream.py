@@ -16,6 +16,7 @@ class tcpServer():
         loop = asyncio.get_event_loop()
         loop.create_task(self.manager())
         self.readerCallBack = []
+        self.onConnectCallBack = []
 
     
     async def manager(self): #manages the async connection server 
@@ -34,11 +35,18 @@ class tcpServer():
     async def readerCallBackAdder(self,callback): #allows the user to add a callback handle
         self.readerCallBack.append(callback)
 
+    async def onConnectCallBackAdder(self,callback): #allows the user to add a callback handle
+        self.onConnectCallBack.append(callback)
+
     async def connectionHandler(self, reader, writer): #handles connections for a single connection.    
         #this will only allow for one connection for port at this current time. may change in the future
         print("ServerStarted")
+        loop = asyncio.get_event_loop()
+        
         self.reader = reader
         self.writer = writer
+        for callback in self.onConnectCallBack: #handles creating events for when data comes in to handle the data coming in and out
+            loop.create_task(callback())
         await self.read()
 
     async def write(self,data):#handles writing data to the connection
