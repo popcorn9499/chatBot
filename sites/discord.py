@@ -115,7 +115,16 @@ class Discord:
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
             await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
-            
+    
+    async def discordEmbed(self,description=None,author=None,icon=None,thumbnail=None,image=None,fields=None):
+        embed=discord.Embed(description=description, colour=discord.Colour.blue())
+        embed.set_author(name=author, icon_url=icon)
+        embed.set_thumbnail(url=thumbnail)
+        embed.set_image(url=image)
+        for field in fields:
+            embed.add_field(name=field["Name"],value=field["Value"],inline=field["Inline"])
+        return embed
+
     def start(self,token):
         if config.c.discordEnabled: #allows discord to not be launched
             while True:
