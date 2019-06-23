@@ -114,9 +114,23 @@ class Discord:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
-            
+            #
             await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
     
+
+    async def discordEmbedData(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
+        embedData = {}
+        embedData.update({"description": description})
+        embedData.update({"author":author})
+        embedData.update({"icon": icon})
+        embedData.update({"thumbnail": thumbnail})
+        embedData.update({"image":image})
+        embedData.update({"fields": fields})
+        embedData.update({"color":color})
+        return embedData
+
+
+
     async def discordEmbed(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=discord.Colour.blue()):
         if description != None:
             embed=discord.Embed(description=description, colour=color)
