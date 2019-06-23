@@ -87,9 +87,12 @@ class Discord:
             if (isinstance(message.channel, discord.channel.TextChannel)):
                 channelName = message.channel.name
                 serverName = message.guild.name
-                if message.author.nick != None:
-                    authorName = message.author.nick
-                else:
+                try:
+                    if message.author.nick != None:
+                        authorName = message.author.nick
+                    else:
+                        authorName = message.author.name
+                except AttributeError: #is handled cuz webhooks dont have a nick only a name
                     authorName = message.author.name
             elif (isinstance(message.channel, discord.channel.DMChannel)):
                 channelName = "#{0}".format(message.author.name)
