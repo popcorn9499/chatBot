@@ -8,6 +8,7 @@ from utils import logger
 from utils import messageFormatter
 from utils import fileIO
 import os
+import aiohttp
 
 
 client = discord.Client() #sets this to just client for reasons cuz y not? (didnt have to be done like this honestly could of been just running discord.Client().)
@@ -125,6 +126,11 @@ class Discord:
                 await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
             elif embed != None:
                 await channel.send(embed=embed)
+
+    async def webhooks(username,message,avatar=None):
+        async with aiohttp.ClientSession() as session:
+            webhook = discord.Webhook.from_url('', adapter=discord.AsyncWebhookAdapter(session))
+            await webhook.send('Hello World', username='Foo',avatar_url=avatar)
 
     async def discordEmbedData(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
         embedData = {"type":"discordEmbed"}
