@@ -139,7 +139,7 @@ class Discord:
 
 
 
-    async def discordEmbed(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=discord.Colour.blue()):
+    async def discordEmbed(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
         if description != None:
             embed=discord.Embed(description=description, colour=color)
         else:
