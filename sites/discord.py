@@ -114,15 +114,25 @@ class Discord:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
+            
             await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
     
-    async def discordEmbed(self,description=None,author=None,icon=None,thumbnail=None,image=None,fields=None):
-        embed=discord.Embed(description=description, colour=discord.Colour.blue())
-        embed.set_author(name=author, icon_url=icon)
-        embed.set_thumbnail(url=thumbnail)
-        embed.set_image(url=image)
-        for field in fields:
-            embed.add_field(name=field["Name"],value=field["Value"],inline=field["Inline"])
+    async def discordEmbed(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=discord.Colour.blue()):
+        if description != None:
+            embed=discord.Embed(description=description, colour=color)
+        else:
+            embed=discord.Embed(colour=discord.Colour.blue())
+        if icon != None and author != None:
+            embed.set_author(name=author, icon_url=icon)
+        elif author != None:
+            embed.set_author(name=author)
+        if thumbnail != None:
+            embed.set_thumbnail(url=thumbnail)
+        if image != None:
+            embed.set_image(url=image)
+        if not fields == None:
+            for field in fields:
+                embed.add_field(name=field["Name"],value=field["Value"],inline=field["Inline"])
         return embed
 
     def start(self,token):
