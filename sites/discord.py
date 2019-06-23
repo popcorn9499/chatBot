@@ -119,7 +119,7 @@ class Discord:
     
 
     async def discordEmbedData(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
-        embedData = {}
+        embedData = {"type":"discordEmbed"}
         embedData.update({"description": description})
         embedData.update({"author":author})
         embedData.update({"icon": icon})
