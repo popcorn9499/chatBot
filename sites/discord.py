@@ -102,12 +102,14 @@ class Discord:
                 channelName = message.channel.name
                 serverName = "GroupDM"
                 authorName =message.author.name
-
             formatOptions = {"%authorName%": authorName, "%channelFrom%": channelName, "%serverFrom%": serverName, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
             msg = Object.ObjectLayout.message(Author=authorName,User=str(message.author),Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList,profilePicture=profilePic)
             objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
             objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=msg, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged=message)
             config.events.onMessage(message=objSendMsg)
+            if message.content.startswith("!hai"):
+                print(message.author.avatar_url)
+                await Discord.webhooks(authorName,"aa", avatar=message.author.avatar_url)
         else:
             l.logger.debug("Why am i recieving my own messages???")
 
@@ -119,9 +121,9 @@ class Discord:
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
             embed = None
-            for args in sndMessage.customArgs:
-                if args["type"] == "discordEmbed":
-                    embed = await Discord.discordEmbed(description=args["description"], author=args["author"], icon=args["icon"],thumbnail=args["thumbnail"],image=args["image"],fields=args["fields"],color=args["color"])
+            # for args in sndMessage.customArgs:
+            #     if args["type"] == "discordEmbed":
+            #         embed = await Discord.discordEmbed(description=args["description"], author=args["author"], icon=args["icon"],thumbnail=args["thumbnail"],image=args["image"],fields=args["fields"],color=args["color"])
             
             if sndMessage.Message != None and embed != None:
                 await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embed) 
