@@ -159,7 +159,7 @@ class Youtube:
                         else: #check if the message was sent by the bot or not
                             msgFound = False
                             for oldMsg in self.oldMessageList:
-                                if oldMsg["Message"] == message:
+                                if oldMsg["Message"].strip() == message.strip():
                                     msgFound = True
                             if not msgFound: #if message not sent by bot then send it
                                 self.l.logger.info("{0} {1}".format(username,message))
