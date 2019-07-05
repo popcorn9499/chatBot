@@ -132,10 +132,20 @@ class Discord:
             elif embed != None:
                 await channel.send(embed=embed)
 
-    async def webhooks(username,message,avatar=None):
-        async with aiohttp.ClientSession() as session:
-            webhook = discord.Webhook.from_url('', adapter=discord.AsyncWebhookAdapter(session))
-            await webhook.send('Hello World', username='Foo',avatar_url=avatar)
+    async def webhooks(username,message, channel,avatar=None):
+        webhooksList = await channel.webhooks()
+        webhookUsed = None
+        for web in webhooksList:
+            print(web.name)
+            correctName = web.name == "discordBotHook"
+            correctChannel = web.channel_id == channel.id
+            if correctChannel and correctName:
+                webhookUsed = web
+                break 
+        if webhookUsed == None:
+            webhookUsed = await channel.create_webhook(name='discordBotHook')
+
+        await webhookUsed.send(message, username=username,avatar_url=avatar)
 
     async def discordEmbedData(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
         embedData = {"type":"discordEmbed"}
