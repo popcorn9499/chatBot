@@ -27,6 +27,7 @@ class Discord:
         config.c.discordEnabled = fileIO.loadConf("config{0}auth{0}discord.json")["Enabled"]
         config.events.onMessageSend += self.discordSendMsg
         config.events.deleteMessage += self.delete_message
+        config.events.onWebhookSend += self.discordSendWebhook
    
     async def delete_message(self,message):
         await client.delete(message)
@@ -109,10 +110,21 @@ class Discord:
             config.events.onMessage(message=objSendMsg)
             if message.content.startswith("!hai"):
                 print(message.author.avatar_url)
-                await Discord.webhooks(authorName,"aa", avatar=message.author.avatar_url)
+                await Discord.webhookSend(authorName,"aa",message.channel, avatar=message.author.avatar_url)
         else:
             l.logger.debug("Why am i recieving my own messages???")
 
+    async def discordSendWebhook(self,sndMessage):
+        global config
+        while discordStarted != True:
+            await asyncio.sleep(0.2)
+        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
+            channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
+            embed = None
+            message = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
+            profilePic = sndMessage.Message.profilePic
+            username = sndMessage.Message.Author
+            await Discord.webhookSend(username,message,channel,avatar=profilePic)
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
         global config
@@ -132,7 +144,7 @@ class Discord:
             elif embed != None:
                 await channel.send(embed=embed)
 
-    async def webhooks(username,message, channel,avatar=None):
+    async def webhookSend(username,message, channel,avatar=None):
         webhooksList = await channel.webhooks()
         webhookUsed = None
         for web in webhooksList:
