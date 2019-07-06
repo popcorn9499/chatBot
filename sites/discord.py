@@ -150,7 +150,7 @@ class Discord:
                 await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
 
 
-    async def parseEmbeds(self,customArgs):
+    async def parseEmbeds(customArgs):
         embeds = []
         for args in customArgs:
             if args["type"] == "discordEmbed":
