@@ -122,7 +122,7 @@ class Discord:
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
             embed = None
             message = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
-            profilePic = sndMessage.Message.profilePic
+            profilePic = sndMessage.Message.ProfilePicture
             username = sndMessage.Message.Author
             await Discord.webhookSend(username,message,channel,avatar=profilePic)
 
