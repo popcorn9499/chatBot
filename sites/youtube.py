@@ -137,7 +137,7 @@ class Youtube:
                 self.pageToken = list_chatmessages["nextPageToken"] #page token for next use
             except googleapiclient.errors.HttpError:
                 self.l.logger.info("Some Google API Error Occured")
-                youtube = self.Login()
+                await self.Login()
                 continuation = False 
             
             amount = 0
@@ -159,7 +159,7 @@ class Youtube:
                         else: #check if the message was sent by the bot or not
                             msgFound = False
                             for oldMsg in self.oldMessageList:
-                                if oldMsg["Message"] == message:
+                                if oldMsg["Message"].strip() == message.strip():
                                     msgFound = True
                             if not msgFound: #if message not sent by bot then send it
                                 self.l.logger.info("{0} {1}".format(username,message))
@@ -181,7 +181,7 @@ class Youtube:
             self.messageFrequency = amount
         except ConnectionResetError:
             x = 1
-            youtube = await self.Login()
+            await self.Login()
             self.l.logger.info('Connection Error reconnecting')
 
     async def weedMsg(self,userID,message):
@@ -235,7 +235,7 @@ class Youtube:
             ).execute()
             fileIO.fileSave("youtubeliveStreamsJson.json", x)
         except:
-            youtube = await self.Login()
+            await self.Login()
             self.l.logger.info('Connection Error reconnecting')
         
         
@@ -248,7 +248,7 @@ class Youtube:
           ).execute()
             fileIO.fileSave("youtubeliveBroadcastsJson.json", x)
         except:
-            youtube = await self.Login()
+            await self.Login()
             self.l.logger.info('Connection Error reconnecting')
 
         

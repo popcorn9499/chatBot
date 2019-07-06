@@ -8,6 +8,7 @@ from utils import logger
 from utils import messageFormatter
 from utils import fileIO
 import os
+import aiohttp
 
 
 client = discord.Client() #sets this to just client for reasons cuz y not? (didnt have to be done like this honestly could of been just running discord.Client().)
@@ -26,6 +27,7 @@ class Discord:
         config.c.discordEnabled = fileIO.loadConf("config{0}auth{0}discord.json")["Enabled"]
         config.events.onMessageSend += self.discordSendMsg
         config.events.deleteMessage += self.delete_message
+        config.events.onWebhookSend += self.discordSendWebhook
    
     async def delete_message(self,message):
         await client.delete(message)
@@ -86,9 +88,12 @@ class Discord:
             if (isinstance(message.channel, discord.channel.TextChannel)):
                 channelName = message.channel.name
                 serverName = message.guild.name
-                if message.author.nick != None:
-                    authorName = message.author.nick
-                else:
+                try:
+                    if message.author.nick != None:
+                        authorName = message.author.nick
+                    else:
+                        authorName = message.author.name
+                except AttributeError: #is handled cuz webhooks dont have a nick only a name
                     authorName = message.author.name
             elif (isinstance(message.channel, discord.channel.DMChannel)):
                 channelName = "#{0}".format(message.author.name)
@@ -98,15 +103,28 @@ class Discord:
                 channelName = message.channel.name
                 serverName = "GroupDM"
                 authorName =message.author.name
-
             formatOptions = {"%authorName%": authorName, "%channelFrom%": channelName, "%serverFrom%": serverName, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
             msg = Object.ObjectLayout.message(Author=authorName,User=str(message.author),Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList,profilePicture=profilePic)
             objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
             objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=msg, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged=message)
             config.events.onMessage(message=objSendMsg)
+            if message.content.startswith("!hai"):
+                print(message.author.avatar_url)
+                await Discord.webhookSend(authorName,"aa",message.channel, avatar=message.author.avatar_url)
         else:
             l.logger.debug("Why am i recieving my own messages???")
 
+    async def discordSendWebhook(self,sndMessage):
+        global config
+        while discordStarted != True:
+            await asyncio.sleep(0.2)
+        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
+            channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
+            embed = None
+            message = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
+            profilePic = sndMessage.Message.ProfilePicture
+            username = sndMessage.Message.Author
+            await Discord.webhookSend(username,message,channel,avatar=profilePic)
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
         global config
@@ -114,8 +132,64 @@ class Discord:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
-            await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
+            embed = None
+            # for args in sndMessage.customArgs:
+            #     if args["type"] == "discordEmbed":
+            #         embed = await Discord.discordEmbed(description=args["description"], author=args["author"], icon=args["icon"],thumbnail=args["thumbnail"],image=args["image"],fields=args["fields"],color=args["color"])
             
+            if sndMessage.Message != None and embed != None:
+                await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embed) 
+            elif sndMessage.Message != None:
+                await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
+            elif embed != None:
+                await channel.send(embed=embed)
+
+    async def webhookSend(username,message, channel,avatar=None):
+        webhooksList = await channel.webhooks()
+        webhookUsed = None
+        for web in webhooksList:
+            print(web.name)
+            correctName = web.name == "discordBotHook"
+            correctChannel = web.channel_id == channel.id
+            if correctChannel and correctName:
+                webhookUsed = web
+                break 
+        if webhookUsed == None:
+            webhookUsed = await channel.create_webhook(name='discordBotHook')
+
+        await webhookUsed.send(message, username=username,avatar_url=avatar)
+
+    async def discordEmbedData(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
+        embedData = {"type":"discordEmbed"}
+        embedData.update({"description": description})
+        embedData.update({"author":author})
+        embedData.update({"icon": icon})
+        embedData.update({"thumbnail": thumbnail})
+        embedData.update({"image":image})
+        embedData.update({"fields": fields})
+        embedData.update({"color":color})
+        return embedData
+
+
+
+    async def discordEmbed(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
+        if description != None:
+            embed=discord.Embed(description=description, colour=color)
+        else:
+            embed=discord.Embed(colour=discord.Colour.blue())
+        if icon != None and author != None:
+            embed.set_author(name=author, icon_url=icon)
+        elif author != None:
+            embed.set_author(name=author)
+        if thumbnail != None:
+            embed.set_thumbnail(url=thumbnail)
+        if image != None:
+            embed.set_image(url=image)
+        if not fields == None:
+            for field in fields:
+                embed.add_field(name=field["Name"],value=field["Value"],inline=field["Inline"])
+        return embed
+
     def start(self,token):
         if config.c.discordEnabled: #allows discord to not be launched
             while True:
