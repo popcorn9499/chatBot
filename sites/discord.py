@@ -120,11 +120,12 @@ class Discord:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
-            embed = None
+            embed = await Discord.parseEmbeds(sndMessage.customArgs)
             message = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             profilePic = sndMessage.Message.ProfilePicture
             username = sndMessage.Message.Author
-            await Discord.webhookSend(username,message,channel,avatar=profilePic)
+            await Discord.webhookSend(username,message,channel,avatar=profilePic,embeds=embed)
+
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
         global config
@@ -137,7 +138,6 @@ class Discord:
             embeds = await Discord.parseEmbeds(sndMessage.customArgs)
 
             if embed != None:
-                
                 if sndMessage.Message != None: #print the embed with a message if thats been requested.
                     await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
                 else: #print a messageless embed
@@ -159,7 +159,7 @@ class Discord:
                 embeds.append(await Discord.discordEmbed(description=args["description"], author=args["author"], icon=args["icon"],thumbnail=args["thumbnail"],image=args["image"],fields=args["fields"],color=args["color"]))
         return emebds
 
-    async def webhookSend(username,message, channel,avatar=None):
+    async def webhookSend(username,message, channel,avatar=None,emebds=None):
         webhooksList = await channel.webhooks()
         webhookUsed = None
         for web in webhooksList:
@@ -172,7 +172,10 @@ class Discord:
         if webhookUsed == None:
             webhookUsed = await channel.create_webhook(name='discordBotHook')
 
-        await webhookUsed.send(message, username=username,avatar_url=avatar)
+        if emebds == None:
+            await webhookUsed.send(message, username=username,avatar_url=avatar)
+        else: 
+            await webhookUsed.send(message, username=username,avatar_url=avatar,embeds=emebds)
 
     async def discordEmbedData(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
         embedData = {"type":"discordEmbed"}
