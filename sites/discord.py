@@ -134,7 +134,7 @@ class Discord:
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
             embed = None
 
-            embeds = Discord.parseEmbeds(sndMessage.customArgs)
+            embeds = await Discord.parseEmbeds(sndMessage.customArgs)
 
             if embed != None:
                 
