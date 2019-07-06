@@ -152,6 +152,8 @@ class Discord:
 
     async def parseEmbeds(customArgs):
         embeds = []
+        if customArgs == None:
+            return None
         for args in customArgs:
             if args["type"] == "discordEmbed":
                 embeds.append(await Discord.discordEmbed(description=args["description"], author=args["author"], icon=args["icon"],thumbnail=args["thumbnail"],image=args["image"],fields=args["fields"],color=args["color"]))
