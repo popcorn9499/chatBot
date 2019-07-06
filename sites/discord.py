@@ -133,16 +133,29 @@ class Discord:
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
             embed = None
-            # for args in sndMessage.customArgs:
-            #     if args["type"] == "discordEmbed":
-            #         embed = await Discord.discordEmbed(description=args["description"], author=args["author"], icon=args["icon"],thumbnail=args["thumbnail"],image=args["image"],fields=args["fields"],color=args["color"])
-            
-            if sndMessage.Message != None and embed != None:
-                await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embed) 
-            elif sndMessage.Message != None:
+
+            embeds = Discord.parseEmbeds(sndMessage.customArgs)
+
+            if embed != None:
+                
+                if sndMessage.Message != None: #print the embed with a message if thats been requested.
+                    await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
+                else: #print a messageless embed
+                    await channel.send(embed=embeds[0])
+
+                if len(embeds) > 1: #print any extra embeds that may? exist
+                    for embed in embeds[1:]:
+                        await channel.send(embed=embed)
+            else:
                 await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
-            elif embed != None:
-                await channel.send(embed=embed)
+
+
+    async def parseEmbeds(self,customArgs):
+        embeds = []
+        for args in customArgs:
+            if args["type"] == "discordEmbed":
+                embeds.append(await Discord.discordEmbed(description=args["description"], author=args["author"], icon=args["icon"],thumbnail=args["thumbnail"],image=args["image"],fields=args["fields"],color=args["color"]))
+        return emebds
 
     async def webhookSend(username,message, channel,avatar=None):
         webhooksList = await channel.webhooks()
