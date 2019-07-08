@@ -61,7 +61,10 @@ class chatbot:
                         formatOptions.update({"%serviceIcon%": ServiceIcon}) #Adds more formatting options
                         
                         if webhookSupport:
-                            msg.Author = ServiceIcon + ": " + msg.Author
+                            try:
+                                pass
+                            except KeyError:
+                                msg.Author = "[" + ServiceIcon + "] " + msg.Author
                             self.l.logger.info("Sending Webook")
                             await self.sendWebhook(message=msg,objDeliveryDetails=objDeliveryDetails,FormattingOptions=formatOptions,formattingSettings=formattingSettings,formatType=formatType,messageUnchanged=message)#.messageUnchanged) #sends the message
                         else:
