@@ -8,7 +8,6 @@ from utils import logger
 from utils import messageFormatter
 from utils import fileIO
 import os
-import aiohttp
 
 
 client = discord.Client() #sets this to just client for reasons cuz y not? (didnt have to be done like this honestly could of been just running discord.Client().)
@@ -27,7 +26,6 @@ class Discord:
         config.c.discordEnabled = fileIO.loadConf("config{0}auth{0}discord.json")["Enabled"]
         config.events.onMessageSend += self.discordSendMsg
         config.events.deleteMessage += self.delete_message
-        config.events.onWebhookSend += self.discordSendWebhook
    
     async def delete_message(self,message):
         await client.delete(message)
@@ -83,73 +81,31 @@ class Discord:
             #await client.delete_message(message)
             channelName = ""
             serverName = ""
+            authorName = ""
             profilePic = message.author.avatar_url
             if (isinstance(message.channel, discord.channel.TextChannel)):
                 channelName = message.channel.name
                 serverName = message.guild.name
+                if message.author.nick != None:
+                    authorName = message.author.nick
+                else:
+                    authorName = message.author.name
             elif (isinstance(message.channel, discord.channel.DMChannel)):
                 channelName = "#{0}".format(message.author.name)
                 serverName = "DM"
+                authorName =message.author.name
             elif (isinstance(message.channel, discord.channel.GroupChannel)):
                 channelName = message.channel.name
                 serverName = "GroupDM"
+                authorName =message.author.name
 
-            authorName = await Discord.getAuthor(message.author)
-            messageContents = await Discord.userAtMentionsFix(messageContents, message.mentions)
-            messageContents = await Discord.roleAtMentionsFix(messageContents,message.role_mentions)
-            messageContents = await Discord.channelAtMentionsFix(messageContents,message.channel_mentions)
             formatOptions = {"%authorName%": authorName, "%channelFrom%": channelName, "%serverFrom%": serverName, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
             msg = Object.ObjectLayout.message(Author=authorName,User=str(message.author),Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList,profilePicture=profilePic)
             objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
             objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=msg, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged=message)
             config.events.onMessage(message=objSendMsg)
-            if message.content.startswith("!hai"):
-                print(message.author.avatar_url)
-                await Discord.webhookSend(authorName,"aa",message.channel, avatar=message.author.avatar_url)
         else:
             l.logger.debug("Why am i recieving my own messages???")
-
-    async def getAuthor(user):
-        try:
-            return user.nick
-        except AttributeError:
-            return user.name
-
-    async def roleAtMentionsFix(message,mentionList):
-        for role in mentionList:
-            badMention = "@&" + str(role.id)
-            goodMention = "@" + role.name
-            message = message.replace(badMention, goodMention)
-        return message
-
-    async def channelAtMentionsFix(message,mentionList):
-        for chanMention in mentionList:
-            badMention = "#" + str(chanMention.id)
-            goodMention = "#" + chanMention.name
-            message = message.replace(badMention, goodMention)
-        return message
-
-    async def userAtMentionsFix(message,mentionList):
-        for mention in mentionList:
-            badMention = "@!" + str(mention.id)
-            goodMention = "@" + await Discord.getAuthor(mention)
-            message = message.replace(badMention, goodMention)
-        return message
-
-
-    async def discordSendWebhook(self,sndMessage):
-        global config
-        while discordStarted != True: #wait until discord has started
-            await asyncio.sleep(0.2)
-        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
-            #gather required information
-            channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
-            embed = await Discord.parseEmbeds(sndMessage.customArgs)
-            message = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
-            profilePic = sndMessage.Message.ProfilePicture
-            username = sndMessage.Message.Author
-            #send the webhook message
-            await Discord.webhookSend(username,message,channel,avatar=profilePic,embeds=embed)
 
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
@@ -158,75 +114,8 @@ class Discord:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
-            embeds = await Discord.parseEmbeds(sndMessage.customArgs)
-            if embeds != None:
-                if sndMessage.Message != None: #print the embed with a message if thats been requested.
-                    await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
-                else: #print a messageless embed
-                    await channel.send(embed=embeds[0])
-
-                if len(embeds) > 1: #print any extra embeds that may? exist
-                    for embed in embeds[1:]:
-                        await channel.send(embed=embed)
-            else:
-                await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
-
-
-    async def parseEmbeds(customArgs): #cycles through any potential embeds in the message
-        embeds = []
-        if customArgs == None: #if never set assume no args
-            return None
-        for args in customArgs: #cycles through the customArgs for potential embeds
-            if args["type"] == "discordEmbed":
-                embeds.append(await Discord.discordEmbed(description=args["description"], author=args["author"], icon=args["icon"],thumbnail=args["thumbnail"],image=args["image"],fields=args["fields"],color=args["color"]))
-        return emebds
-
-    async def webhookSend(username,message, channel,avatar=None,embeds=None):
-        webhooksList = await channel.webhooks()
-        webhookUsed = None
-        for web in webhooksList: #check if the webhook exists already in this channel
-            correctName = web.name == "discordBotHook" #if not create the webhook
-            correctChannel = web.channel_id == channel.id
-            if correctChannel and correctName:
-                webhookUsed = web
-                break 
-        if webhookUsed == None: #if no webhook existing create one
-            webhookUsed = await channel.create_webhook(name='discordBotHook')
-
-        if embeds == None: #send webhook. check if it needs to add the embed or not
-            await webhookUsed.send(message, username=username,avatar_url=avatar)
-        else: 
-            await webhookUsed.send(message, username=username,avatar_url=avatar,embeds=embeds)
-
-    async def discordEmbedData(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
-        embedData = {"type":"discordEmbed"}
-        embedData.update({"description": description})
-        embedData.update({"author":author})
-        embedData.update({"icon": icon})
-        embedData.update({"thumbnail": thumbnail})
-        embedData.update({"image":image})
-        embedData.update({"fields": fields})
-        embedData.update({"color":color})
-        return embedData
-
-    async def discordEmbed(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
-        if description != None:
-            embed=discord.Embed(description=description, colour=color)
-        else:
-            embed=discord.Embed(colour=discord.Colour.blue())
-        if icon != None and author != None:
-            embed.set_author(name=author, icon_url=icon)
-        elif author != None:
-            embed.set_author(name=author)
-        if thumbnail != None:
-            embed.set_thumbnail(url=thumbnail)
-        if image != None:
-            embed.set_image(url=image)
-        if not fields == None:
-            for field in fields:
-                embed.add_field(name=field["Name"],value=field["Value"],inline=field["Inline"])
-        return embed
-
+            await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
+            
     def start(self,token):
         if config.c.discordEnabled: #allows discord to not be launched
             while True:

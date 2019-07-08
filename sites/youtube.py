@@ -40,9 +40,12 @@ class Youtube:
         fileIO.checkFile("config-example{0}auth{0}youtube.json".format(os.sep),"config{0}auth{0}youtube.json".format(os.sep),"youtube.json",self.l)
         self.enabled = fileIO.loadConf("config{0}auth{0}youtube.json")["Enabled"]
         self.pageToken = fileIO.loadConf("config{0}auth{0}youtube.json")["pageToken"]
+<<<<<<< HEAD
+        self.olgMessageList = [] #keeps track of old messages to filter out
+=======
         self.oldMessageList = [] #keeps track of old messages to filter out
         self.messageFrequency = 0
-
+>>>>>>> 2.0-Beta
         if (self.enabled):
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
             self.msgCheckList = fileIO.loadConf("config{0}auth{0}youtube.json")["selfMsgFilter"]
@@ -138,7 +141,7 @@ class Youtube:
                 self.pageToken = list_chatmessages["nextPageToken"] #page token for next use
             except googleapiclient.errors.HttpError:
                 self.l.logger.info("Some Google API Error Occured")
-                await self.Login()
+                youtube = self.Login()
                 continuation = False 
             
             amount = 0
@@ -159,8 +162,8 @@ class Youtube:
                             amount = amount + 1
                         else: #check if the message was sent by the bot or not
                             msgFound = False
-                            for oldMsg in self.oldMessageList:
-                                if oldMsg["Message"].strip() == message.strip():
+                            for oldMsg in self.olgMessageList:
+                                if oldMsg["Message"] == message:
                                     msgFound = True
                             if not msgFound: #if message not sent by bot then send it
                                 self.l.logger.info("{0} {1}".format(username,message))
@@ -182,7 +185,7 @@ class Youtube:
             self.messageFrequency = amount
         except ConnectionResetError:
             x = 1
-            await self.Login()
+            youtube = await self.Login()
             self.l.logger.info('Connection Error reconnecting')
 
     async def weedMsg(self,userID,message):
@@ -236,7 +239,7 @@ class Youtube:
             ).execute()
             fileIO.fileSave("youtubeliveStreamsJson.json", x)
         except:
-            await self.Login()
+            youtube = await self.Login()
             self.l.logger.info('Connection Error reconnecting')
         
         
@@ -249,7 +252,7 @@ class Youtube:
           ).execute()
             fileIO.fileSave("youtubeliveBroadcastsJson.json", x)
         except:
-            await self.Login()
+            youtube = await self.Login()
             self.l.logger.info('Connection Error reconnecting')
 
         
