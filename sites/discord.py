@@ -121,7 +121,13 @@ class Discord:
         except:
             return user.name
 
-    async def atMentionsFix(message,mentionList):
+    async def roleAtMentionsFix(message,mentionList):
+        for role in mentionList:
+            badMention = "@&" + str(role.id)
+            goodMention = "@" + role.name
+            message = message.replace(badMention, goodMention)
+        return message
+
     async def channelAtMentionsFix(message,mentionList):
         for chanMention in mentionList:
             badMention = "#" + str(chanMention.id)
