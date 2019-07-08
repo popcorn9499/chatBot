@@ -161,7 +161,7 @@ class Discord:
                 embeds.append(await Discord.discordEmbed(description=args["description"], author=args["author"], icon=args["icon"],thumbnail=args["thumbnail"],image=args["image"],fields=args["fields"],color=args["color"]))
         return emebds
 
-    async def webhookSend(username,message, channel,avatar=None,emebds=None):
+    async def webhookSend(username,message, channel,avatar=None,embeds=None):
         webhooksList = await channel.webhooks()
         webhookUsed = None
         for web in webhooksList: #check if the webhook exists already in this channel
