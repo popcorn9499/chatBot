@@ -83,26 +83,18 @@ class Discord:
             #await client.delete_message(message)
             channelName = ""
             serverName = ""
-            authorName = ""
             profilePic = message.author.avatar_url
             if (isinstance(message.channel, discord.channel.TextChannel)):
                 channelName = message.channel.name
                 serverName = message.guild.name
-                try:
-                    if message.author.nick != None:
-                        authorName = message.author.nick
-                    else:
-                        authorName = message.author.name
-                except AttributeError: #is handled cuz webhooks dont have a nick only a name
-                    authorName = message.author.name
             elif (isinstance(message.channel, discord.channel.DMChannel)):
                 channelName = "#{0}".format(message.author.name)
                 serverName = "DM"
-                authorName =message.author.name
             elif (isinstance(message.channel, discord.channel.GroupChannel)):
                 channelName = message.channel.name
                 serverName = "GroupDM"
-                authorName =message.author.name
+
+            authorName = Discord.getAuthor(message.author)
             messageContents = await Discord.userAtMentionsFix(messageContents, message.mentions)
             messageContents = await Discord.roleAtMentionsFix(messageContents,message.role_mentions)
             messageContents = await Discord.channelAtMentionsFix(messageContents,message.channel_mentions)
@@ -120,7 +112,7 @@ class Discord:
     async def getAuthor(user):
         try:
             return user.nick
-        except:
+        except AttributeError:
             return user.name
 
     async def roleAtMentionsFix(message,mentionList):
