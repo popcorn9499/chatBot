@@ -136,7 +136,7 @@ class Discord:
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
             embeds = await Discord.parseEmbeds(sndMessage.customArgs)
-            if embed != None:
+            if embeds != None:
                 if sndMessage.Message != None: #print the embed with a message if thats been requested.
                     await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
                 else: #print a messageless embed
@@ -170,10 +170,10 @@ class Discord:
         if webhookUsed == None: #if no webhook existing create one
             webhookUsed = await channel.create_webhook(name='discordBotHook')
 
-        if emebds == None: #send webhook. check if it needs to add the embed or not
+        if embeds == None: #send webhook. check if it needs to add the embed or not
             await webhookUsed.send(message, username=username,avatar_url=avatar)
         else: 
-            await webhookUsed.send(message, username=username,avatar_url=avatar,embeds=emebds)
+            await webhookUsed.send(message, username=username,avatar_url=avatar,embeds=embeds)
 
     async def discordEmbedData(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
         embedData = {"type":"discordEmbed"}
