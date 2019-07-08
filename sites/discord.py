@@ -128,6 +128,8 @@ class Discord:
             goodMention = "#" + chanMention.name
             message = message.replace(badMention, goodMention)
         return message
+
+    async def userAtMentionsFix(message,mentionList):
         for mention in mentionList:
             badMention = "@!" + str(mention.id)
             goodMention = "@" + await Discord.getAuthor(mention)
