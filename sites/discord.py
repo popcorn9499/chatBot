@@ -103,6 +103,7 @@ class Discord:
                 channelName = message.channel.name
                 serverName = "GroupDM"
                 authorName =message.author.name
+            messageContents = await Discord.atMentionsFix(messageContents, message.mentions)
             formatOptions = {"%authorName%": authorName, "%channelFrom%": channelName, "%serverFrom%": serverName, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
             msg = Object.ObjectLayout.message(Author=authorName,User=str(message.author),Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList,profilePicture=profilePic)
             objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
@@ -113,6 +114,20 @@ class Discord:
                 await Discord.webhookSend(authorName,"aa",message.channel, avatar=message.author.avatar_url)
         else:
             l.logger.debug("Why am i recieving my own messages???")
+
+    async def getAuthor(user):
+        try:
+            return user.nick
+        except:
+            return user.name
+
+    async def atMentionsFix(message,mentionList):
+        for mention in mentionList:
+            badMention = "@!" + str(mention.id)
+            goodMention = "@" + await Discord.getAuthor(mention)
+            message = message.replace(badMention, goodMention)
+        return message
+
 
     async def discordSendWebhook(self,sndMessage):
         global config
