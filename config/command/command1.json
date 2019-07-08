@@ -1,7 +1,0 @@
-{
-    "CommandType":"Message",
-    "Command": "!hi",
-    "CommandDetails": "You Thought Wrong!!",
-    "RolesAllowed": ["Owner","Mod","Normal"],
-    "HelpDetails": "Hey you are wrong about me!!!"
-}

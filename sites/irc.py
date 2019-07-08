@@ -20,11 +20,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         config.c.irc = fileIO.loadConf("config{0}auth{0}irc.json")
         
         self.l.logger.info("Starting")
-        #self.serviceStarted = False
-        self.serviceStarted = {}
-        for sKey, sVal in config.c.irc["Servers"].items():
-            if sVal["Enabled"] == True:
-                self.serviceStarted.update({sKey:False})
+        self.serviceStarted = True
         config.events.onMessageSend += self.sendMSG
         self.writer = {}
         self.reader = {}
@@ -36,8 +32,8 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             if sVal["Enabled"] == True:
                 host = sKey
                 print(type(host))
-                self.l.logger.info("{0} - Connecting".format(host))
-                loop.create_task(self.ircConnect(loop,host))
+                self.l.logger.info("{0} - Connecting".format(host)) 
+                await self.ircConnect(loop,host)
             else:
                 await asyncio.sleep(3)
         try:#stops the crash if no irc settings r set
@@ -74,8 +70,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                         self.l.logger.info("{0} - Joining channel {1}".format(host,key))
                 await asyncio.sleep(3)
                 self.l.logger.info("{0} - Initiating IRC Reader".format(host))
-                self.msgHandlerTasks.update({host: loop.create_task(self.handleMsg(loop,host))})
-                self.serviceStarted[host] = True 
+                self.msgHandlerTasks.update({host: loop.create_task(self.handleMsg(loop,host))}) 
                 while not self.msgHandlerTasks[host].done():
                     await asyncio.sleep(5)
             except Exception as e:
@@ -188,9 +183,15 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 
                 
     async def sendMSG(self,sndMessage): #sends messages to youtube live chat
+<<<<<<< HEAD
+        while self.serviceStarted != True:
+            await asyncio.sleep(0.2)
+        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "irc": #determines if its the right service and supposed to be here
+=======
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "irc": #determines if its the right service and supposed to be here 
             while self.serviceStarted[sndMessage.DeliveryDetails.Server] != True:
                 await asyncio.sleep(0.2)
+>>>>>>> 2.0-Beta
             #print(await sndMessage.DeliveryDetails.Channel,messageFormatter.formatter(sndMessage))
             msg = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             #print(sndMessage.DeliveryDetails.Server)

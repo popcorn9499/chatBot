@@ -1,9 +1,0 @@
-{
-    "1": {
-        "Channel": "test2",
-        "Enabled": true,
-        "Formatting": "{0} {1} {2} {3} {4}",
-        "Server": "Popicraft Network",
-        "Service": "Discord"
-    }
-}

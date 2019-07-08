@@ -138,8 +138,8 @@ def listChat():
                             variables.mainMsg.append(msgStats)    
     except ConnectionResetError:
         x = 1
-        youtube = Login()
         mainBot.mainBot().addToConsole('Connection Error reconnecting',"Youtube","Info")
+        youtube = Login()
         
     
 

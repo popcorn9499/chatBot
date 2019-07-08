@@ -1,7 +1,0 @@
-{
-    "CommandType":"FileRead",
-    "Command": "!hi",
-    "CommandDetails": "test.txt",
-    "RolesAllowed": ["Owner","Mod","Normal"],
-    "HelpDetails": "Hey you are reading a file just run the command"
-}

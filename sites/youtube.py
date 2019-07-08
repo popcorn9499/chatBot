@@ -42,6 +42,7 @@ class Youtube:
         self.pageToken = fileIO.loadConf("config{0}auth{0}youtube.json")["pageToken"]
         self.oldMessageList = [] #keeps track of old messages to filter out
         self.messageFrequency = 0
+
         if (self.enabled):
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
             self.msgCheckList = fileIO.loadConf("config{0}auth{0}youtube.json")["selfMsgFilter"]
@@ -201,9 +202,9 @@ class Youtube:
 
     async def clearMsgList(self):
         oldTime = datetime.datetime.now() - datetime.timedelta(minutes=15)
-        for msg in self.oldMessageList:
+        for msg in self.olgMessageList:
             if msg["Time"] < oldTime:
-                self.oldMessageList.remove(msg)
+                self.olgMessageList.remove(msg)
 
 
     async def processMsg(self,username,message,roleList,profilePicture):
@@ -261,7 +262,7 @@ class Youtube:
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Youtube": #determines if its the right service and supposed to be here
             msg = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             time = datetime.datetime.now()
-            self.oldMessageList.append({"Time":time, "Message":msg}) #keeps track of old messages so that we can check and not listen to these
+            self.olgMessageList.append({"Time":time, "Message":msg}) #keeps track of old messages so that we can check and not listen to these
             list_chatmessages_inset = self.youtube.liveChatMessages().insert(
                 part = "snippet",
                 body = dict (

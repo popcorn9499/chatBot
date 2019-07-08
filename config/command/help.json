@@ -1,7 +1,0 @@
-{
-    "CommandType":"Help",
-    "Command": "!help",
-    "CommandDetails": "HELPPP",
-    "RolesAllowed": ["Owner","Mod","Normal"],
-    "HelpDetails": "This is Sorta Obvious"
-}
