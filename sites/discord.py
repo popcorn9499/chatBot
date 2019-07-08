@@ -122,6 +122,12 @@ class Discord:
             return user.name
 
     async def atMentionsFix(message,mentionList):
+    async def channelAtMentionsFix(message,mentionList):
+        for chanMention in mentionList:
+            badMention = "#" + str(chanMention.id)
+            goodMention = "#" + chanMention.name
+            message = message.replace(badMention, goodMention)
+        return message
         for mention in mentionList:
             badMention = "@!" + str(mention.id)
             goodMention = "@" + await Discord.getAuthor(mention)
