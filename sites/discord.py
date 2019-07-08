@@ -135,8 +135,6 @@ class Discord:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
-            embed = None
-
             embeds = await Discord.parseEmbeds(sndMessage.customArgs)
             if embed != None:
                 if sndMessage.Message != None: #print the embed with a message if thats been requested.
@@ -152,7 +150,6 @@ class Discord:
 
 
     async def parseEmbeds(customArgs): #cycles through any potential embeds in the message
-
         embeds = []
         if customArgs == None: #if never set assume no args
             return None
