@@ -94,7 +94,7 @@ class Discord:
                 channelName = message.channel.name
                 serverName = "GroupDM"
 
-            authorName = Discord.getAuthor(message.author)
+            authorName = await Discord.getAuthor(message.author)
             messageContents = await Discord.userAtMentionsFix(messageContents, message.mentions)
             messageContents = await Discord.roleAtMentionsFix(messageContents,message.role_mentions)
             messageContents = await Discord.channelAtMentionsFix(messageContents,message.channel_mentions)
