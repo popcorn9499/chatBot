@@ -275,5 +275,7 @@ class Discord:
                 finally:
                     l.logger.info("Client Closed")
                     loop.close()
-                l.logger.info("Reconnecting")
+                l.logger.info("Reconnecting in 5 seconds")
+                time.sleep(5)
+                l.logger.info("Attempting to reconnect")
 
