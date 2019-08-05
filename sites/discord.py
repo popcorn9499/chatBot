@@ -72,7 +72,7 @@ class Discord:
             l.logger.debug(message.author.name)
             attachments = "" #gets the attachments so we dont loose that
             for i in message.attachments:
-                if attachment == "":
+                if attachments == "":
                     attachments += i.url
                 else:
                     attachments += " " + i.url 
