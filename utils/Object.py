@@ -5,10 +5,10 @@ class Object():
 
 class ObjectLayout:
 
-    def message(Contents,Author,Server,Channel,Service,Roles,User=None,profilePicture=None):
+    def message(Contents,Author,Server,Channel,Service,Roles,User=None,profilePicture=None,emojis={}):
         if User == None:
             User = Author
-        messageObj = Object({"Contents":Contents,"Author":Author,"User": User,"Server":Server,"Channel":Channel,"Service":Service,"Roles":Roles, "ProfilePicture":profilePicture})
+        messageObj = Object({"Contents":Contents,"Author":Author,"User": User,"Server":Server,"Channel":Channel,"Service":Service,"Roles":Roles, "ProfilePicture":profilePicture, "Emojis": emojis})
         #print(messageObj.__dict__)
         return messageObj
     
@@ -16,9 +16,9 @@ class ObjectLayout:
         DeliveryDetailsObj = Object({"Module":Module,"ModuleTo":ModuleTo,"Service": Service,"Server": Server, "Channel": Channel})
         return DeliveryDetailsObj
 
-    def sendMsgDeliveryDetails(Message,DeliveryDetails,FormattingOptions,messageUnchanged,formattingSettings="default.json",formatType="File"):
+    def sendMsgDeliveryDetails(Message,DeliveryDetails,FormattingOptions,messageUnchanged,formattingSettings="default.json",formatType="File", customArgs=None):
 
-        sendMsgDeliveryDetails = Object({"Message": Message, "DeliveryDetails":DeliveryDetails,"FormattingOptions":FormattingOptions,"formattingSettings":formattingSettings,"formatType":formatType,"messageUnchanged":messageUnchanged})
+        sendMsgDeliveryDetails = Object({"Message": Message,"customArgs": customArgs, "DeliveryDetails":DeliveryDetails,"FormattingOptions":FormattingOptions,"formattingSettings":formattingSettings,"formatType":formatType,"messageUnchanged":messageUnchanged})
         return sendMsgDeliveryDetails
         
 
