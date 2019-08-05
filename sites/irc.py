@@ -20,7 +20,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         config.c.irc = fileIO.loadConf("config{0}auth{0}irc.json")
         
         self.l.logger.info("Starting")
-        self.serviceStarted = True
+        self.serviceStarted = {}
         config.events.onMessageSend += self.sendMSG
         self.writer = {}
         self.reader = {}
@@ -33,7 +33,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 host = sKey
                 print(type(host))
                 self.l.logger.info("{0} - Connecting".format(host)) 
-                await self.ircConnect(loop,host)
+                loop.create_task(self.ircConnect(loop,host))
             else:
                 await asyncio.sleep(3)
         try:#stops the crash if no irc settings r set
@@ -46,6 +46,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
     async def ircConnect(self,loop,host):#handles the irc connection
         while True:
             try:
+                self.serviceStarted.update({host:False})
                 self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config.c.irc["Servers"][host]["Port"], loop=loop)
                 self.reader.update({host: self.readerBasic})
                 self.writer.update({host: self.writerBasic})
@@ -70,7 +71,8 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                         self.l.logger.info("{0} - Joining channel {1}".format(host,key))
                 await asyncio.sleep(3)
                 self.l.logger.info("{0} - Initiating IRC Reader".format(host))
-                self.msgHandlerTasks.update({host: loop.create_task(self.handleMsg(loop,host))}) 
+                self.msgHandlerTasks.update({host: loop.create_task(self.handleMsg(loop,host))})
+                self.serviceStarted.update({host:True})
                 while not self.msgHandlerTasks[host].done():
                     await asyncio.sleep(5)
             except Exception as e:
@@ -122,6 +124,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                     break
                 except asyncio.streams.IncompleteReadError:
                     pass
+                self.l.logger.info("Why am i looping?")
             else:
                 print("{0} doesnt exist".format(host))
 

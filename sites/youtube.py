@@ -262,7 +262,7 @@ class Youtube:
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Youtube": #determines if its the right service and supposed to be here
             msg = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             time = datetime.datetime.now()
-            self.olgMessageList.append({"Time":time, "Message":msg}) #keeps track of old messages so that we can check and not listen to these
+            self.oldMessageList.append({"Time":time, "Message":msg}) #keeps track of old messages so that we can check and not listen to these
             list_chatmessages_inset = self.youtube.liveChatMessages().insert(
                 part = "snippet",
                 body = dict (
@@ -311,7 +311,7 @@ class Youtube:
                     #youtube = self.Login()
                     #self.l.logger.info('Connection Error reconnecting')
             if self.messageFrequency == 0: #this should prevent overuse of the google api quota slowing down the bot during times of low use and speeding it up during times of high use
-                await asyncio.sleep(20)
+                await asyncio.sleep(8)
             elif self.messageFrequency == 1:
                 await asyncio.sleep(5)
             elif self.messageFrequency > 1:

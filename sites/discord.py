@@ -72,7 +72,12 @@ class Discord:
             l.logger.debug(message.author.name)
             attachments = "" #gets the attachments so we dont loose that
             for i in message.attachments:
-                attachments += i.url + " "
+                if attachments == "":
+                    attachments += i.url
+                else:
+                    attachments += " " + i.url 
+
+            
             messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
             roleList={}
             try: 
@@ -275,5 +280,7 @@ class Discord:
                 finally:
                     l.logger.info("Client Closed")
                     loop.close()
-                l.logger.info("Reconnecting")
+                l.logger.info("Reconnecting in 5 seconds")
+                time.sleep(5)
+                l.logger.info("Attempting to reconnect")
 
