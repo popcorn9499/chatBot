@@ -202,9 +202,9 @@ class Youtube:
 
     async def clearMsgList(self):
         oldTime = datetime.datetime.now() - datetime.timedelta(minutes=15)
-        for msg in self.olgMessageList:
+        for msg in self.oldMessageList:
             if msg["Time"] < oldTime:
-                self.olgMessageList.remove(msg)
+                self.oldMessageList.remove(msg)
 
 
     async def processMsg(self,username,message,roleList,profilePicture):
