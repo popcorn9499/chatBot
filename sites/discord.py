@@ -98,7 +98,10 @@ class Discord:
             #print(re.findall(r'<:\w*:\d*>', message.content))
 
             ######maybe use this to remove the annoying end bit of some emojis
+
             
+            msgEmojis = await Discord.getMsgEmojis(message.content)
+
 
             authorName = await Discord.getAuthor(message.author)
             messageContents = await Discord.userAtMentionsFix(messageContents, message.mentions)
@@ -114,6 +117,30 @@ class Discord:
                 await Discord.webhookSend(authorName,"aa",message.channel, avatar=message.author.avatar_url)
         else:
             l.logger.debug("Why am i recieving my own messages???")
+
+
+    async def getMsgEmojis(msg):
+        # custom_emojis_unanimated = re.findall(r'<:\w*:\d*>', msg.content)
+        # custom_emojis_animated = re.findall(r'<a:\w*:\d*>', msg.content)
+        # custom_emojis = custom_emojis_animated + custom_emojis_unanimated
+        # custom_emojis_Ints = []
+        # for e in custom_emojis:
+        #     eSplit = e.split(":")
+        #     emojiID = ""
+        #     if len(eSplit) == 2:
+        #         emojiID = int(e.split(':')[1].replace('>', ''))
+        #     else:
+        #         emojiID = int(e.split(':')[2].replace('>', ''))
+        #     customEmoteObj = discord.utils.get(client.emojis, id=e)
+        #     print(customEmoteObj)
+        #custom_emojis = [discord.utils.get(client.emojis, id=e) for e in custom_emojis_Ints]
+        msgEmojis = {}
+        for emoji in client.emojis:
+            print(emoji)
+            if msg.find(str(emoji)) != -1:
+                msgEmojis.update({str(emoji): str(emoji.url)})
+
+        return msgEmojis
 
     async def getAuthor(user):
         try:
