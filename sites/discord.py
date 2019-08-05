@@ -99,16 +99,13 @@ class Discord:
 
             ######maybe use this to remove the annoying end bit of some emojis
 
-            
             msgEmojis = await Discord.getMsgEmojis(message.content)
-
-
             authorName = await Discord.getAuthor(message.author)
             messageContents = await Discord.userAtMentionsFix(messageContents, message.mentions)
             messageContents = await Discord.roleAtMentionsFix(messageContents,message.role_mentions)
             messageContents = await Discord.channelAtMentionsFix(messageContents,message.channel_mentions)
             formatOptions = {"%authorName%": authorName, "%channelFrom%": channelName, "%serverFrom%": serverName, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
-            msg = Object.ObjectLayout.message(Author=authorName,User=str(message.author),Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList,profilePicture=profilePic)
+            msg = Object.ObjectLayout.message(Author=authorName,User=str(message.author),Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList,profilePicture=profilePic, emojis=msgEmojis)
             objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
             objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=msg, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged=message)
             config.events.onMessage(message=objSendMsg)
