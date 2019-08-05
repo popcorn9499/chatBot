@@ -5,10 +5,10 @@ class Object():
 
 class ObjectLayout:
 
-    def message(Contents,Author,Server,Channel,Service,Roles,User=None,profilePicture=None):
+    def message(Contents,Author,Server,Channel,Service,Roles,User=None,profilePicture=None,emojis={}):
         if User == None:
             User = Author
-        messageObj = Object({"Contents":Contents,"Author":Author,"User": User,"Server":Server,"Channel":Channel,"Service":Service,"Roles":Roles, "ProfilePicture":profilePicture})
+        messageObj = Object({"Contents":Contents,"Author":Author,"User": User,"Server":Server,"Channel":Channel,"Service":Service,"Roles":Roles, "ProfilePicture":profilePicture, "Emojis": emojis})
         #print(messageObj.__dict__)
         return messageObj
     
