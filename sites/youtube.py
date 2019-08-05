@@ -262,7 +262,7 @@ class Youtube:
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Youtube": #determines if its the right service and supposed to be here
             msg = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             time = datetime.datetime.now()
-            self.olgMessageList.append({"Time":time, "Message":msg}) #keeps track of old messages so that we can check and not listen to these
+            self.oldMessageList.append({"Time":time, "Message":msg}) #keeps track of old messages so that we can check and not listen to these
             list_chatmessages_inset = self.youtube.liveChatMessages().insert(
                 part = "snippet",
                 body = dict (
