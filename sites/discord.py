@@ -9,6 +9,7 @@ from utils import messageFormatter
 from utils import fileIO
 import os
 import aiohttp
+import re
 
 
 client = discord.Client() #sets this to just client for reasons cuz y not? (didnt have to be done like this honestly could of been just running discord.Client().)
@@ -93,13 +94,18 @@ class Discord:
             elif (isinstance(message.channel, discord.channel.GroupChannel)):
                 channelName = message.channel.name
                 serverName = "GroupDM"
+            
+            #print(re.findall(r'<:\w*:\d*>', message.content))
 
+            ######maybe use this to remove the annoying end bit of some emojis
+
+            msgEmojis = await Discord.getMsgEmojis(message.content)
             authorName = await Discord.getAuthor(message.author)
             messageContents = await Discord.userAtMentionsFix(messageContents, message.mentions)
             messageContents = await Discord.roleAtMentionsFix(messageContents,message.role_mentions)
             messageContents = await Discord.channelAtMentionsFix(messageContents,message.channel_mentions)
             formatOptions = {"%authorName%": authorName, "%channelFrom%": channelName, "%serverFrom%": serverName, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
-            msg = Object.ObjectLayout.message(Author=authorName,User=str(message.author),Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList,profilePicture=profilePic)
+            msg = Object.ObjectLayout.message(Author=authorName,User=str(message.author),Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList,profilePicture=profilePic, emojis=msgEmojis)
             objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
             objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=msg, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged=message)
             config.events.onMessage(message=objSendMsg)
@@ -108,6 +114,30 @@ class Discord:
                 await Discord.webhookSend(authorName,"aa",message.channel, avatar=message.author.avatar_url)
         else:
             l.logger.debug("Why am i recieving my own messages???")
+
+
+    async def getMsgEmojis(msg):
+        # custom_emojis_unanimated = re.findall(r'<:\w*:\d*>', msg.content)
+        # custom_emojis_animated = re.findall(r'<a:\w*:\d*>', msg.content)
+        # custom_emojis = custom_emojis_animated + custom_emojis_unanimated
+        # custom_emojis_Ints = []
+        # for e in custom_emojis:
+        #     eSplit = e.split(":")
+        #     emojiID = ""
+        #     if len(eSplit) == 2:
+        #         emojiID = int(e.split(':')[1].replace('>', ''))
+        #     else:
+        #         emojiID = int(e.split(':')[2].replace('>', ''))
+        #     customEmoteObj = discord.utils.get(client.emojis, id=e)
+        #     print(customEmoteObj)
+        #custom_emojis = [discord.utils.get(client.emojis, id=e) for e in custom_emojis_Ints]
+        msgEmojis = {}
+        for emoji in client.emojis:
+            print(emoji)
+            if msg.find(str(emoji)) != -1:
+                msgEmojis.update({str(emoji): str(emoji.url)})
+
+        return msgEmojis
 
     async def getAuthor(user):
         try:
