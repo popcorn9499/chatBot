@@ -122,6 +122,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                     break
                 except asyncio.streams.IncompleteReadError:
                     pass
+                self.l.logger.info("Why am i looping?")
             else:
                 print("{0} doesnt exist".format(host))
 
