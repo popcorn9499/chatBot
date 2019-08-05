@@ -9,6 +9,7 @@ from utils import messageFormatter
 from utils import fileIO
 import os
 import aiohttp
+import re
 
 
 client = discord.Client() #sets this to just client for reasons cuz y not? (didnt have to be done like this honestly could of been just running discord.Client().)
@@ -93,6 +94,11 @@ class Discord:
             elif (isinstance(message.channel, discord.channel.GroupChannel)):
                 channelName = message.channel.name
                 serverName = "GroupDM"
+            
+            #print(re.findall(r'<:\w*:\d*>', message.content))
+
+            ######maybe use this to remove the annoying end bit of some emojis
+            
 
             authorName = await Discord.getAuthor(message.author)
             messageContents = await Discord.userAtMentionsFix(messageContents, message.mentions)
