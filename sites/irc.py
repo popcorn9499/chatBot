@@ -135,9 +135,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
 
                 
     
-    async def processMsg(self,username,message,roleList,server,channel):
+    async def processMsg(self,username,message,roleList,server,channel,emojis):
         formatOptions = {"%authorName%": username, "%channelFrom%": channel, "%serverFrom%": server, "%serviceFrom%": "irc","%message%":"message","%roles%":roleList}
-        message = Object.ObjectLayout.message(Author=username,Contents=message,Server=server,Channel=channel,Service="irc",Roles=roleList)
+        message = Object.ObjectLayout.message(Author=username,Contents=message,Server=server,Channel=channel,Service="irc",Roles=roleList,emojis=emojis)
         objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
         objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged="None")
         config.events.onMessage(message=objSendMsg)
@@ -150,13 +150,14 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             user = data[0].split('!')[0].lstrip(":")
             m = re.search(self.messagepattern, data[0])
             #meCheck = config.c.irc["Servers"][host]["Nickname"] == user
+            emojis = {}
             if m: #and not meCheck:
                 message = ' '.join(data[3:]).strip(':').split()
                 self.l.logger.info("{0} - ".format(host) + data[2]+ ":" + user +': '+ ' '.join(message))
                 msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":' '.join(message),"sent":False}
                 role = {}
                 role.update({"Normal": 0})
-                await self.processMsg(username=user,message=' '.join(message),roleList=role,server=host,channel=data[2])
+                await self.processMsg(username=user,message=' '.join(message),roleList=role,server=host,channel=data[2],emojis=emojis)
         elif data[1] == 'JOIN':
             user = data[0].split('!')[0].lstrip(":")
             self.l.logger.info("{0} - ".format(host)  + user+" joined")
