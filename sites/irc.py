@@ -160,7 +160,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                         emoteData = tempPair[1].split("/")
                         for emotePair in emoteData:
                             emoteID = emotePair.split(":")[0]
-                            emojis.update({emoteID: "URL"})
+                            emoteURL= "http://static-cdn.jtvnw.net/emoticons/v1/{0}/3.0".format(emoteID)
+
+                            emojis.update({emoteID: emoteURL})
             self.l.logger.info("Emotes: {0}".format(emojis))
             if m: #and not meCheck:
                 message = ' '.join(data[3:]).strip(':').split()
