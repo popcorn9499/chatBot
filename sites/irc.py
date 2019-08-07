@@ -110,8 +110,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                     data = (await self.reader[host].readuntil(b'\n')).decode("utf-8")
                     data = data.rstrip()
                     data = data.split()
-                    self.l.logger.debug(' '.join(data) + host) #,"Extra Debug")
-                    if data[0].startswith('@'): 
+                    allData = data[0]
+                    self.l.logger.info(' '.join(data) + host) #,"Extra Debug")
+                    if data[0].startswith('@'):                      
                         data.pop(0)
                     if data == []:
                         pass
@@ -123,7 +124,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                         #generally not-as-important info
                     else:
                         print(data)
-                        await self._decoded_send(data, loop,host)
+                        await self._decoded_send(data, loop,host,allData)
                 except ConnectionResetError:
                     #self.ircConnect(loop,host)
                     break
@@ -143,7 +144,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         config.events.onMessage(message=objSendMsg)
         
     
-    async def _decoded_send(self, data, loop,host):
+    async def _decoded_send(self, data, loop,host,allData=None):
         """TODO: remove discord only features..."""
         
         if data[1] == 'PRIVMSG':
@@ -151,6 +152,16 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             m = re.search(self.messagepattern, data[0])
             #meCheck = config.c.irc["Servers"][host]["Nickname"] == user
             emojis = {}
+            if host == "irc.chat.twitch.tv":
+                tempData = allData[1:].split(";") # 1: drops the first bit of information we dont need aka "@"
+                for tempPair in tempData:
+                    tempPair = tempPair.split("=")
+                    if tempPair[0] == "emotes":
+                        emoteData = tempPair[1].split("/")
+                        for emotePair in emoteData:
+                            emoteID = emotePair.split(":")[0]
+                            emojis.update({emoteID: "URL"})
+            self.l.logger.info("Emotes: {0}".format(emojis))
             if m: #and not meCheck:
                 message = ' '.join(data[3:]).strip(':').split()
                 self.l.logger.info("{0} - ".format(host) + data[2]+ ":" + user +': '+ ' '.join(message))
