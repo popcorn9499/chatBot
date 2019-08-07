@@ -165,12 +165,12 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                             emojis.update({emoteID: emoteURL})
             self.l.logger.info("Emotes: {0}".format(emojis))
             if m: #and not meCheck:
-                message = ' '.join(data[3:]).strip(':').split()
-                self.l.logger.info("{0} - ".format(host) + data[2]+ ":" + user +': '+ ' '.join(message))
-                msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":' '.join(message),"sent":False}
+                message = ' '.join(data[3:])[1:]
+                self.l.logger.info("{0} - ".format(host) + data[2]+ ":" + user +': '+ message)
+                msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":message,"sent":False}
                 role = {}
                 role.update({"Normal": 0})
-                await self.processMsg(username=user,message=' '.join(message),roleList=role,server=host,channel=data[2],emojis=emojis)
+                await self.processMsg(username=user,message=message,roleList=role,server=host,channel=data[2],emojis=emojis)
         elif data[1] == 'JOIN':
             user = data[0].split('!')[0].lstrip(":")
             self.l.logger.info("{0} - ".format(host)  + user+" joined")
