@@ -156,7 +156,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 tempData = allData[1:].split(";") # 1: drops the first bit of information we dont need aka "@"
                 for tempPair in tempData:
                     tempPair = tempPair.split("=")
-                    if tempPair[0] == "emotes":
+                    if tempPair[0] == "emotes" and tempPair[1] != '':
                         emoteData = tempPair[1].split("/")
                         for emotePair in emoteData:
                             emoteID = emotePair.split(":")[0]
