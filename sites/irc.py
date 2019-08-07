@@ -142,7 +142,6 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
         objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged="None")
         config.events.onMessage(message=objSendMsg)
-        
     
     async def _decoded_send(self, data, loop,host,allData=None):
         """TODO: remove discord only features..."""
@@ -151,6 +150,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             user = data[0].split('!')[0].lstrip(":")
             m = re.search(self.messagepattern, data[0])
             #meCheck = config.c.irc["Servers"][host]["Nickname"] == user
+            message = ' '.join(data[3:])[1:]
             emojis = {}
             if host == "irc.chat.twitch.tv":
                 tempData = allData[1:].split(";") # 1: drops the first bit of information we dont need aka "@"
@@ -161,11 +161,12 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                         for emotePair in emoteData:
                             emoteID = emotePair.split(":")[0]
                             emoteURL= "http://static-cdn.jtvnw.net/emoticons/v1/{0}/3.0".format(emoteID)
-
-                            emojis.update({emoteID: emoteURL})
+                            #get emote string.
+                            emotePos = emotePair.split(":")[1].split(",")[0].split("-")
+                            emote=message[int(emotePos[0]):int(emotePos[1])+1]
+                            emojis.update({emote: emoteURL})
             self.l.logger.info("Emotes: {0}".format(emojis))
             if m: #and not meCheck:
-                message = ' '.join(data[3:])[1:]
                 self.l.logger.info("{0} - ".format(host) + data[2]+ ":" + user +': '+ message)
                 msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":message,"sent":False}
                 role = {}
