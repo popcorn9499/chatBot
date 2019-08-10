@@ -203,11 +203,32 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         await self.channelFrankerFacezEmotes(message,emojis,channel)
 
     async def globalFrankerFacezEmotes(self,message,emojis):
-        pass
+        emoteUrl = "https://api.frankerfacez.com/v1/set/global"
+        requestData = requests.get(emoteUrl)
+        if requestData.status_code != 200:
+            return None
+        emoteList = json.loads(requestData.content)
+        #default emotes
+        for key,val in emoteList["default_sets"].items():
+            await self.getFrankerFacezEmoteSingle(message,emojis,emoteList["sets"][val])
+
+        #potentially later add user specific support
+    
+    async def getFrankerFacesEmotes(self,emoteUrlList):
+        emoteURL = ""
+        for key,val in emoteUrlList.items():
+            emoteURL = val
+        return emoteURL
+    
+    async def getFrankerFacezEmoteSingle(self,message,emojis,emote):
+        for emoticonKey, emoticonVal in emote["emoticons"].items():
+            if message.find(emoticonVal["name"]) != -1:
+                emoteUrl = await self.getFrankerFacesEmotes(emoticonVal["urls"])
+                emojis.update({emoticonVal["name"]: emoteUrl})
 
     async def channelFrankerFacezEmotes(self,message,emojis,channel):
         pass
-    
+
     async def _decoded_send(self, data, loop,host,allData=None):
         """TODO: remove discord only features..."""  
         if data[1] == 'PRIVMSG':
