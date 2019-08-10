@@ -160,7 +160,11 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                     emote=message[int(emotePos[0]):int(emotePos[1])+1]
                     emojis.update({emote: emoteURL})
 
-    async def betterttvEmotes(self,message,emojis):
+    async def betterttvEmotes(self,message,emojis,channel):
+        await self.globalBetterttvEmotes(message, emojis)
+        await self.channelBetterttvEmotes(message,emojis,channel)
+
+    async def globalBetterttvEmotes(self,message,emojis):
         emoteUrl = "https://api.betterttv.net/emotes"
         emoteList = json.loads(requests.get(emoteUrl).content)
         if emoteList["status"] != 200:
@@ -172,6 +176,22 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 emoteUrl = emoteUrl.replace("/1x", "/3x")
                 emojis.update({emoteData["regex"]: emoteUrl})
 
+    async def channelBetterttvEmotes(self,message,emojis,channel):
+        emoteUrl = "https://api.betterttv.net/2/channels/" + channel
+        try:
+            emoteList = json.loads(requests.get(emoteUrl).content)
+            emoteUrlTemplate = "https:" + emoteList["urlTemplate"]
+            if emoteList["status"] != 200 or "message" in emoteList:
+                return None
+            emoteList = emoteList["emotes"]
+            for emoteData in emoteList:
+                if message.find(emoteData["code"]) != -1:
+                    emoteUrl =  emoteUrlTemplate.replace("{{id}}", emoteData["id"])
+                    emoteUrl = emoteUrl.replace("{{image}}", "/3x")
+                    emojis.update({emoteData["code"]: emoteUrl})
+        except:
+            pass
+
     async def _decoded_send(self, data, loop,host,allData=None):
         """TODO: remove discord only features..."""  
         if data[1] == 'PRIVMSG':
@@ -182,7 +202,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             emojis = {}
             if host == "irc.chat.twitch.tv":
                 await self.twitchEmotes(message,allData,emojis)
-            await self.betterttvEmotes(message,emojis)
+            await self.betterttvEmotes(message,emojis,data[2])
             self.l.logger.info("Emotes: {0}".format(emojis))
             if m: #and not meCheck:
                 self.l.logger.info("{0} - ".format(host) + data[2]+ ":" + user +': '+ message)
