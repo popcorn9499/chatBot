@@ -227,7 +227,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         emoteURL = ""
         for val in emoteUrlList:
             emoteURL = val
-        return emoteURL
+        return "https:" + emoteURL
     
     async def getFrankerFacezEmoteSingle(self,message,emojis,emote):
         for emoticonVal in emote["emoticons"]:
