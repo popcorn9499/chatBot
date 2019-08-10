@@ -209,25 +209,33 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             return None
         emoteList = json.loads(requestData.content)
         #default emotes
-        for key,val in emoteList["default_sets"].items():
-            await self.getFrankerFacezEmoteSingle(message,emojis,emoteList["sets"][val])
+        for val in emoteList["default_sets"]:
+            await self.getFrankerFacezEmoteSingle(message,emojis,emoteList["sets"][str(val)])
 
         #potentially later add user specific support
     
-    async def getFrankerFacesEmotes(self,emoteUrlList):
+    async def channelFrankerFacezEmotes(self,message,emojis,channel):
+        emoteUrl = "https://api.frankerfacez.com/v1/room/" + channel
+        requestData = requests.get(emoteUrl)
+        if requestData.status_code != 200:
+            return None
+        emoteList = json.loads(requestData.content)
+        for key, emoteSet in emoteList["sets"].items():
+            await self.getFrankerFacezEmoteSingle(message,emojis,emoteSet)
+
+    async def getFrankerFacesEmotesURL(self,emoteUrlList):
         emoteURL = ""
-        for key,val in emoteUrlList.items():
+        for val in emoteUrlList:
             emoteURL = val
         return emoteURL
     
     async def getFrankerFacezEmoteSingle(self,message,emojis,emote):
-        for emoticonKey, emoticonVal in emote["emoticons"].items():
+        for emoticonVal in emote["emoticons"]:
             if message.find(emoticonVal["name"]) != -1:
-                emoteUrl = await self.getFrankerFacesEmotes(emoticonVal["urls"])
+                emoteUrl = await self.getFrankerFacesEmotesURL(emoticonVal["urls"])
                 emojis.update({emoticonVal["name"]: emoteUrl})
 
-    async def channelFrankerFacezEmotes(self,message,emojis,channel):
-        pass
+    
 
     async def _decoded_send(self, data, loop,host,allData=None):
         """TODO: remove discord only features..."""  
@@ -240,6 +248,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             if host == "irc.chat.twitch.tv":
                 await self.twitchEmotes(message,allData,emojis)
             await self.betterttvEmotes(message,emojis,data[2])
+            await self.frankerFacezEmotes(message,emojis,data[2])
             self.l.logger.info("Emotes: {0}".format(emojis))
             if m: #and not meCheck:
                 self.l.logger.info("{0} - ".format(host) + data[2]+ ":" + user +': '+ message)
