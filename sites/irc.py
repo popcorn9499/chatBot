@@ -166,7 +166,10 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
 
     async def globalBetterttvEmotes(self,message,emojis):
         emoteUrl = "https://api.betterttv.net/emotes"
-        emoteList = json.loads(requests.get(emoteUrl).content)
+        requestData = requests.get(emoteUrl)
+        if requestData.status_code != 200:
+            return None
+        emoteList = json.loads(requestData.content)
         if emoteList["status"] != 200:
             return None
         emoteList = emoteList["emotes"]
@@ -178,8 +181,11 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
 
     async def channelBetterttvEmotes(self,message,emojis,channel):
         emoteUrl = "https://api.betterttv.net/2/channels/" + channel
+        requestData = requests.get(emoteUrl)
+        if requestData.status_code != 200:
+            return None
         try:
-            emoteList = json.loads(requests.get(emoteUrl).content)
+            emoteList = json.loads(requestData.content)
             emoteUrlTemplate = "https:" + emoteList["urlTemplate"]
             if emoteList["status"] != 200 or "message" in emoteList:
                 return None
