@@ -192,6 +192,16 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         except:
             pass
 
+    async def frankerFacezEmotes(self,message,emojis,channel):
+        await self.globalFrankerFacezEmotes(message,emojis)
+        await self.channelFrankerFacezEmotes(message,emojis,channel)
+
+    async def globalFrankerFacezEmotes(self,message,emojis):
+        pass
+
+    async def channelFrankerFacezEmotes(self,message,emojis,channel):
+        pass
+    
     async def _decoded_send(self, data, loop,host,allData=None):
         """TODO: remove discord only features..."""  
         if data[1] == 'PRIVMSG':
