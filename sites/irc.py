@@ -8,6 +8,9 @@ from utils import fileIO
 from utils import messageFormatter
 import os
 import time
+import json
+
+import requests #replace this sometime in the future
 
 ##this is the event loop for the irc client
 class irc():#alot of this code was given to me from thehiddengamer then i adapted to more of what i needed
@@ -157,7 +160,17 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                     emote=message[int(emotePos[0]):int(emotePos[1])+1]
                     emojis.update({emote: emoteURL})
 
-    
+    async def betterttvEmotes(self,message,emojis):
+        emoteUrl = "https://api.betterttv.net/emotes"
+        emoteList = json.loads(requests.get(emoteUrl).content)
+        if emoteList["status"] != 200:
+            return None
+        emoteList = emoteList["emotes"]
+        for emoteData in emoteList:
+            if message.find(emoteData["regex"]) != -1:
+                emoteUrl = "https:" + emoteData["url"]
+                emoteUrl = emoteUrl.replace("/1x", "/3x")
+                emojis.update({emoteData["regex"]: emoteUrl})
 
     async def _decoded_send(self, data, loop,host,allData=None):
         """TODO: remove discord only features..."""  
@@ -169,7 +182,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             emojis = {}
             if host == "irc.chat.twitch.tv":
                 await self.twitchEmotes(message,allData,emojis)
-            
+            await self.betterttvEmotes(message,emojis)
             self.l.logger.info("Emotes: {0}".format(emojis))
             if m: #and not meCheck:
                 self.l.logger.info("{0} - ".format(host) + data[2]+ ":" + user +': '+ message)
