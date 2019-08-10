@@ -143,9 +143,24 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged="None")
         config.events.onMessage(message=objSendMsg)
     
+    async def twitchEmotes(self,message,allData,emojis):
+        tempData = allData[1:].split(";") # 1: drops the first bit of information we dont need aka "@"
+        for tempPair in tempData:
+            tempPair = tempPair.split("=")
+            if tempPair[0] == "emotes" and tempPair[1] != '':
+                emoteData = tempPair[1].split("/")
+                for emotePair in emoteData:
+                    emoteID = emotePair.split(":")[0]
+                    emoteURL= "http://static-cdn.jtvnw.net/emoticons/v1/{0}/3.0".format(emoteID)
+                    #get emote string.
+                    emotePos = emotePair.split(":")[1].split(",")[0].split("-")
+                    emote=message[int(emotePos[0]):int(emotePos[1])+1]
+                    emojis.update({emote: emoteURL})
+
+    
+
     async def _decoded_send(self, data, loop,host,allData=None):
-        """TODO: remove discord only features..."""
-        
+        """TODO: remove discord only features..."""  
         if data[1] == 'PRIVMSG':
             user = data[0].split('!')[0].lstrip(":")
             m = re.search(self.messagepattern, data[0])
@@ -153,18 +168,8 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             message = ' '.join(data[3:])[1:]
             emojis = {}
             if host == "irc.chat.twitch.tv":
-                tempData = allData[1:].split(";") # 1: drops the first bit of information we dont need aka "@"
-                for tempPair in tempData:
-                    tempPair = tempPair.split("=")
-                    if tempPair[0] == "emotes" and tempPair[1] != '':
-                        emoteData = tempPair[1].split("/")
-                        for emotePair in emoteData:
-                            emoteID = emotePair.split(":")[0]
-                            emoteURL= "http://static-cdn.jtvnw.net/emoticons/v1/{0}/3.0".format(emoteID)
-                            #get emote string.
-                            emotePos = emotePair.split(":")[1].split(",")[0].split("-")
-                            emote=message[int(emotePos[0]):int(emotePos[1])+1]
-                            emojis.update({emote: emoteURL})
+                await self.twitchEmotes(message,allData,emojis)
+            
             self.l.logger.info("Emotes: {0}".format(emojis))
             if m: #and not meCheck:
                 self.l.logger.info("{0} - ".format(host) + data[2]+ ":" + user +': '+ message)
