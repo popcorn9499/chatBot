@@ -247,8 +247,8 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             emojis = {}
             if host == "irc.chat.twitch.tv":
                 await self.twitchEmotes(message,allData,emojis)
-            await self.betterttvEmotes(message,emojis,data[2])
-            await self.frankerFacezEmotes(message,emojis,data[2])
+                await self.betterttvEmotes(message,emojis,data[2])
+                await self.frankerFacezEmotes(message,emojis,data[2])
             self.l.logger.info("Emotes: {0}".format(emojis))
             if m: #and not meCheck:
                 self.l.logger.info("{0} - ".format(host) + data[2]+ ":" + user +': '+ message)
