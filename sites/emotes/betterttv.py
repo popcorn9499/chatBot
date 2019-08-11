@@ -31,3 +31,11 @@ class betterttv(enotes):
     async def getEmote():
         pass
     
+    async def globalBetterttvEmotes(self,message,emojis):
+        emoteList = super.emoteDictionary["global"]
+        emoteList = emoteList["emotes"]
+        for emoteData in emoteList:
+            if message.find(emoteData["regex"]) != -1:
+                emoteUrl = "https:" + emoteData["url"]
+                emoteUrl = emoteUrl.replace("/1x", "/3x")
+                emojis.update({emoteData["regex"]: emoteUrl})
