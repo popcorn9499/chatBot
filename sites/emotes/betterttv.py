@@ -28,9 +28,14 @@ class betterttv(enotes):
             emoteUrl = emoteUrl.replace("{{image}}", "/3x")
             emoteReturn.update({emoteName: emoteUrl})
         return emoteReturn
+
     async def getEmote():
         pass
     
+    async def betterttvEmotes(self,message,emojis,channel):
+        await self.globalBetterttvEmotes(message, emojis)
+        await self.channelBetterttvEmotes(message,emojis,channel)
+
     async def globalBetterttvEmotes(self,message,emojis):
         emoteList = super.emoteDictionary["global"]
         emoteList = emoteList["emotes"]
@@ -39,3 +44,17 @@ class betterttv(enotes):
                 emoteUrl = "https:" + emoteData["url"]
                 emoteUrl = emoteUrl.replace("/1x", "/3x")
                 emojis.update({emoteData["regex"]: emoteUrl})
+
+    async def channelBetterttvEmotes(self,message,emojis,channel):
+        emoteUrl = "" + channel
+
+        emoteList = json.loads(requestData.content)
+        emoteUrlTemplate = "https:" + emoteList["urlTemplate"]
+        if emoteList["status"] != 200 or "message" in emoteList:
+            return None
+        emoteList = emoteList["emotes"]
+        for emoteData in emoteList:
+            if message.find(emoteData["code"]) != -1:
+                emoteUrl =  emoteUrlTemplate.replace("{{id}}", emoteData["id"])
+                emoteUrl = emoteUrl.replace("{{image}}", "/3x")
+                emojis.update({emoteData["code"]: emoteUrl})
