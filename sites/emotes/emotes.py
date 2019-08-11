@@ -15,6 +15,7 @@ class emotes():
         self.loop = asyncio.get_event_loop()
     
     async def getEmote(self,message,emojis,channel):
+        #emojis should add to a dictionary in the format of {emoteName: emoteURL}
         pass
 
     async def getDataJson(self,url):
