@@ -7,7 +7,7 @@ class betterttv(enotes):
         globalUrl = "https://api.betterttv.net/emotes"
         channelUrlFormat = "https://api.betterttv.net/2/channels/" #:channel
         super(globalUrl,channelUrlFormat)
-        super.loop.create_task(super.updateData(super.gloablUrl,"global", self.parseGlobalEmoteData)])
+        super.loop.create_task(super.updateData(super.globalUrl,"global", self.parseGlobalEmoteData))
 
     
     async def parseGlobalEmoteData(self,emoteList):
