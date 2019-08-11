@@ -11,9 +11,16 @@ class emotes():
         self.channelUrlFormat = channelUrl
         self.channelUrl = {} #{Channel: channelName, URL: url}
         self.updateDelay = 5*60
-        self.emoteDictionary = {} 
+        self.emoteDictionary = {}
+        self.services=[] #list of services allowed to be subscribed to this emote
         self.loop = asyncio.get_event_loop()
+        config.events.subscribeEmote += self.subscribeEmote
     
+    async def subscribeEmote(self,service,emoteHandleList):
+        for checkService in self.services:
+            if isinstance(service, checkService):
+                emoteHandleList.append(self)
+
     async def getEmote(self,message,emojis,channel):
         #emojis should add to a dictionary in the format of {emoteName: emoteURL}
         pass
