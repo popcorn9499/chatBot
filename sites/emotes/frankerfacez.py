@@ -26,3 +26,9 @@ class frankerfacez(enotes):
         for emoticonVal in emote["emoticons"]:
             emoteUrl = await self.getFrankerFacesEmotesURL(emoticonVal["urls"])
             emoteList.update({emoticonVal["name"]: emoteUrl})
+
+    async def parseChannelEmoteData(self,emoteList):
+        emoteReturn = {} #this should be in {emoteName: emoteUrl} format
+        for key, emoteSet in emoteList["sets"].items():
+            await self._getFrankerFacezEmoteSet(emoteSet, emoteReturn)
+        return emoteReturn
