@@ -17,6 +17,15 @@ class betterttv(enotes):
             emoteReturn.update({emoteName: emoteUrl})
         return emoteReturn
 
+    async def parseChannelEmoteData(self,emoteList):
+        emoteReturn = {} #this should be in {emoteName: emoteUrl} format
+        emoteUrlTemplate = "https:" + emoteList["urlTemplate"] #gets a template url
+        for emoteData in emoteList["emotes"]:
+            emoteName = emoteData["code"]
+            emoteUrl =  emoteUrlTemplate.replace("{{id}}", emoteData["id"])
+            emoteUrl = emoteUrl.replace("{{image}}", "/3x")
+            emoteReturn.update({emoteName: emoteUrl})
+        return emoteReturn
     async def getEmote():
         pass
     
