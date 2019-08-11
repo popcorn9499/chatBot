@@ -29,10 +29,7 @@ class betterttv(enotes):
             emoteReturn.update({emoteName: emoteUrl})
         return emoteReturn
 
-    async def getEmote():
-        pass
-    
-    async def betterttvEmotes(self,message,emojis,channel):
+    async def getEmote(self,message,emojis,channel):
         await self.globalBetterttvEmotes(message, emojis)
         await self.channelBetterttvEmotes(message,emojis,channel)
 
