@@ -27,8 +27,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         config.events.onMessageSend += self.sendMSG
         self.writer = {}
         self.reader = {}
-
+        self.emoteObjects = [] #this should be just plain emote objects
         self.msgHandlerTasks = {}
+        asyncio.get_event_loop().create_task(config.events.subscribeEmoteEngine(self,self.emoteObjects))
     
     async def irc_bot(self, loop): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.        
         for sKey, sVal in config.c.irc["Servers"].items():
@@ -175,8 +176,8 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             emojis = {}
             if host == "irc.chat.twitch.tv":
                 await self.twitchEmotes(message,allData,emojis)
-                await self.betterttvEmotes(message,emojis,data[2])
-                await self.frankerFacezEmotes(message,emojis,data[2])
+            for emoteObj in self.emoteObjects:
+                emoteObj.getEmote(message,emojis,data[2])
             self.l.logger.info("Emotes: {0}".format(emojis))
             if m: #and not meCheck:
                 self.l.logger.info("{0} - ".format(host) + data[2]+ ":" + user +': '+ message)
