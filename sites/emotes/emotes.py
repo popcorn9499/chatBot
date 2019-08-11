@@ -9,12 +9,12 @@ class emotes():
     def __init__(self,globalUrl=None,channelUrl=None):
         self.globalUrl = globalUrl
         self.channelUrlFormat = channelUrl
-        self.channelUrl = {} #{Channel: channelName, List: listData, URL: url, Timeout: time}
+        self.channelUrl = {} #{Channel: channelName, URL: url}
         self.updateDelay = 5*60
-    
+        self.emoteDictionary = {} 
     
     async def getDataJson(self,url):
-        requestData = requests.get()
+        requestData = requests.get(url)
         if requestData.status_code != 200:
             return None
         emoteList = json.loads(requestData.content)
