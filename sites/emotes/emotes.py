@@ -14,6 +14,9 @@ class emotes():
         self.emoteDictionary = {} 
         self.loop = asyncio.get_event_loop()
     
+    async def getEmote(self,message,emojis,channel):
+        pass
+
     async def getDataJson(self,url):
         requestData = requests.get(url)
         if requestData.status_code != 200:
