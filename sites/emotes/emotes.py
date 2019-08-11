@@ -14,7 +14,7 @@ class emotes():
         self.emoteDictionary = {}
         self.services=[] #list of services allowed to be subscribed to this emote
         self.loop = asyncio.get_event_loop()
-        config.events.subscribeEmote += self.subscribeEmote
+        config.events.subscribeEmoteEngine += self.subscribeEmote
     
     async def subscribeEmote(self,service,emoteHandleList):
         for checkService in self.services:
