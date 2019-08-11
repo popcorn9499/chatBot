@@ -1,4 +1,5 @@
 from sites.emotes.emotes import emotes
+from sites import irc
 import asyncio
 
 class frankerfacez(enotes):
@@ -6,6 +7,7 @@ class frankerfacez(enotes):
         globalUrl = "https://api.frankerfacez.com/v1/set/global"
         channelUrlFormat = "https://api.frankerfacez.com/v1/room/" #:channel
         super(globalUrl,channelUrlFormat)
+        super.services.append(irc.irc)
         super.loop.create_task(super.updateData(super.globalUrl,"global", self.parseGlobalEmoteData))
 
     

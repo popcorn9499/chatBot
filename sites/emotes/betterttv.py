@@ -1,4 +1,5 @@
 from sites.emotes.emotes import emotes
+from sites import irc
 import asyncio
 
 class betterttv(enotes):
@@ -7,6 +8,7 @@ class betterttv(enotes):
         globalUrl = "https://api.betterttv.net/emotes"
         channelUrlFormat = "https://api.betterttv.net/2/channels/" #:channel
         super(globalUrl,channelUrlFormat)
+        super.services.append(irc.irc)
         super.loop.create_task(super.updateData(super.globalUrl,"global", self.parseGlobalEmoteData))
 
     
