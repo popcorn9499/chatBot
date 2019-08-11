@@ -22,9 +22,7 @@ class frankerfacez(enotes):
             emoteURL = val
         return "https:" + emoteURL
     
-    async def _getFrankerFacezEmoteSet(self,emote):
-        emojis = {}
+    async def _getFrankerFacezEmoteSet(self,emote, emoteList):
         for emoticonVal in emote["emoticons"]:
             emoteUrl = await self.getFrankerFacesEmotesURL(emoticonVal["urls"])
-            emojis.update({emoticonVal["name"]: emoteUrl})
-        return emojis
+            emoteList.update({emoticonVal["name"]: emoteUrl})
