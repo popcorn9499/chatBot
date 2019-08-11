@@ -43,15 +43,14 @@ class betterttv(enotes):
                 emotes.update({key: val})
 
     async def channelBetterttvEmotes(self,message,emojis,channel):
-        emoteUrl = "" + channel
+        if not channel in super.emoteDictionary: #handle getting the data for the channel emotes if they havent been cached
+            data = self.getDataJson()
+            if data != None: #only update data if it got any response with data from the url
+                emoteData = await self.parseChannelEmoteData(data) #parse the data into {emoteName: emoteUrl}
+                self.emoteDictionary({channel: emoteData})
+            super.loop.create_task(super.updateData(super.channel,channel, self.parseChannelEmoteData)) #create a caching loop
 
-        emoteList = json.loads(requestData.content)
-        emoteUrlTemplate = "https:" + emoteList["urlTemplate"]
-        if emoteList["status"] != 200 or "message" in emoteList:
-            return None
-        emoteList = emoteList["emotes"]
-        for emoteData in emoteList:
-            if message.find(emoteData["code"]) != -1:
-                emoteUrl =  emoteUrlTemplate.replace("{{id}}", emoteData["id"])
-                emoteUrl = emoteUrl.replace("{{image}}", "/3x")
-                emojis.update({emoteData["code"]: emoteUrl})
+        emoteList = super.emoteDictionary[channel]
+        for key,val in emoteList.items():
+            if message.find(key) != -1:
+                emotes.update({key: val})
