@@ -8,4 +8,6 @@ class betterttv(enotes):
         super(globalUrl,channelUrlFormat)
 
     
+    async def getEmote():
+        pass
     
