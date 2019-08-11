@@ -38,12 +38,9 @@ class betterttv(enotes):
 
     async def globalBetterttvEmotes(self,message,emojis):
         emoteList = super.emoteDictionary["global"]
-        emoteList = emoteList["emotes"]
-        for emoteData in emoteList:
-            if message.find(emoteData["regex"]) != -1:
-                emoteUrl = "https:" + emoteData["url"]
-                emoteUrl = emoteUrl.replace("/1x", "/3x")
-                emojis.update({emoteData["regex"]: emoteUrl})
+        for key,val in emoteList.items():
+            if message.find(key) != -1:
+                emotes.update({key: val})
 
     async def channelBetterttvEmotes(self,message,emojis,channel):
         emoteUrl = "" + channel
