@@ -7,6 +7,15 @@ class frankerfacez(enotes):
         channelUrlFormat = "https://api.frankerfacez.com/v1/room/" #:channel
         super(globalUrl,channelUrlFormat)
         super.loop.create_task(super.updateData(super.globalUrl,"global", self.parseGlobalEmoteData))
+
+    
+    async def parseGlobalEmoteData(self,emoteList):
+        emoteReturn = {} #this should be in {emoteName: emoteUrl} format
+        for val in emoteList["default_sets"]:
+            for emoteData in emoteList["sets"][str(val)]:
+                await self._getFrankerFacezEmoteSet(emoteData, emoteReturn)
+        return emoteReturn
+
     async def _getFrankerFacesEmotesURL(self,emoteUrlList):
         emoteURL = ""
         for key,val in emoteUrlList.items():
