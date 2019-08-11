@@ -12,6 +12,7 @@ class emotes():
         self.channelUrl = {} #{Channel: channelName, URL: url}
         self.updateDelay = 5*60
         self.emoteDictionary = {} 
+        self.loop = asyncio.get_event_loop()
     
     async def getDataJson(self,url):
         requestData = requests.get(url)

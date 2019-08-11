@@ -1,4 +1,5 @@
 from sites.emotes.emotes import emotes
+import asyncio
 
 class betterttv(enotes):
     def __init__(self):
@@ -6,6 +7,7 @@ class betterttv(enotes):
         globalUrl = "https://api.betterttv.net/emotes"
         channelUrlFormat = "https://api.betterttv.net/2/channels/" #:channel
         super(globalUrl,channelUrlFormat)
+        super.loop.create_task(super.updateData(super.gloablUrl,"global", self.parseGlobalEmoteData)])
 
     
     async def parseGlobalEmoteData(self,emoteList):
