@@ -32,3 +32,70 @@ class frankerfacez(enotes):
         for key, emoteSet in emoteList["sets"].items():
             await self._getFrankerFacezEmoteSet(emoteSet, emoteReturn)
         return emoteReturn
+
+    async def getEmote(self,message,emojis,channel):
+        await self.globalFrankerFacezEmotes(message,emojis)
+        await self.channelFrankerFacezEmotes(message,emojis,channel)
+
+    async def globalFrankerFacezEmotes(self,message,emojis):
+        emoteList = super.emoteDictionary["global"]
+        for key,val in emoteList.items():
+            if message.find(key) != -1:
+                emotes.update({key: val})
+
+    async def channelFrankerFacezEmotes(self,message,emojis,channel):
+        if not channel in super.emoteDictionary: #handle getting the data for the channel emotes if they havent been cached
+            data = self.getDataJson()
+            if data != None: #only update data if it got any response with data from the url
+                emoteData = await self.parseChannelEmoteData(data) #parse the data into {emoteName: emoteUrl}
+                self.emoteDictionary({channel: emoteData})
+            super.loop.create_task(super.updateData(super.channel,channel, self.parseChannelEmoteData)) #create a caching loop
+
+        emoteList = super.emoteDictionary[channel]
+        for key,val in emoteList.items():
+            if message.find(key) != -1:
+                emotes.update({key: val})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async def frankerFacezEmotes(self,message,emojis,channel):
+
+
+async def globalFrankerFacezEmotes(self,message,emojis):
+    emoteUrl = ""
+    requestData = requests.get(emoteUrl)
+    if requestData.status_code != 200:
+        return None
+    emoteList = json.loads(requestData.content)
+    #default emotes
+    for val in emoteList["default_sets"]:
+        await self.getFrankerFacezEmoteSingle(message,emojis,emoteList["sets"][str(val)])
+
+    #potentially later add user specific support
+
+async def channelFrankerFacezEmotes(self,message,emojis,channel):
+    emoteUrl = "https://api.frankerfacez.com/v1/room/" + channel
+    requestData = requests.get(emoteUrl)
+    if requestData.status_code != 200:
+        return None
+    emoteList = json.loads(requestData.content)
+    for key, emoteSet in emoteList["sets"].items():
+        await self.getFrankerFacezEmoteSingle(message,emojis,emoteSet)
+
+
