@@ -22,7 +22,10 @@ class emotes():
             return None
         return emoteList
 
-    async def updateData(self, parameter_list):
+    async def updateData(self, url, dictionaryTag, dataParser):
         while True:
-
-            await asyncio.sleep()
+            data = self.getDataJson(url)
+            if data != None: #only update data if it got any response with data from the url
+                emoteData = await dataParser(data) #parse the data into {emoteName: emoteUrl}
+                self.emoteDictionary({dictionaryTag: emoteData})
+            await asyncio.sleep(self.updateDelay)
