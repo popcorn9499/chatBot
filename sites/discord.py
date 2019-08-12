@@ -33,7 +33,6 @@ class Discord:
     async def delete_message(self,message):
         await client.delete(message)
 
-
     @client.event
     async def on_ready(): #when the discord api has logged in and is ready then this even is fired
         global clientID,discordStarted
