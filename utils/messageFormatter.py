@@ -21,7 +21,6 @@ async def formatter(unformatMsg,formattingOptions="default.json",formatType="Fil
                 role = await findRole(unformatMsg.FormattingOptions[items])
                 formatting = formatting.replace(items,role[0])
             else:
-                print(await checkMessage(unformatMsg.FormattingOptions))
                 formatting = formatting.replace(items,unformatMsg.FormattingOptions[items])
         except KeyError: #prevents format stryings that dont exist from crashing the formatter
             pass
