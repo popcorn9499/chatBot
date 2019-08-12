@@ -36,9 +36,7 @@ class betterttv(emotes):
 
     async def globalBetterttvEmotes(self,message,emojis):
         emoteList = self.emoteDictionary["global"]
-        for key,val in emoteList.items():
-            if message.find(key) != -1:
-                emojis.update({key: val})
+        await self.findEmote(self,emoteList,message,emojis)
 
     async def channelBetterttvEmotes(self,message,emojis,channel):
         channel = channel[1:]
@@ -52,8 +50,6 @@ class betterttv(emotes):
             else: #avoids a crash due to invalid channel
                 return
         emoteList = self.emoteDictionary[channel]
-        for key,val in emoteList.items():
-            if message.find(key) != -1:
-                emojis.update({key: val})
+        await self.findEmote(self,emoteList,message,emojis)
             
 betterTTV = betterttv()

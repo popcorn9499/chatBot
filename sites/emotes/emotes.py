@@ -42,3 +42,8 @@ class emotes():
                 emoteData = await dataParser(data) #parse the data into {emoteName: emoteUrl}
                 self.emoteDictionary.update({dictionaryTag: emoteData})
             await asyncio.sleep(self.updateDelay)
+
+    async def findEmote(self,emoteList,message,emojis):
+        for key,val in emoteList.items():
+            if message.find(key) != -1:
+                emojis.update({key: val})
