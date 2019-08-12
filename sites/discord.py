@@ -28,7 +28,7 @@ class Discord:
         config.c.discordEnabled = fileIO.loadConf("config{0}auth{0}discord.json")["Enabled"]
         config.events.onMessageSend += self.discordSendMsg
         config.events.deleteMessage += self.delete_message
-        config.events.onWebhookSend += self.discordSendWebhook
+        config.events.onMessageSend += self.discordSendWebhook
    
     async def delete_message(self,message):
         await client.delete(message)
@@ -178,7 +178,7 @@ class Discord:
         global config
         while discordStarted != True: #wait until discord has started
             await asyncio.sleep(0.2)
-        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
+        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Webhook": #determines if its the right service and supposed to be here
             #gather required information
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
             embed = await Discord.parseEmbeds(sndMessage.customArgs)
