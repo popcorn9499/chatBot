@@ -264,25 +264,24 @@ class Discord:
                 embed.add_field(name=field["Name"],value=field["Value"],inline=field["Inline"])
         return embed
 
-    def start(self,token):
+    async def start(self,token):
         if config.c.discordEnabled: #allows discord to not be launched
             while True:
                 loop = asyncio.get_event_loop()
                 try:
-                    loop.run_until_complete(client.start(token,reconnect=True))
+                    await client.start(token,reconnect=True)
                 except (discord.ConnectionClosed, discord.GatewayNotFound,discord.HTTPException,discord.ClientException) as error:
-                    loop.run_until_complete(client.logout())
-                    loop.close()
-                    start(token)
+                    await client.logout()
                     l.logger.info("Client Connection Lost")
                     l.logger.debug("Some error occured: " + error)
-                    # cancel all tasks lingering
-                except KeyboardInterrupt:
-                    loop.run_until_complete(client.logout())
                 finally:
                     l.logger.info("Client Closed")
-                    loop.close()
                 l.logger.info("Reconnecting in 5 seconds")
                 time.sleep(5)
                 l.logger.info("Attempting to reconnect")
+
+discordP = Discord()
+
+loop = asyncio.get_event_loop()
+loop.create_task(discordP.start(config.c.discordToken))
 
