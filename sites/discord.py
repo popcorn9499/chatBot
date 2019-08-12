@@ -114,9 +114,9 @@ class Discord:
             objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
             objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=msg, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged=message)
             config.events.onMessage(message=objSendMsg)
-            if message.content.startswith("!hai"):
-                print(message.author.avatar_url)
-                await Discord.webhookSend(authorName,"aa",message.channel, avatar=message.author.avatar_url)
+            # if message.content.startswith("!hai"): #webhook testing code
+            #     print(message.author.avatar_url)
+            #     await Discord.webhookSend(authorName,"aa",message.channel, avatar=message.author.avatar_url)
         else:
             l.logger.debug("Why am i recieving my own messages???")
 
