@@ -6,6 +6,9 @@ from utils import fileIO
 l = logger.logs("Messages")
 
 async def formatter(unformatMsg,formattingOptions="default.json",formatType="File"):
+    await _formatter(unformatMsg.Message.Contents, unformatMsg.FormattingOptions,formattingOptions,formatType)
+    
+async def _formatter(message,formattingOptionsItems,formattingOptions="default.json",formatType="File"):   
     if (formatType == "File"):
         formatting = fileIO.loadConf("config{0}ChatFormatting{0}"+formattingOptions)["Format"]
     elif (formatType == "Other") or (formatType == "MutedOther"):
@@ -16,12 +19,12 @@ async def formatter(unformatMsg,formattingOptions="default.json",formatType="Fil
         items = await removeChar(":",items)
         try:
             if items == "%message%":
-                formatting = formatting.replace(items,unformatMsg.Message.Contents)
+                formatting = formatting.replace(items,message)
             elif items == "%roles%":
-                role = await findRole(unformatMsg.FormattingOptions[items])
+                role = await findRole(formattingOptionsItems[items])
                 formatting = formatting.replace(items,role[0])
             else:
-                formatting = formatting.replace(items,unformatMsg.FormattingOptions[items])
+                formatting = formatting.replace(items,formattingOptionsItems[items])
         except KeyError: #prevents format stryings that dont exist from crashing the formatter
             pass
     if (formatType != "MutedOther"):
