@@ -6,7 +6,7 @@ from utils import fileIO
 l = logger.logs("Messages")
 
 async def formatter(unformatMsg,formattingOptions="default.json",formatType="File"):
-    await _formatter(unformatMsg.Message.Contents, unformatMsg.FormattingOptions,formattingOptions,formatType)
+    return await _formatter(unformatMsg.Message.Contents, unformatMsg.FormattingOptions,formattingOptions,formatType)
     
 async def _formatter(message,formattingOptionsItems,formattingOptions="default.json",formatType="File"):   
     if (formatType == "File"):
