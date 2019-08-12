@@ -45,7 +45,7 @@ class betterttv(emotes):
             await self.checkIfEmotesCached(channel,channelUrL)
             emoteList = self.emoteDictionary[channel]
             await self.findEmote(emoteList,message,emojis)
-        except:
+        except: #this should theoretically just check for emotes.emotesMissing exception but this is fine as is
             pass
             
 betterTTV = betterttv()
