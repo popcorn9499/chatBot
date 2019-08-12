@@ -29,9 +29,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         self.reader = {}
         self.emoteObjects = [] #this should be just plain emote objects
         self.msgHandlerTasks = {}
-        asyncio.get_event_loop().create_task(config.events.subscribeEmoteEngine(self,self.emoteObjects))
-    
+
     async def irc_bot(self, loop): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.        
+        config.events.subscribeEmoteEngine(self,self.emoteObjects)
         for sKey, sVal in config.c.irc["Servers"].items():
             if sVal["Enabled"] == True:
                 host = sKey
