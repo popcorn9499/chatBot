@@ -6,16 +6,15 @@ class frankerfacez(emotes):
     def __init__(self):
         globalUrl = "https://api.frankerfacez.com/v1/set/global"
         channelUrlFormat = "https://api.frankerfacez.com/v1/room/" #:channel
-        super(globalUrl,channelUrlFormat)
-        super.services.append(irc.irc)
-        super.loop.create_task(super.updateData(super.globalUrl,"global", self.parseGlobalEmoteData))
-
+        super().__init__(globalUrl,channelUrlFormat)
+        self.services.append(irc.irc)
+        self.loop.create_task(self.updateData(self.globalUrl,"global", self.parseGlobalEmoteData))
     
     async def parseGlobalEmoteData(self,emoteList):
         emoteReturn = {} #this should be in {emoteName: emoteUrl} format
         for val in emoteList["default_sets"]:
-            for emoteData in emoteList["sets"][str(val)]:
-                await self._getFrankerFacezEmoteSet(emoteData, emoteReturn)
+            emoteData = emoteList["sets"][str(val)]
+            await self._getFrankerFacezEmoteSet(emoteData, emoteReturn)
         return emoteReturn
 
     async def _getFrankerFacesEmotesURL(self,emoteUrlList):
@@ -26,7 +25,7 @@ class frankerfacez(emotes):
     
     async def _getFrankerFacezEmoteSet(self,emote, emoteList):
         for emoticonVal in emote["emoticons"]:
-            emoteUrl = await self.getFrankerFacesEmotesURL(emoticonVal["urls"])
+            emoteUrl = await self._getFrankerFacesEmotesURL(emoticonVal["urls"])
             emoteList.update({emoticonVal["name"]: emoteUrl})
 
     async def parseChannelEmoteData(self,emoteList):
@@ -40,20 +39,18 @@ class frankerfacez(emotes):
         await self.channelFrankerFacezEmotes(message,emojis,channel)
 
     async def globalFrankerFacezEmotes(self,message,emojis):
-        emoteList = super.emoteDictionary["global"]
-        for key,val in emoteList.items():
-            if message.find(key) != -1:
-                emotes.update({key: val})
+        emoteList = self.emoteDictionary["global"]
+        await self.findEmote(emoteList,message,emojis)
 
     async def channelFrankerFacezEmotes(self,message,emojis,channel):
-        if not channel in super.emoteDictionary: #handle getting the data for the channel emotes if they havent been cached
-            data = self.getDataJson()
-            if data != None: #only update data if it got any response with data from the url
-                emoteData = await self.parseChannelEmoteData(data) #parse the data into {emoteName: emoteUrl}
-                self.emoteDictionary({channel: emoteData})
-            super.loop.create_task(super.updateData(super.channel,channel, self.parseChannelEmoteData)) #create a caching loop
+        try:
+            channel = channel[1:]
+            channelUrL = self.channelUrlFormat + channel
+            await self.checkIfEmotesCached(channel,channelUrL)
+            emoteList = self.emoteDictionary[channel]
+            await self.findEmote(emoteList,message,emojis)
+        except: #this should theoretically just check for emotes.emotesMissing exception but this is fine as is
+            pass
+            
 
-        emoteList = super.emoteDictionary[channel]
-        for key,val in emoteList.items():
-            if message.find(key) != -1:
-                emotes.update({key: val})
+ffz = frankerfacez()
