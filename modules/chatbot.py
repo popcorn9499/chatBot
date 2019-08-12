@@ -77,7 +77,10 @@ class chatbot:
             if val["To"]["Service"] == toService and val["From"]["Service"] == fromService:
                 if val["To"]["Server"] == toServer and val["From"]["Server"] == fromServer:
                     if val["To"]["Channel"] == toChannel and val["From"]["Channel"] == fromChannel:
-                        return "{0}".format(val["Identifier"])#formats the message potentially
+                        if "Identifier" in val:
+                            return "{0}".format(val["Identifier"])#formats the message potentially
+                        else: #return empty string if Identifier does not exist
+                            return ""
         return "" #returns nothing if all else fails
 
 
