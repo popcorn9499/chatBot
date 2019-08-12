@@ -27,10 +27,11 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         config.events.onMessageSend += self.sendMSG
         self.writer = {}
         self.reader = {}
-
+        self.emoteObjects = [] #this should be just plain emote objects
         self.msgHandlerTasks = {}
-    
+
     async def irc_bot(self, loop): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.        
+        config.events.subscribeEmoteEngine(self,self.emoteObjects)
         for sKey, sVal in config.c.irc["Servers"].items():
             if sVal["Enabled"] == True:
                 host = sKey
@@ -160,81 +161,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                     emote=message[int(emotePos[0]):int(emotePos[1])+1]
                     emojis.update({emote: emoteURL})
 
-    async def betterttvEmotes(self,message,emojis,channel):
-        await self.globalBetterttvEmotes(message, emojis)
-        await self.channelBetterttvEmotes(message,emojis,channel)
 
-    async def globalBetterttvEmotes(self,message,emojis):
-        emoteUrl = "https://api.betterttv.net/emotes"
-        requestData = requests.get(emoteUrl)
-        if requestData.status_code != 200:
-            return None
-        emoteList = json.loads(requestData.content)
-        if emoteList["status"] != 200:
-            return None
-        emoteList = emoteList["emotes"]
-        for emoteData in emoteList:
-            if message.find(emoteData["regex"]) != -1:
-                emoteUrl = "https:" + emoteData["url"]
-                emoteUrl = emoteUrl.replace("/1x", "/3x")
-                emojis.update({emoteData["regex"]: emoteUrl})
 
-    async def channelBetterttvEmotes(self,message,emojis,channel):
-        emoteUrl = "https://api.betterttv.net/2/channels/" + channel
-        requestData = requests.get(emoteUrl)
-        if requestData.status_code != 200:
-            return None
-        try:
-            emoteList = json.loads(requestData.content)
-            emoteUrlTemplate = "https:" + emoteList["urlTemplate"]
-            if emoteList["status"] != 200 or "message" in emoteList:
-                return None
-            emoteList = emoteList["emotes"]
-            for emoteData in emoteList:
-                if message.find(emoteData["code"]) != -1:
-                    emoteUrl =  emoteUrlTemplate.replace("{{id}}", emoteData["id"])
-                    emoteUrl = emoteUrl.replace("{{image}}", "/3x")
-                    emojis.update({emoteData["code"]: emoteUrl})
-        except:
-            pass
-
-    async def frankerFacezEmotes(self,message,emojis,channel):
-        await self.globalFrankerFacezEmotes(message,emojis)
-        await self.channelFrankerFacezEmotes(message,emojis,channel)
-
-    async def globalFrankerFacezEmotes(self,message,emojis):
-        emoteUrl = "https://api.frankerfacez.com/v1/set/global"
-        requestData = requests.get(emoteUrl)
-        if requestData.status_code != 200:
-            return None
-        emoteList = json.loads(requestData.content)
-        #default emotes
-        for val in emoteList["default_sets"]:
-            await self.getFrankerFacezEmoteSingle(message,emojis,emoteList["sets"][str(val)])
-
-        #potentially later add user specific support
     
-    async def channelFrankerFacezEmotes(self,message,emojis,channel):
-        emoteUrl = "https://api.frankerfacez.com/v1/room/" + channel
-        requestData = requests.get(emoteUrl)
-        if requestData.status_code != 200:
-            return None
-        emoteList = json.loads(requestData.content)
-        for key, emoteSet in emoteList["sets"].items():
-            await self.getFrankerFacezEmoteSingle(message,emojis,emoteSet)
-
-    async def getFrankerFacesEmotesURL(self,emoteUrlList):
-        emoteURL = ""
-        for key,val in emoteUrlList.items():
-            emoteURL = val
-        return "https:" + emoteURL
-    
-    async def getFrankerFacezEmoteSingle(self,message,emojis,emote):
-        for emoticonVal in emote["emoticons"]:
-            if message.find(emoticonVal["name"]) != -1:
-                emoteUrl = await self.getFrankerFacesEmotesURL(emoticonVal["urls"])
-                emojis.update({emoticonVal["name"]: emoteUrl})
-
     
 
     async def _decoded_send(self, data, loop,host,allData=None):
@@ -247,8 +176,8 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             emojis = {}
             if host == "irc.chat.twitch.tv":
                 await self.twitchEmotes(message,allData,emojis)
-                await self.betterttvEmotes(message,emojis,data[2])
-                await self.frankerFacezEmotes(message,emojis,data[2])
+            for emoteObj in self.emoteObjects:
+                await emoteObj.getEmote(message,emojis,data[2])
             self.l.logger.info("Emotes: {0}".format(emojis))
             if m: #and not meCheck:
                 self.l.logger.info("{0} - ".format(host) + data[2]+ ":" + user +': '+ message)
