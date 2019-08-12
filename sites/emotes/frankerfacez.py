@@ -2,7 +2,7 @@ from sites.emotes.emotes import emotes
 from sites import irc
 import asyncio
 
-class frankerfacez(enotes):
+class frankerfacez(emotes):
     def __init__(self):
         globalUrl = "https://api.frankerfacez.com/v1/set/global"
         channelUrlFormat = "https://api.frankerfacez.com/v1/room/" #:channel

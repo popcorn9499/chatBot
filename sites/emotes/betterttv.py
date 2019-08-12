@@ -2,7 +2,7 @@ from sites.emotes.emotes import emotes
 from sites import irc
 import asyncio
 
-class betterttv(enotes):
+class betterttv(emotes):
     def __init__(self):
 
         globalUrl = "https://api.betterttv.net/emotes"
