@@ -15,6 +15,7 @@ class Events(object):
         self.onWebhookSend = EventHook()
         self.deleteMessage = EventHook()
         self.newLogger = EventHook()
+        self.subscribeEmoteEngine = EventHook() 
 
 
 
