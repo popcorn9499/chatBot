@@ -146,7 +146,10 @@ class Discord:
 
     async def getAuthor(user):
         try:
-            return user.nick
+            if user.nick == None: #as i have found. sometimes this value isnt set for some reason and is just None. so i check for that to prevent that from causing issues
+                return user.name
+            else:
+                return user.nick 
         except AttributeError:
             return user.name
 
