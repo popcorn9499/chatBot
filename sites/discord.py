@@ -280,3 +280,8 @@ class Discord:
                 time.sleep(5)
                 l.logger.info("Attempting to reconnect")
 
+discordP = Discord()
+
+loop = asyncio.get_event_loop()
+loop.create_task(discordP.start(config.c.discordToken))
+

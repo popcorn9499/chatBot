@@ -7,8 +7,5 @@ import asyncio
 from sites import emotes
 
 #this is the starting point for all the bot tasks
-discordP = sites.discord.Discord()
-
 loop = asyncio.get_event_loop()
-loop.create_task(discordP.start(utils.config.c.discordToken))
 loop.run_forever()
