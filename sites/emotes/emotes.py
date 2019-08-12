@@ -1,3 +1,4 @@
+from utils import config
 
 import json
 
@@ -36,8 +37,8 @@ class emotes():
 
     async def updateData(self, url, dictionaryTag, dataParser):
         while True:
-            data = self.getDataJson(url)
+            data = await self.getDataJson(url)
             if data != None: #only update data if it got any response with data from the url
                 emoteData = await dataParser(data) #parse the data into {emoteName: emoteUrl}
-                self.emoteDictionary({dictionaryTag: emoteData})
+                self.emoteDictionary.update({dictionaryTag: emoteData})
             await asyncio.sleep(self.updateDelay)
