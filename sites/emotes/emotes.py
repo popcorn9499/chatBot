@@ -31,8 +31,6 @@ class emotes():
         if requestData.status_code != 200:
             return None
         emoteList = json.loads(requestData.content)
-        if emoteList["status"] != 200:
-            return None
         return emoteList
 
     async def updateData(self, url, dictionaryTag, dataParser):
