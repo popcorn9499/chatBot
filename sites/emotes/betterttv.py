@@ -36,20 +36,16 @@ class betterttv(emotes):
 
     async def globalBetterttvEmotes(self,message,emojis):
         emoteList = self.emoteDictionary["global"]
-        await self.findEmote(self,emoteList,message,emojis)
+        await self.findEmote(emoteList,message,emojis)
 
     async def channelBetterttvEmotes(self,message,emojis,channel):
-        channel = channel[1:]
-        if not channel in self.emoteDictionary: #handle getting the data for the channel emotes if they havent been cached
-            channelURL = self.channelUrlFormat + channel
-            data = await self.getDataJson(channelURL)
-            self.loop.create_task(self.updateData(channelURL,channel, self.parseChannelEmoteData)) #create a caching loop
-            if data != None: #only update data if it got any response with data from the url
-                emoteData = await self.parseChannelEmoteData(data) #parse the data into {emoteName: emoteUrl}
-                self.emoteDictionary.update({channel: emoteData})
-            else: #avoids a crash due to invalid channel
-                return
-        emoteList = self.emoteDictionary[channel]
-        await self.findEmote(self,emoteList,message,emojis)
+        try:
+            channel = channel[1:]
+            channelUrL = self.channelUrlFormat + channel
+            await self.checkIfEmotesCached(channel,channelUrL)
+            emoteList = self.emoteDictionary[channel]
+            await self.findEmote(emoteList,message,emojis)
+        except:
+            pass
             
 betterTTV = betterttv()
