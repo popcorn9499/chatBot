@@ -6,6 +6,7 @@ import datetime
 from utils import logger
 from utils import fileIO
 from modules import messageFilter
+from utils import messageFormatter
 import os
 
 
@@ -49,26 +50,26 @@ class chatbot:
                         except KeyError:
                             formatType = "File"
                             formattingSettings = "default.json"
-                        try:
-                            webhookSupport = val["Webhooks"]
-                        except KeyError:
-                            self.l.logger.info("No Webook")
-                            webhookSupport=False
-
+                        
                         self.l.logger.debug('Sent Message')
                         objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Chatbot",ModuleTo=val["To"]["Module"],Service=val["To"]["Service"], Server=val["To"]["Server"],Channel=val["To"]["Channel"]) #prepares the delivery location
                         ServiceIcon = await self.serviceIdentifier(fromService=msg.Service,fromServer=msg.Server,fromChannel=msg.Channel,toService=val["To"]["Service"],toServer=val["To"]["Server"],toChannel=val["To"]["Channel"],message=msg.Contents) #sees if it needs to be identified
                         formatOptions.update({"%serviceIcon%": ServiceIcon}) #Adds more formatting options
                         
-                        if webhookSupport:
-                            try:
-                                pass
-                            except KeyError:
-                                msg.Author = "[" + ServiceIcon + "] " + msg.Author
+
+                        if val["To"]["Service"].find("-Webhook") == -1:
+                            self.l.logger.info("No Webook")
+                            webhookSupport=False
+                        else: #webhook exists
+                            webhookSupport=True
+                            if "AuthorFormatting" in val:
+                                authorFormatting = val["AuthorFormatting"]
+                                msg.Author = await messageFormatter._formatter(msg.Author,formatOptions,formattingOptions=authorFormatting,formatType="Other")
+                            else:
+                                msg.Author = ServiceIcon + " " + msg.Author
                             self.l.logger.info("Sending Webook")
-                            await self.sendWebhook(message=msg,objDeliveryDetails=objDeliveryDetails,FormattingOptions=formatOptions,formattingSettings=formattingSettings,formatType=formatType,messageUnchanged=message)#.messageUnchanged) #sends the message
-                        else:
-                            await self.sendMessage(message=msg,objDeliveryDetails=objDeliveryDetails,FormattingOptions=formatOptions,formattingSettings=formattingSettings,formatType=formatType,messageUnchanged=message)#.messageUnchanged) #sends the message
+
+                        await self.sendMessage(message=msg,objDeliveryDetails=objDeliveryDetails,FormattingOptions=formatOptions,formattingSettings=formattingSettings,formatType=formatType,messageUnchanged=message)#.messageUnchanged) #sends the message
 
                         
 
