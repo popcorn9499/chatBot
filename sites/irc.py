@@ -6,6 +6,7 @@ from utils import Object
 from utils import logger
 from utils import fileIO
 from utils import messageFormatter
+import sites.emotes
 import os
 import time
 import json
@@ -162,10 +163,31 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                     emojis.update({emote: emoteURL})
 
 
-
-    
-    
-
+    async def twitchBadges(self,message,allData,badges):
+        roomID = await self.getRoomID(allData)
+        tempData = allData[1:].split(";") # 1: drops the first bit of information we dont need aka "@"
+        for tempPair in tempData:
+            tempPair = tempPair.split("=")
+            if tempPair[0] == "badges" and tempPair[1] != '':
+                badgeData = tempPair[1].split(",")
+                print(badgeData)
+                for badgePair in badgeData:
+                    badgeName = badgePair.split("/")[0]
+                    badgeVersion = badgePair.split("/")[1]
+                    #find twitchBadge object
+                    for obj in self.emoteObjects:
+                        print(type(obj))
+                        if (isinstance(obj, sites.emotes.twitchBadges.twitchBadges)):
+                            await obj.getBadges(badgeName,badgeVersion,badges,roomID)
+                            break
+                            
+    async def getRoomID(self,allData):
+        tempData = allData[1:].split(";") # 1: drops the first bit of information we dont need aka "@"
+        for tempPair in tempData:
+            tempPair = tempPair.split("=")
+            if tempPair[0] == "room-id" and tempPair[1] != '':
+                roomID = tempPair[1]
+                return roomID
     async def _decoded_send(self, data, loop,host,allData=None):
         """TODO: remove discord only features..."""  
         if data[1] == 'PRIVMSG':
@@ -174,8 +196,11 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             #meCheck = config.c.irc["Servers"][host]["Nickname"] == user
             message = ' '.join(data[3:])[1:]
             emojis = {}
+            badges = {}
             if host == "irc.chat.twitch.tv":
                 await self.twitchEmotes(message,allData,emojis)
+                await self.twitchBadges(message,allData,badges)
+                self.l.logger.info("TWITCH TAGS: " + allData)
             for emoteObj in self.emoteObjects:
                 await emoteObj.getEmote(message,emojis,data[2])
             self.l.logger.info("Emotes: {0}".format(emojis))
