@@ -188,6 +188,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             if tempPair[0] == "room-id" and tempPair[1] != '':
                 roomID = tempPair[1]
                 return roomID
+
     async def _decoded_send(self, data, loop,host,allData=None):
         """TODO: remove discord only features..."""  
         if data[1] == 'PRIVMSG':
