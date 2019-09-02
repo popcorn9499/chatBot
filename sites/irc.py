@@ -141,9 +141,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
 
                 
     
-    async def processMsg(self,username,message,roleList,server,channel,emojis):
+    async def processMsg(self,username,message,roleList,server,channel,emojis,badges):
         formatOptions = {"%authorName%": username, "%channelFrom%": channel, "%serverFrom%": server, "%serviceFrom%": "irc","%message%":"message","%roles%":roleList}
-        message = Object.ObjectLayout.message(Author=username,Contents=message,Server=server,Channel=channel,Service="irc",Roles=roleList,emojis=emojis)
+        message = Object.ObjectLayout.message(Author=username,Contents=message,Server=server,Channel=channel,Service="irc",Roles=roleList,emojis=emojis,Badges=badges)
         objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
         objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged="None")
         config.events.onMessage(message=objSendMsg)
@@ -209,7 +209,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 msgStats = {"sentFrom":"IRC","msgData": None,"Bot":"IRC","Server": host,"Channel": data[2], "author": user,"authorData": None,"authorsRole": {"Normal": 0},"msg":message,"sent":False}
                 role = {}
                 role.update({"Normal": 0})
-                await self.processMsg(username=user,message=message,roleList=role,server=host,channel=data[2],emojis=emojis)
+                await self.processMsg(username=user,message=message,roleList=role,server=host,channel=data[2],emojis=emojis,badges=badges)
         elif data[1] == 'JOIN':
             user = data[0].split('!')[0].lstrip(":")
             self.l.logger.info("{0} - ".format(host)  + user+" joined")
