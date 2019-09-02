@@ -6,6 +6,7 @@ import sites
 import asyncio
 from sites import emotes
 
+emotes.start()
 #this is the starting point for all the bot tasks
 loop = asyncio.get_event_loop()
 loop.run_forever()
