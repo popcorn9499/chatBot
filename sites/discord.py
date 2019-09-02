@@ -274,6 +274,10 @@ class Discord:
                     await client.logout()
                     l.logger.info("Client Connection Lost")
                     l.logger.debug("Some error occured: " + error)
+                except Exception as error: #we shall see if this fixes discord not reconnecting
+                    await client.logout()
+                    l.logger.info("Client Connection Lost Due to unknown error...")
+                    l.logger.debug("Some error occured: " + error)
                 finally:
                     l.logger.info("Client Closed")
                 l.logger.info("Reconnecting in 5 seconds")
