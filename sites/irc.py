@@ -46,8 +46,6 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             self.l.logger.info("Connected: " + host)#wtf is this ment for anymore?
         except UnboundLocalError:
             pass
-
-        
             
     async def ircConnect(self,loop,host):#handles the irc connection
         while True:
@@ -92,8 +90,6 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             except asyncio.streams.IncompleteReadError:
                 pass
             await asyncio.sleep(60)
-                   
-       
             
     async def handleMsg(self,loop,host):
         #info_pattern = re.compile(r'00[1234]|37[526]|CAP')
@@ -121,9 +117,8 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                         if host == "irc.chat.twitch.tv":
                             self.l.logger.info("Applying for twitch tags")
                             self.writer[host].write(b'CAP REQ :twitch.tv/tags' + b'\r\n')
-
                         loop.create_task(self.keepAlive(loop,host)) #creates the keep alive task
-                    elif data[1] == "433" or data[1] == "436":
+                    elif data[1] == "433" or data[1] == "436": #handles avoiding nickname conflicts
                         password=config.c.irc["Servers"][host]["Password"]
                         nickname=config.c.irc["Servers"][host]["Nickname"] + "_"
                         self.hostNicknames.update({host:nickname})
