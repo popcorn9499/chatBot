@@ -30,6 +30,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         self.reader = {}
         self.emoteObjects = [] #this should be just plain emote objects
         self.msgHandlerTasks = {}
+        self.hostNicknames = {} #{host: nickname}
 
     async def irc_bot(self, loop): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.        
         config.events.subscribeEmoteEngine(self,self.emoteObjects)
@@ -45,8 +46,6 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             self.l.logger.info("Connected: " + host)#wtf is this ment for anymore?
         except UnboundLocalError:
             pass
-
-        
             
     async def ircConnect(self,loop,host):#handles the irc connection
         while True:
@@ -55,31 +54,12 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config.c.irc["Servers"][host]["Port"], loop=loop)
                 self.reader.update({host: self.readerBasic})
                 self.writer.update({host: self.writerBasic})
-                #print(self.reader)
-                #print(self.writer)
                 self.l.logger.debug("{0} - Reader {1} ".format(host,self.reader))
                 self.l.logger.debug("{0} - Writer {1} ".format(host, self.writer))
-                await asyncio.sleep(3)
-                if config.c.irc["Servers"][host]["Password"] != "":
-                    self.writer[host].write(b'PASS ' + config.c.irc["Servers"][host]["Password"].encode('utf-8') + b'\r\n')
-                    self.l.logger.info("{0} - Inputing password ".format(host)) #,"Info")
-                self.l.logger.info("{0} - Setting user {1}+ ".format(host,config.c.irc["Servers"][host]["Nickname"]))
-                self.writer[host].write(b'NICK ' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
-                self.l.logger.info("{0} - Setting user {1}".format(host,config.c.irc["Servers"][host]["Nickname"]))
-                self.writer[host].write(b'USER ' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b' B hi :' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
-                await asyncio.sleep(3)
-                self.l.logger.info("{0} - Joining channels".format(host))
-                for key, val in config.c.irc["Servers"][host]["Channel"].items():
-                    if val["Enabled"] == True:
-                        print(key)
-                        self.writer[host].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
-                        self.l.logger.info("{0} - Joining channel {1}".format(host,key))
-                await asyncio.sleep(3)
-
-                if host == "irc.chat.twitch.tv":
-                    self.l.logger.info("Applying for twitch tags")
-                    self.writer[host].write(b'CAP REQ :twitch.tv/tags' + b'\r\n')
-
+                password=config.c.irc["Servers"][host]["Password"]
+                nickname=config.c.irc["Servers"][host]["Nickname"]
+                self.hostNicknames.update({host:nickname})
+                await self.register(self.writer[host],password,nickname,host)
                 self.l.logger.info("{0} - Initiating IRC Reader".format(host))
                 self.msgHandlerTasks.update({host: loop.create_task(self.handleMsg(loop,host))})
                 self.serviceStarted.update({host:True})
@@ -89,7 +69,15 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 self.l.logger.info(e)
             await asyncio.sleep(10) #retry timeout
         
-
+    async def register(self,writer,password,nickname,host):
+        print("WRiter:" + str(writer))
+        if password != "":
+            writer.write(b'PASS ' + password.encode('utf-8') + b'\r\n')
+            self.l.logger.info("{0} - Inputing password ".format(host)) #,"Info")
+        self.l.logger.info("{0} - Setting user {1}+ ".format(host,nickname))
+        writer.write(b'NICK ' + nickname.encode('utf-8') + b'\r\n')
+        self.l.logger.info("{0} - Setting user {1}".format(host, nickname))
+        writer.write(b'USER ' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b' B hi :' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
 
     async def keepAlive(self,loop,host):
         while True:
@@ -102,13 +90,9 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             except asyncio.streams.IncompleteReadError:
                 pass
             await asyncio.sleep(60)
-                   
-       
             
     async def handleMsg(self,loop,host):
         #info_pattern = re.compile(r'00[1234]|37[526]|CAP')
-        await asyncio.sleep(1)
-        loop.create_task(self.keepAlive(loop,host)) #creates the keep alive task
         while True:
             if host in self.reader:
                 try:
@@ -117,10 +101,28 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                     data = data.split()
                     allData = data[0]
                     self.l.logger.info(' '.join(data) + host) #,"Extra Debug")
+                    print(data[0])
                     if data[0].startswith('@'):                      
                         data.pop(0)
                     if data == []:
                         pass
+                    elif data[1] == '001': #connect to my channels
+                        self.l.logger.info("{0} - Joining channels".format(host))
+                        for key, val in config.c.irc["Servers"][host]["Channel"].items():
+                            if val["Enabled"] == True:
+                                print(key)
+                                self.writer[host].write(b'JOIN ' + key.encode('utf-8')+ b'\r\n')
+                                self.l.logger.info("{0} - Joining channel {1}".format(host,key))
+
+                        if host == "irc.chat.twitch.tv":
+                            self.l.logger.info("Applying for twitch tags")
+                            self.writer[host].write(b'CAP REQ :twitch.tv/tags' + b'\r\n')
+                        loop.create_task(self.keepAlive(loop,host)) #creates the keep alive task
+                    elif data[1] == "433" or data[1] == "436": #handles avoiding nickname conflicts
+                        password=config.c.irc["Servers"][host]["Password"]
+                        nickname=config.c.irc["Servers"][host]["Nickname"] + "_"
+                        self.hostNicknames.update({host:nickname})
+                        await self.register(self.writer[host],password,nickname,host)
                     elif data[0] == 'PING':
                         print(data)
                         self.writer[host].write(b'PONG %s\r\n' % data[1].encode("utf-8"))
