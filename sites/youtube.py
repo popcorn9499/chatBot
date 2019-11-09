@@ -119,7 +119,7 @@ class Youtube:
             broadcastType="all"
         ).execute() #executes it so its not just some object
         self.liveChatId = list_streams_request["items"][0]["snippet"]["liveChatId"]#sifts through the output to get the live chat id and saves it
-        self.botUserID = list_streams_request["items"][1]["snippet"]["channelId"] #saves the bots channel user id that we will use as a identifier
+        self.botUserID = list_streams_request["items"][0]["snippet"]["channelId"] #saves the bots channel user id that we will use as a identifier
         self.l.logger.debug("liveID {0}".format(self.liveChatId)) #print the live chat id
         self.l.logger.debug("BotID" + str(self.botUserID))
       
