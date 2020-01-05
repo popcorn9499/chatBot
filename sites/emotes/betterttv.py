@@ -12,7 +12,7 @@ class betterttv(emotes):
 
     
     async def parseGlobalEmoteData(self,emoteList):
-        return self.parseChannelEmoteData(self,emoteList)
+        return await self.parseChannelEmoteData(emoteList)
 
  
     async def parseChannelEmoteData(self,emoteList):
