@@ -188,7 +188,7 @@ class Discord:
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Webhook": #determines if its the right service and supposed to be here
             #gather required information
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
-            embed = await Discord.parseEmbeds(sndMessage.customArgs)
+            embed = await Discord.parseEmbeds(sndMessage.customArgs["Embeds"])
             message = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             profilePic = sndMessage.Message.ProfilePicture
             username = sndMessage.Message.Author
@@ -202,7 +202,7 @@ class Discord:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
-            embeds = await Discord.parseEmbeds(sndMessage.customArgs)
+            embeds = await Discord.parseEmbeds(sndMessage.customArgs["Embeds"])
             if embeds != None:
                 if sndMessage.Message != None: #print the embed with a message if thats been requested.
                     await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
