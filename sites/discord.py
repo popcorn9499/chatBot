@@ -29,6 +29,7 @@ class Discord:
         config.events.onMessageSend += self.discordSendMsg
         config.events.deleteMessage += self.delete_message
         config.events.onMessageSend += self.discordSendWebhook
+        config.events.onMessageSend += self.discordSendPrivMsg
    
     async def delete_message(self,message):
         await client.delete(message)
@@ -215,6 +216,30 @@ class Discord:
             else:
                 await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
 
+    async def discordSendPrivMsg(self,sndMessage)
+        global config
+        while discordStarted != True:
+            await asyncio.sleep(0.2)
+        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Private": #determines if its the right service and supposed to be here
+            if isinstance(sndMessage.DeliveryDetails.channel, int):
+                channel = await client.get_id(sndMessage.DeliveryDetails.channel)
+            elif not sndMessage.DeliveryDetails.channel.find("#") == -1:
+                discrim = int(sndMessage.DeliveryDetails.channel[sndMessage.DeliveryDetails.channel.rfind("#")+1:])
+                username = sndMessage.DeliveryDetails.channel[:sndMessage.DeliveryDetails.channel.rfind("#")]
+                channel = Discord.findMember(username,discrim)
+            
+            embeds = await Discord.parseEmbeds(sndMessage.customArgs["Embeds"])
+            if embeds != None:
+                if sndMessage.Message != None: #print the embed with a message if thats been requested.
+                    await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
+                else: #print a messageless embed
+                    await channel.send(embed=embeds[0])
+
+                if len(embeds) > 1: #print any extra embeds that may? exist
+                    for embed in embeds[1:]:
+                        await channel.send(embed=embed)
+            else:
+                await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
 
     async def parseEmbeds(customArgs): #cycles through any potential embeds in the message
         embeds = []
