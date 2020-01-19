@@ -181,6 +181,12 @@ class Discord:
             message = message.replace(badMention, goodMention)
         return message
 
+    async def findMember(username,discrim):
+        p = client.get_all_members()
+        member = discord.utils.get(client.get_all_members(), name=username, discriminator=str(discrim))
+        l.logger.info("USER: {0}".format(member))
+        return member
+
 
     async def discordSendWebhook(self,sndMessage):
         global config
@@ -189,7 +195,7 @@ class Discord:
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Webhook": #determines if its the right service and supposed to be here
             #gather required information
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
-            embed = await Discord.parseEmbeds(sndMessage.customArgs["Embeds"])
+            embed = await Discord.parseEmbeds(sndMessage.customArgs)
             message = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             profilePic = sndMessage.Message.ProfilePicture
             username = sndMessage.Message.Author
@@ -203,7 +209,7 @@ class Discord:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
-            embeds = await Discord.parseEmbeds(sndMessage.customArgs["Embeds"])
+            embeds = await Discord.parseEmbeds(sndMessage.customArgs)
             if embeds != None:
                 if sndMessage.Message != None: #print the embed with a message if thats been requested.
                     await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
@@ -216,19 +222,25 @@ class Discord:
             else:
                 await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
 
-    async def discordSendPrivMsg(self,sndMessage)
+    async def discordSendPrivMsg(self,sndMessage):
         global config
         while discordStarted != True:
             await asyncio.sleep(0.2)
+        l.logger.info("WHYYY {0}".format(sndMessage.DeliveryDetails.Service))
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Private": #determines if its the right service and supposed to be here
-            if isinstance(sndMessage.DeliveryDetails.channel, int):
-                channel = await client.get_id(sndMessage.DeliveryDetails.channel)
-            elif not sndMessage.DeliveryDetails.channel.find("#") == -1:
-                discrim = int(sndMessage.DeliveryDetails.channel[sndMessage.DeliveryDetails.channel.rfind("#")+1:])
-                username = sndMessage.DeliveryDetails.channel[:sndMessage.DeliveryDetails.channel.rfind("#")]
-                channel = Discord.findMember(username,discrim)
-            
-            embeds = await Discord.parseEmbeds(sndMessage.customArgs["Embeds"])
+            l.logger.info("Sent DM")
+            if isinstance(sndMessage.DeliveryDetails.Channel, int):
+                channel = await client.get_id(sndMessage.DeliveryDetails.Channel)
+            elif not sndMessage.DeliveryDetails.Channel.find("#") == -1:
+                discrim = int(sndMessage.DeliveryDetails.Channel[sndMessage.DeliveryDetails.Channel.rfind("#")+1:])
+                username = sndMessage.DeliveryDetails.Channel[:sndMessage.DeliveryDetails.Channel.rfind("#")]
+                channel = await Discord.findMember(username,discrim)
+            l.logger.info(type(channel))
+            if channel.dm_channel == None:
+                await channel.create_dm()
+            channel = channel.dm_channel
+
+            embeds = await Discord.parseEmbeds(sndMessage.customArgs)
             if embeds != None:
                 if sndMessage.Message != None: #print the embed with a message if thats been requested.
                     await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
