@@ -33,7 +33,7 @@ class Discord:
     async def delete_message(self,message):
         await client.delete(message)
 
-    async def findMember(discrim,username):
+    async def findMember(username,discrim):
         p = client.get_all_members()
         found_members = filter(lambda m: m.discriminator==str(dscrim), p)
         l.logger.info(list(found_members))
