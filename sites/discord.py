@@ -301,7 +301,8 @@ class Discord:
             embed.set_image(url=image)
         if not fields == None:
             for field in fields:
-                embed.add_field(name=field["Name"],value=field["Value"],inline=field["Inline"])
+                if field["Name"] != "" or field["Value"] != "":
+                    embed.add_field(name=field["Name"],value=field["Value"],inline=field["Inline"])
         return embed
 
     async def start(self,token):
