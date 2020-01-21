@@ -34,12 +34,7 @@ class Discord:
     async def delete_message(self,message):
         await client.delete(message)
 
-    async def findMember(username,discrim):
-        p = client.get_all_members()
-        found_members = filter(lambda m: m.discriminator==str(dscrim), p)
-        l.logger.info(list(found_members))
-        member = discord.utils.get(found_members, name=username)
-        l.logger.info(member)
+  
 
     @client.event
     async def on_ready(): #when the discord api has logged in and is ready then this even is fired
@@ -227,8 +222,7 @@ class Discord:
         while discordStarted != True:
             await asyncio.sleep(0.2)
         l.logger.info("WHYYY {0}".format(sndMessage.DeliveryDetails.Service))
-        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Private": #determines if its the right service and supposed to be here
-            l.logger.info("Sent DM")
+        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Private" and sndMessage.DeliveryDetails.Server == "PrivateMessage": #determines if its the right service and supposed to be here
             if isinstance(sndMessage.DeliveryDetails.Channel, int):
                 channel = await client.get_id(sndMessage.DeliveryDetails.Channel)
             elif not sndMessage.DeliveryDetails.Channel.find("#") == -1:
