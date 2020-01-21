@@ -260,7 +260,7 @@ class Discord:
         for args in customArgs: #cycles through the customArgs for potential embeds
             if args["type"] == "discordEmbed":
                 embeds.append(await Discord.discordEmbed(description=args["description"], author=args["author"], icon=args["icon"],thumbnail=args["thumbnail"],image=args["image"],fields=args["fields"],color=args["color"]))
-        return emebds
+        return embeds
 
     async def webhookSend(username,message, channel,avatar=None,embeds=None):
         webhooksList = await channel.webhooks()
@@ -291,10 +291,12 @@ class Discord:
         return embedData
 
     async def discordEmbed(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
+        if color ==None:
+            color = discord.Colour.blue()
         if description != None:
             embed=discord.Embed(description=description, colour=color)
         else:
-            embed=discord.Embed(colour=discord.Colour.blue())
+            embed=discord.Embed(colour=color)
         if icon != None and author != None:
             embed.set_author(name=author, icon_url=icon)
         elif author != None:
