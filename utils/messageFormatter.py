@@ -13,6 +13,8 @@ async def _formatter(message,formattingOptionsItems,formattingOptions="default.j
         formatting = fileIO.loadConf("config{0}ChatFormatting{0}"+formattingOptions)["Format"]
     elif (formatType == "Other") or (formatType == "MutedOther"):
         formatting = formattingOptions
+    if formattingOptions == None:
+        return None
     for items in formatting.split(" "): #cycles through all the items and replaces the code name with the contents the message should have
         items = await removeChar("[",items)
         items = await removeChar("]",items)
