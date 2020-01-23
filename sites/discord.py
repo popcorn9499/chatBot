@@ -177,6 +177,8 @@ class Discord:
         return message
 
     async def findMember(username,discrim):
+        while discordStarted != True: #wait until discord has started
+            await asyncio.sleep(0.2)
         p = client.get_all_members()
         member = discord.utils.get(client.get_all_members(), name=username, discriminator=str(discrim))
         l.logger.info("USER: {0}".format(member))
