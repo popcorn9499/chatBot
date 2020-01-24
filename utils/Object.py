@@ -16,7 +16,7 @@ class ObjectLayout:
         DeliveryDetailsObj = Object({"Module":Module,"ModuleTo":ModuleTo,"Service": Service,"Server": Server, "Channel": Channel})
         return DeliveryDetailsObj
 
-    def sendMsgDeliveryDetails(Message,DeliveryDetails,FormattingOptions,messageUnchanged,formattingSettings="default.json",formatType="File", customArgs=None):
+    def sendMsgDeliveryDetails(Message,DeliveryDetails,FormattingOptions,messageUnchanged,formattingSettings="default.json",formatType="File", customArgs=[]):
 
         sendMsgDeliveryDetails = Object({"Message": Message,"customArgs": customArgs, "DeliveryDetails":DeliveryDetails,"FormattingOptions":FormattingOptions,"formattingSettings":formattingSettings,"formatType":formatType,"messageUnchanged":messageUnchanged})
         return sendMsgDeliveryDetails
