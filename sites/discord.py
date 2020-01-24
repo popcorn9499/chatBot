@@ -180,10 +180,16 @@ class Discord:
         while discordStarted != True: #wait until discord has started
             await asyncio.sleep(0.2)
         p = client.get_all_members()
+        l.logger.info("NAME: {0} DISCRIM: {1}".format(username,discrim))
         member = discord.utils.get(client.get_all_members(), name=username, discriminator=str(discrim))
         l.logger.info("USER: {0}".format(member))
         return member
 
+    async def findMemberID(id):
+        while discordStarted != True: #wait until discord has started
+            await asyncio.sleep(0.2)
+        p = client.get_all_members()
+        return discord.utils.get(p,id=int(id))
 
     async def discordSendWebhook(self,sndMessage):
         global config
@@ -207,7 +213,7 @@ class Discord:
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
             embeds = await Discord.parseEmbeds(sndMessage.customArgs)
-            if embeds != None:
+            if len(embeds) != 0:
                 if sndMessage.Message != None: #print the embed with a message if thats been requested.
                     await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
                 else: #print a messageless embed
@@ -237,7 +243,7 @@ class Discord:
             channel = channel.dm_channel
 
             embeds = await Discord.parseEmbeds(sndMessage.customArgs)
-            if embeds != None:
+            if len(embeds) != 0:
                 if sndMessage.Message != None: #print the embed with a message if thats been requested.
                     await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
                 else: #print a messageless embed
