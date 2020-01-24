@@ -2,7 +2,7 @@ from utils import config
 
 import json
 
-import requests #replace this sometime in the future
+import aiohttp
 import asyncio
 
 
@@ -27,11 +27,16 @@ class emotes():
         pass
 
     async def getDataJson(self,url):
-        requestData = requests.get(url)
-        if requestData.status_code != 200:
-            return None
-        emoteList = json.loads(requestData.content)
+        emoteList = None
+        async with aiohttp.ClientSession(json_serialize=json.dump) as session:
+            async with session.get(url) as resp:
+                if resp.status != 200:
+                    return None
+                emoteList = await resp.json()
+ 
         return emoteList
+
+
 
     async def updateData(self, url, dictionaryTag, dataParser):
         while True:
