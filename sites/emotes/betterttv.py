@@ -4,7 +4,7 @@ import asyncio
 
 class betterttv(emotes):
     def __init__(self):
-        globalUrl = "https://api.betterttv.net/emotes"
+        globalUrl = "https://api.betterttv.net/2/emotes"
         channelUrlFormat = "https://api.betterttv.net/2/channels/" #:channel
         super().__init__(globalUrl,channelUrlFormat)
         self.services.append(irc.irc)
@@ -12,14 +12,9 @@ class betterttv(emotes):
 
     
     async def parseGlobalEmoteData(self,emoteList):
-        emoteReturn = {} #this should be in {emoteName: emoteUrl} format
-        for emoteData in emoteList["emotes"]:
-            emoteName = emoteData["regex"]
-            emoteUrl = "https:" + emoteData["url"]
-            emoteUrl = emoteUrl.replace("/1x", "/3x")
-            emoteReturn.update({emoteName: emoteUrl})
-        return emoteReturn
+        return await self.parseChannelEmoteData(emoteList)
 
+ 
     async def parseChannelEmoteData(self,emoteList):
         emoteReturn = {} #this should be in {emoteName: emoteUrl} format
         emoteUrlTemplate = "https:" + emoteList["urlTemplate"] #gets a template url

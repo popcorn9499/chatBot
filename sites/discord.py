@@ -29,9 +29,12 @@ class Discord:
         config.events.onMessageSend += self.discordSendMsg
         config.events.deleteMessage += self.delete_message
         config.events.onMessageSend += self.discordSendWebhook
+        config.events.onMessageSend += self.discordSendPrivMsg
    
     async def delete_message(self,message):
         await client.delete(message)
+
+  
 
     @client.event
     async def on_ready(): #when the discord api has logged in and is ready then this even is fired
@@ -173,6 +176,20 @@ class Discord:
             message = message.replace(badMention, goodMention)
         return message
 
+    async def findMember(username,discrim):
+        while discordStarted != True: #wait until discord has started
+            await asyncio.sleep(0.2)
+        p = client.get_all_members()
+        l.logger.info("NAME: {0} DISCRIM: {1}".format(username,discrim))
+        member = discord.utils.get(client.get_all_members(), name=username, discriminator=str(discrim))
+        l.logger.info("USER: {0}".format(member))
+        return member
+
+    async def findMemberID(id):
+        while discordStarted != True: #wait until discord has started
+            await asyncio.sleep(0.2)
+        p = client.get_all_members()
+        return discord.utils.get(p,id=int(id))
 
     async def discordSendWebhook(self,sndMessage):
         global config
@@ -196,7 +213,7 @@ class Discord:
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
             embeds = await Discord.parseEmbeds(sndMessage.customArgs)
-            if embeds != None:
+            if len(embeds) != 0:
                 if sndMessage.Message != None: #print the embed with a message if thats been requested.
                     await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
                 else: #print a messageless embed
@@ -208,6 +225,35 @@ class Discord:
             else:
                 await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
 
+    async def discordSendPrivMsg(self,sndMessage):
+        global config
+        while discordStarted != True:
+            await asyncio.sleep(0.2)
+        l.logger.info("WHYYY {0}".format(sndMessage.DeliveryDetails.Service))
+        if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Private" and sndMessage.DeliveryDetails.Server == "PrivateMessage": #determines if its the right service and supposed to be here
+            if isinstance(sndMessage.DeliveryDetails.Channel, int):
+                channel = await client.get_id(sndMessage.DeliveryDetails.Channel)
+            elif not sndMessage.DeliveryDetails.Channel.find("#") == -1:
+                discrim = int(sndMessage.DeliveryDetails.Channel[sndMessage.DeliveryDetails.Channel.rfind("#")+1:])
+                username = sndMessage.DeliveryDetails.Channel[:sndMessage.DeliveryDetails.Channel.rfind("#")]
+                channel = await Discord.findMember(username,discrim)
+            l.logger.info(type(channel))
+            if channel.dm_channel == None:
+                await channel.create_dm()
+            channel = channel.dm_channel
+
+            embeds = await Discord.parseEmbeds(sndMessage.customArgs)
+            if len(embeds) != 0:
+                if sndMessage.Message != None: #print the embed with a message if thats been requested.
+                    await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
+                else: #print a messageless embed
+                    await channel.send(embed=embeds[0])
+
+                if len(embeds) > 1: #print any extra embeds that may? exist
+                    for embed in embeds[1:]:
+                        await channel.send(embed=embed)
+            else:
+                await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
 
     async def parseEmbeds(customArgs): #cycles through any potential embeds in the message
         embeds = []
@@ -216,7 +262,7 @@ class Discord:
         for args in customArgs: #cycles through the customArgs for potential embeds
             if args["type"] == "discordEmbed":
                 embeds.append(await Discord.discordEmbed(description=args["description"], author=args["author"], icon=args["icon"],thumbnail=args["thumbnail"],image=args["image"],fields=args["fields"],color=args["color"]))
-        return emebds
+        return embeds
 
     async def webhookSend(username,message, channel,avatar=None,embeds=None):
         webhooksList = await channel.webhooks()
@@ -247,10 +293,12 @@ class Discord:
         return embedData
 
     async def discordEmbed(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
+        if color ==None:
+            color = discord.Colour.blue()
         if description != None:
             embed=discord.Embed(description=description, colour=color)
         else:
-            embed=discord.Embed(colour=discord.Colour.blue())
+            embed=discord.Embed(colour=color)
         if icon != None and author != None:
             embed.set_author(name=author, icon_url=icon)
         elif author != None:
@@ -261,7 +309,8 @@ class Discord:
             embed.set_image(url=image)
         if not fields == None:
             for field in fields:
-                embed.add_field(name=field["Name"],value=field["Value"],inline=field["Inline"])
+                if field["Name"] != "" or field["Value"] != "":
+                    embed.add_field(name=field["Name"],value=field["Value"],inline=field["Inline"])
         return embed
 
     async def start(self,token):
