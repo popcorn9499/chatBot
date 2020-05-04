@@ -331,12 +331,19 @@ class Youtube:
                 #except googleapiclient.errors.HttpError:
                     #youtube = self.Login()
                     #self.l.logger.info('Connection Error reconnecting')
-            if self.messageFrequency == 0: #this should prevent overuse of the google api quota slowing down the bot during times of low use and speeding it up during times of high use
-                await asyncio.sleep(8)
-            elif self.messageFrequency == 1:
-                await asyncio.sleep(5)
-            elif self.messageFrequency > 1:
-                await asyncio.sleep(1)
+            if self.isStreaming: #check if live and determine which sleep schedule to use
+                if self.messageFrequency == 0: #this should prevent overuse of the google api quota slowing down the bot during times of low use and speeding it up during times of high use
+                    await asyncio.sleep(8)
+                elif self.messageFrequency == 1:
+                    await asyncio.sleep(5)
+                elif self.messageFrequency > 1:
+                    await asyncio.sleep(1)
+            else:
+                for i in range(0,20*60): #check every 10 seconds to see if we went live and if so leave this loop hopefully
+                    if not self.isStreaming:
+                        await asyncio.sleep(10)
+                    else:
+                        break
 
     async def youtubeStreamChecker(self):
         while True:
