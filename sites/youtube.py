@@ -235,6 +235,7 @@ class Youtube:
                 maxResults=50
             ).execute()
             fileIO.fileSave("youtubeliveStreamsJson.json", x)
+            return x
         except:
             await self.Login()
             self.l.logger.info('Connection Error reconnecting')
