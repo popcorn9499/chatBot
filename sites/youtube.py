@@ -348,7 +348,7 @@ class Youtube:
     async def youtubeStreamChecker(self):
         while True:
             streamData = await self.getLiveStatus()
-            if len(streamData["items"]) > 0:
+            if len(streamData["items"]) > 0: #assume if the items in the liveStatus is above 0 then we must be streaming
                 self.l.logger.info("They must be streaming now")
                 self.isStreaming = True
             else:
