@@ -251,6 +251,18 @@ class Youtube:
         except:
             await self.Login()
             self.l.logger.info('Connection Error reconnecting')
+    
+    async def getLiveStatus(self):
+        try:
+            x = self.youtube.liveBroadcasts().list(
+            broadcastStatus="active",
+            part="status",
+            maxResults=50
+          ).execute()
+            return x
+        except:
+            await self.Login()
+            self.l.logger.info('Connection Error reconnecting')
 
         
 
@@ -325,6 +337,19 @@ class Youtube:
             elif self.messageFrequency > 1:
                 await asyncio.sleep(1)
 
+    async def youtubeStreamChecker(self):
+        while True:
+            streamData = await self.getLiveStatus()
+            if len(streamData["items"]) > 0:
+                self.l.logger.info("They must be streaming now")
+                self.isStreaming = True
+            else:
+                self.isStreaming = False
+            if self.isStreaming: #when streaming check if streaming every 30 minutes
+                await asyncio.sleep(30*60) 
+            elif not self.isStreaming: #when not streaming check every 5 minutes
+                await asyncio.sleep(5*60)
+            
 
 y = Youtube()
 
@@ -332,3 +357,4 @@ if (y.enabled):
     loop = asyncio.get_event_loop()
     loop.create_task(y.Login())
     loop.create_task(y.youtubeChatControl())
+    loop.create_task(y.youtubeStreamChecker())
