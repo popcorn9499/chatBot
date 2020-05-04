@@ -42,7 +42,7 @@ class Youtube:
         self.pageToken = fileIO.loadConf("config{0}auth{0}youtube.json")["pageToken"]
         self.oldMessageList = [] #keeps track of old messages to filter out
         self.messageFrequency = 0
-
+        self.isStreaming = False
         if (self.enabled):
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
             self.msgCheckList = fileIO.loadConf("config{0}auth{0}youtube.json")["selfMsgFilter"]
