@@ -256,27 +256,35 @@ class Youtube:
 
         
     async def sendLiveChat(self,sndMessage): #sends messages to youtube live chat
-        
         while self.serviceStarted != True:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Youtube": #determines if its the right service and supposed to be here
             msg = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             time = datetime.datetime.now()
             self.oldMessageList.append({"Time":time, "Message":msg}) #keeps track of old messages so that we can check and not listen to these
-            list_chatmessages_inset = self.youtube.liveChatMessages().insert(
-                part = "snippet",
-                body = dict (
-                    snippet = dict(
-                        liveChatId = self.liveChatId,
-                        type = "textMessageEvent",
-                        textMessageDetails = dict(
-                            messageText = msg
+            retry = 0
+            while retry <= 3: #retry incase of network error. however quota likely is the issue
+                try:
+                    list_chatmessages_inset = self.youtube.liveChatMessages().insert(
+                        part = "snippet",
+                        body = dict (
+                            snippet = dict(
+                                liveChatId = self.liveChatId,
+                                type = "textMessageEvent",
+                                textMessageDetails = dict(
+                                    messageText = msg
+                                )
+                            )
                         )
-                    )
-                )
-            )  
-            list_chatmessages_inset.execute()
-            #print(list_chatmessages_inset.execute()) #debug for sending live chat messages
+                    )  
+                    list_chatmessages_inset.execute()
+                    #print(list_chatmessages_inset.execute()) #debug for sending live chat messages
+                except googleapiclient.errors.HttpError:
+                    self.l.logger.info("Http Error Sending Msg (Likely you hit quota however will retry 3 times)")
+                    retry=retry+1
+
+            if retry > 0:
+                self.l.logger.info("Http Error Sending Msg (You Hit Quota Likely")
       
     async def Login(self):
         if "__main__" == "__main__":
