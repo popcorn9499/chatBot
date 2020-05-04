@@ -124,20 +124,6 @@ class Discord:
 
 
     async def getMsgEmojis(msg):
-        # custom_emojis_unanimated = re.findall(r'<:\w*:\d*>', msg.content)
-        # custom_emojis_animated = re.findall(r'<a:\w*:\d*>', msg.content)
-        # custom_emojis = custom_emojis_animated + custom_emojis_unanimated
-        # custom_emojis_Ints = []
-        # for e in custom_emojis:
-        #     eSplit = e.split(":")
-        #     emojiID = ""
-        #     if len(eSplit) == 2:
-        #         emojiID = int(e.split(':')[1].replace('>', ''))
-        #     else:
-        #         emojiID = int(e.split(':')[2].replace('>', ''))
-        #     customEmoteObj = discord.utils.get(client.emojis, id=e)
-        #     print(customEmoteObj)
-        #custom_emojis = [discord.utils.get(client.emojis, id=e) for e in custom_emojis_Ints]
         msgEmojis = {}
         for emoji in client.emojis:
             print(emoji)
