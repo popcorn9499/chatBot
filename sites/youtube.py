@@ -291,6 +291,7 @@ class Youtube:
                         )
                     )  
                     list_chatmessages_inset.execute()
+                    break
                     #print(list_chatmessages_inset.execute()) #debug for sending live chat messages
                 except googleapiclient.errors.HttpError:
                     self.l.logger.info("Http Error Sending Msg (Likely you hit quota however will retry 3 times)")
@@ -347,7 +348,7 @@ class Youtube:
 
     async def youtubeStreamChecker(self):
         while True:
-            streamData = await self.getLiveStatus()
+            streamData = await self.getLiveStatus() #this operation seems to cost around 5 quota which compared to getting a message is quite low
             if len(streamData["items"]) > 0: #assume if the items in the liveStatus is above 0 then we must be streaming
                 self.l.logger.info("They must be streaming now")
                 self.isStreaming = True
