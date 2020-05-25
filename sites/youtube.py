@@ -42,7 +42,7 @@ class Youtube:
         self.pageToken = fileIO.loadConf("config{0}auth{0}youtube.json")["pageToken"]
         self.oldMessageList = [] #keeps track of old messages to filter out
         self.messageFrequency = 0
-        self.isStreaming = False
+        self.isStreaming = True
         if (self.enabled):
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
             self.msgCheckList = fileIO.loadConf("config{0}auth{0}youtube.json")["selfMsgFilter"]
@@ -213,6 +213,7 @@ class Youtube:
         objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
         objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged="None")
         config.events.onMessage(message=objSendMsg)
+        self.l.logger.info("PROCESSING")
 
 
     async def youtubeRoles(self,authorDetails):
