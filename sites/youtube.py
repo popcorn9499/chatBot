@@ -341,7 +341,7 @@ class Youtube:
                 elif self.messageFrequency > 1:
                     await asyncio.sleep(1)
             else:
-                for i in range(0,20*60/10): #check every 10 seconds to see if we went live and if so leave this loop hopefully
+                for i in range(0,int(20*60/10)): #check every 10 seconds to see if we went live and if so leave this loop hopefully
                     if not self.isStreaming:
                         await asyncio.sleep(10)
                     else:
