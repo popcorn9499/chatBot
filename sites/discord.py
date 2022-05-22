@@ -107,6 +107,7 @@ class Discord:
             ######maybe use this to remove the annoying end bit of some emojis
 
             msgEmojis = await Discord.getMsgEmojis(message.content)
+            l.logger.info("EMOJIS: {0}".format(msgEmojis))
             authorName = await Discord.getAuthor(message.author)
             messageContents = await Discord.userAtMentionsFix(messageContents, message.mentions)
             messageContents = await Discord.roleAtMentionsFix(messageContents,message.role_mentions)
@@ -215,7 +216,7 @@ class Discord:
         global config
         while discordStarted != True:
             await asyncio.sleep(0.2)
-        l.logger.info("WHYYY {0}".format(sndMessage.DeliveryDetails.Service))
+        #l.logger.info("WHYYY {0}".format(sndMessage.DeliveryDetails.Service))
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Private" and sndMessage.DeliveryDetails.Server == "PrivateMessage": #determines if its the right service and supposed to be here
             if isinstance(sndMessage.DeliveryDetails.Channel, int):
                 channel = await client.get_id(sndMessage.DeliveryDetails.Channel)

@@ -9,7 +9,7 @@ import traceback
 class tcpServer():
     def __init__(self,port):
         self.port = port
-        self.ipAddress = "localhost"
+        self.ipAddress = "0.0.0.0"
         self.reader = None
         self.writer = None
         self.server = None
