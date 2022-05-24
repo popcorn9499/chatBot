@@ -51,7 +51,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         while True:
             try:
                 self.serviceStarted.update({host:False})
-                self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config.c.irc["Servers"][host]["Port"], loop=loop)
+                self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config.c.irc["Servers"][host]["Port"])
                 self.reader.update({host: self.readerBasic})
                 self.writer.update({host: self.writerBasic})
                 self.l.logger.debug("{0} - Reader {1} ".format(host,self.reader))
