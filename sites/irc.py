@@ -284,28 +284,5 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             self.writer[sndMessage.DeliveryDetails.Server].write("PRIVMSG {0} :{1}".format(sndMessage.DeliveryDetails.Channel,msg).encode("utf-8") + b'\r\n')
             await self.writer[sndMessage.DeliveryDetails.Server].drain()
 
-        
 
-
-
-# def ircCheck():
-#     global config
-#     ircThread = threading.Thread(target=ircStart) #creates the thread for the irc client
-#     ircThread.start() #starts the irc bot
-#     time.sleep(10)
-    # while True:
-        # time.sleep(1)
-        # state = ircThread.isAlive()
-        # if state == False:
-            # print("damn it")
-            # ircThread = threading.Thread(target=ircStart) #creates the thread for the irc client
-            # ircThread.start() #starts the irc bot   
-        #irc msg handler
-        # j = 0
-        # for msg in variables.processedMSG: #this cycles through the array for messages unsent to irc and sends them
-            # #print(msg["sendTo"])
-            # if msg["sent"] == False and msg["sendTo"]["Bot"] == "IRC":
-                # ircClient.message(msg["sendTo"]["Channel"],msg["msgFormated"])#sends the message to the irc from whatever
-                # variables.processedMSG[j]["sent"] = True#promptly after sets that to the delete code
-            # j = j + 1
 myIRCObj = irc()
