@@ -31,6 +31,8 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         self.emoteObjects = [] #this should be just plain emote objects
         self.msgHandlerTasks = {}
         self.hostNicknames = {} #{host: nickname}
+        if config.c.irc["Enabled"] == True:
+            config.events.onStartup += self.irc_bot
 
     async def irc_bot(self): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.        
         config.events.subscribeEmoteEngine(self,self.emoteObjects)
@@ -283,13 +285,6 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             await self.writer[sndMessage.DeliveryDetails.Server].drain()
 
         
-#this starts everything for the irc client 
-##possibly could of put all this in a class and been done with it?
-def ircStart():
-    IRC = irc()
-    if config.c.irc["Enabled"] == True:
-        loop = asyncio.get_event_loop()
-        loop.create_task(IRC.irc_bot())
 
 
 
@@ -313,5 +308,4 @@ def ircStart():
                 # ircClient.message(msg["sendTo"]["Channel"],msg["msgFormated"])#sends the message to the irc from whatever
                 # variables.processedMSG[j]["sent"] = True#promptly after sets that to the delete code
             # j = j + 1
-        
-ircStart()
+myIRCObj = irc()
