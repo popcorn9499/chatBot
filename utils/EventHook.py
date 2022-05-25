@@ -30,7 +30,7 @@ class EventHook(object):
         e.fire(earg).
         """
         for handler in self.handlers:
-            asyncio.get_event_loop().create_task(handler(*args, **keywargs))
+            asyncio.create_task(handler(*args, **keywargs))
     
     __iadd__ = add
     __isub__ = remove
