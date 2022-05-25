@@ -5,8 +5,28 @@ import modules
 import sites
 import asyncio
 from sites import emotes
+from utils import config
+# #this is the starting point for all the bot tasks
+
+    
+
+
+async def run():
+    config.events.onStartup() #fire off the startup event for all to view and see
+    while (True):
+        await asyncio.sleep(60)
+        
+
+
+loop = asyncio.get_event_loop()
+
+loop.create_task(run())
+
+loop.run_forever()
 
 emotes.start()
-#this is the starting point for all the bot tasks
-loop = asyncio.get_event_loop()
-loop.run_forever()
+async def hello():
+    print("hello")
+
+
+# asyncio.run(run())
