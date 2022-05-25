@@ -13,7 +13,7 @@ class tcpServer():
         self.reader = None
         self.writer = None
         self.server = None
-        config.event.onStartup += self.manager
+        config.events.onStartup += self.manager
         self.readerCallBack = []
         self.onConnectCallBack = []
 
