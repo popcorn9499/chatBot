@@ -24,15 +24,20 @@ class Discord(discord.Client):
         fileIO.checkFile("config-example{0}auth{0}discord.json".format(os.sep),"config{0}auth{0}discord.json".format(os.sep),"discord.json",l)
         self.discordToken = fileIO.loadConf("config{0}auth{0}discord.json")["Token"]
         self.discordEnabled = fileIO.loadConf("config{0}auth{0}discord.json")["Enabled"]
+        
+        self.discordStarted = False #shows that the discord bot has not started as of yet
+        self.clientID = None #set the client id as empty until use later
+        
+        #events to be fired potentially
         config.events.onMessageSend += self.discordSendMsg
         config.events.deleteMessage += self.delete_message
         config.events.onMessageSend += self.discordSendWebhook
         config.events.onMessageSend += self.discordSendPrivMsg
-        self.discordStarted = False #shows that the discord bot has not started as of yet
-        self.clientID = None #set the client id as empty until use later
+        config.events.onStartup += self.processStart #added to manage startup
 
     #run handler???? idk look into switching to client.run
     async def processStart(self):
+        
         if self.discordEnabled: #allows discord to not be launched
             while True:
                 try:
@@ -325,7 +330,4 @@ class Discord(discord.Client):
     
 
 discordP = Discord()
-
-loop = asyncio.get_event_loop()
-loop.create_task(discordP.processStart())
 
