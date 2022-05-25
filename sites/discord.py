@@ -30,7 +30,27 @@ class Discord(discord.Client):
         config.events.onMessageSend += self.discordSendPrivMsg
         self.discordStarted = False #shows that the discord bot has not started as of yet
         self.clientID = None #set the client id as empty until use later
-        
+
+    #run handler???? idk look into switching to client.run
+    async def processStart(self):
+        if self.discordEnabled: #allows discord to not be launched
+            while True:
+                try:
+                    await self.start(self.discordToken,reconnect=True)
+                except (discord.ConnectionClosed, discord.GatewayNotFound,discord.HTTPException,discord.ClientException) as error:
+                    await self.close()
+                    l.logger.info("Client Connection Lost")
+                    l.logger.debug("Some error occured: " + error)
+                except Exception as error: #we shall see if this fixes discord not reconnecting
+                    await self.close()
+                    l.logger.info("Client Connection Lost Due to unknown error...")
+                    l.logger.debug("Some error occured: " + error)
+                finally:
+                    l.logger.info("Client Closed")
+                l.logger.info("Reconnecting in 5 seconds")
+                time.sleep(5)
+                l.logger.info("Attempting to reconnect")
+    
     async def delete_message(self,message):
         await self.delete(message)
 
@@ -302,25 +322,7 @@ class Discord(discord.Client):
                     embed.add_field(name=field["Name"],value=field["Value"],inline=field["Inline"])
         return embed
 
-    #run handler???? idk look into switching to client.run
-    async def processStart(self):
-        if self.discordEnabled: #allows discord to not be launched
-            while True:
-                try:
-                    await self.start(self.discordToken,reconnect=True)
-                except (discord.ConnectionClosed, discord.GatewayNotFound,discord.HTTPException,discord.ClientException) as error:
-                    await self.close()
-                    l.logger.info("Client Connection Lost")
-                    l.logger.debug("Some error occured: " + error)
-                except Exception as error: #we shall see if this fixes discord not reconnecting
-                    await self.close()
-                    l.logger.info("Client Connection Lost Due to unknown error...")
-                    l.logger.debug("Some error occured: " + error)
-                finally:
-                    l.logger.info("Client Closed")
-                l.logger.info("Reconnecting in 5 seconds")
-                time.sleep(5)
-                l.logger.info("Attempting to reconnect")
+    
 
 discordP = Discord()
 
