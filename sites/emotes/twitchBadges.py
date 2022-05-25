@@ -8,7 +8,7 @@ class twitchBadges(emotes):
         channelUrlFormat = "https://badges.twitch.tv/v1/badges/channels/{0}/display?language=en" #:channel
         super().__init__(globalUrl,channelUrlFormat)
         self.services.append(irc.irc)
-        self.loop.create_task(self.updateData(self.globalUrl,"global", self.parseGlobalEmoteData))
+        asyncio.create_task(self.updateData(self.globalUrl,"global", self.parseGlobalEmoteData))
 
     
     async def parseGlobalEmoteData(self,emoteList):

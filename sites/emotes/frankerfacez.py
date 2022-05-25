@@ -8,7 +8,7 @@ class frankerfacez(emotes):
         channelUrlFormat = "https://api.frankerfacez.com/v1/room/" #:channel
         super().__init__(globalUrl,channelUrlFormat)
         self.services.append(irc.irc)
-        self.loop.create_task(self.updateData(self.globalUrl,"global", self.parseGlobalEmoteData))
+        asyncio.create_task(self.updateData(self.globalUrl,"global", self.parseGlobalEmoteData))
     
     async def parseGlobalEmoteData(self,emoteList):
         emoteReturn = {} #this should be in {emoteName: emoteUrl} format
