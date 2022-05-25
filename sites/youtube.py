@@ -46,6 +46,7 @@ class Youtube:
         if (self.enabled):
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
             self.msgCheckList = fileIO.loadConf("config{0}auth{0}youtube.json")["selfMsgFilter"]
+            config.events.onStartup += self.start
             if (secretsExist):
                 self.l.logger.info("Starting")
                 self.initAuth()
@@ -53,6 +54,12 @@ class Youtube:
             else:
                 self.l.logger.info("Please make sure the oauth and client secret files exist")
                 #sys.exit()
+
+    async def start(self):
+        if (self.enabled):
+            asyncio.create_task(y.Login())
+            asyncio.create_task(y.youtubeChatControl())
+            asyncio.create_task(y.youtubeStreamChecker())
 
     def checkFile(self,filePath,fileName,logger):
         return (os.path.isfile(filePath))
@@ -363,8 +370,4 @@ class Youtube:
 
 y = Youtube()
 
-if (y.enabled):
-    loop = asyncio.get_event_loop()
-    loop.create_task(y.Login())
-    loop.create_task(y.youtubeChatControl())
-    loop.create_task(y.youtubeStreamChecker())
+
