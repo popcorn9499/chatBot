@@ -42,10 +42,11 @@ class Youtube:
         self.pageToken = fileIO.loadConf("config{0}auth{0}youtube.json")["pageToken"]
         self.oldMessageList = [] #keeps track of old messages to filter out
         self.messageFrequency = 0
-        self.isStreaming = False
+        self.isStreaming = True
         if (self.enabled):
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
             self.msgCheckList = fileIO.loadConf("config{0}auth{0}youtube.json")["selfMsgFilter"]
+            config.events.onStartup += self.start
             if (secretsExist):
                 self.l.logger.info("Starting")
                 self.initAuth()
@@ -53,6 +54,12 @@ class Youtube:
             else:
                 self.l.logger.info("Please make sure the oauth and client secret files exist")
                 #sys.exit()
+
+    async def start(self):
+        if (self.enabled):
+            asyncio.create_task(y.Login())
+            asyncio.create_task(y.youtubeChatControl())
+            asyncio.create_task(y.youtubeStreamChecker())
 
     def checkFile(self,filePath,fileName,logger):
         return (os.path.isfile(filePath))
@@ -213,6 +220,7 @@ class Youtube:
         objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
         objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged="None")
         config.events.onMessage(message=objSendMsg)
+        self.l.logger.info("PROCESSING")
 
 
     async def youtubeRoles(self,authorDetails):
@@ -291,6 +299,7 @@ class Youtube:
                         )
                     )  
                     list_chatmessages_inset.execute()
+                    break
                     #print(list_chatmessages_inset.execute()) #debug for sending live chat messages
                 except googleapiclient.errors.HttpError:
                     self.l.logger.info("Http Error Sending Msg (Likely you hit quota however will retry 3 times)")
@@ -339,7 +348,7 @@ class Youtube:
                 elif self.messageFrequency > 1:
                     await asyncio.sleep(1)
             else:
-                for i in range(0,20*60): #check every 10 seconds to see if we went live and if so leave this loop hopefully
+                for i in range(0,int(20*60/10)): #check every 10 seconds to see if we went live and if so leave this loop hopefully
                     if not self.isStreaming:
                         await asyncio.sleep(10)
                     else:
@@ -347,7 +356,7 @@ class Youtube:
 
     async def youtubeStreamChecker(self):
         while True:
-            streamData = await self.getLiveStatus()
+            streamData = await self.getLiveStatus() #this operation seems to cost around 5 quota which compared to getting a message is quite low
             if len(streamData["items"]) > 0: #assume if the items in the liveStatus is above 0 then we must be streaming
                 self.l.logger.info("They must be streaming now")
                 self.isStreaming = True
@@ -361,8 +370,4 @@ class Youtube:
 
 y = Youtube()
 
-if (y.enabled):
-    loop = asyncio.get_event_loop()
-    loop.create_task(y.Login())
-    loop.create_task(y.youtubeChatControl())
-    loop.create_task(y.youtubeStreamChecker())
+

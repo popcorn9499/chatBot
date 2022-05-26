@@ -5,8 +5,8 @@ This is a rewrite of the orriginal base code and stuff. The code got rather mess
 
 
 Librarys required
--discord.py 
--google-api-python-client
+- discord.py 
+- google-api-python-client
 - oauth2client
 
 Changes

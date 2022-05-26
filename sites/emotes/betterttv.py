@@ -2,13 +2,19 @@ from sites.emotes.emotes import emotes
 from sites import irc
 import asyncio
 
+from utils import config
+
 class betterttv(emotes):
     def __init__(self):
         globalUrl = "https://api.betterttv.net/2/emotes"
         channelUrlFormat = "https://api.betterttv.net/2/channels/" #:channel
         super().__init__(globalUrl,channelUrlFormat)
         self.services.append(irc.irc)
-        self.loop.create_task(self.updateData(self.globalUrl,"global", self.parseGlobalEmoteData))
+        config.events.onStartup += self.start
+
+    
+    async def start(self):
+        asyncio.create_task(self.updateData(self.globalUrl,"global", self.parseGlobalEmoteData))
 
     
     async def parseGlobalEmoteData(self,emoteList):

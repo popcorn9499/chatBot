@@ -12,43 +12,67 @@ import aiohttp
 import re
 
 
-client = discord.Client() #sets this to just client for reasons cuz y not? (didnt have to be done like this honestly could of been just running discord.Client().)
-clientID="IDK"
-
-discordStarted = False
+#client = discord.Client() #sets this to just client for reasons cuz y not? (didnt have to be done like this honestly could of been just running discord.Client().)
 
 l = logger.logs("Discord")
 l.logger.info("Starting")
 
-class Discord:
+class Discord(discord.Client):
     def __init__(self):
+        super().__init__()
         fileIO.checkFolder("config{0}auth{0}".format(os.sep),"auth",l)
         fileIO.checkFile("config-example{0}auth{0}discord.json".format(os.sep),"config{0}auth{0}discord.json".format(os.sep),"discord.json",l)
-        config.c.discordToken = fileIO.loadConf("config{0}auth{0}discord.json")["Token"]
-        config.c.discordEnabled = fileIO.loadConf("config{0}auth{0}discord.json")["Enabled"]
+        self.discordToken = fileIO.loadConf("config{0}auth{0}discord.json")["Token"]
+        self.discordEnabled = fileIO.loadConf("config{0}auth{0}discord.json")["Enabled"]
+        
+        self.discordStarted = False #shows that the discord bot has not started as of yet
+        self.clientID = None #set the client id as empty until use later
+        
+        #events to be fired potentially
         config.events.onMessageSend += self.discordSendMsg
         config.events.deleteMessage += self.delete_message
         config.events.onMessageSend += self.discordSendWebhook
         config.events.onMessageSend += self.discordSendPrivMsg
-   
+        config.events.onStartup += self.processStart #added to manage startup
+
+    #run handler???? idk look into switching to client.run
+    async def processStart(self):
+        
+        if self.discordEnabled: #allows discord to not be launched
+            while True:
+                try:
+                    await self.start(self.discordToken,reconnect=True)
+                except (discord.ConnectionClosed, discord.GatewayNotFound,discord.HTTPException,discord.ClientException) as error:
+                    await self.close()
+                    l.logger.info("Client Connection Lost")
+                    l.logger.debug("Some error occured: " + error)
+                except Exception as error: #we shall see if this fixes discord not reconnecting
+                    await self.close()
+                    l.logger.info("Client Connection Lost Due to unknown error...")
+                    l.logger.debug("Some error occured: " + error)
+                finally:
+                    l.logger.info("Client Closed")
+                l.logger.info("Reconnecting in 5 seconds")
+                time.sleep(5)
+                l.logger.info("Attempting to reconnect")
+    
     async def delete_message(self,message):
-        await client.delete(message)
+        await self.delete(message)
 
   
 
-    @client.event
-    async def on_ready(): #when the discord api has logged in and is ready then this even is fired
-        global clientID,discordStarted
+
+    async def on_ready(self): #when the discord api has logged in and is ready then this even is fired
         l.logger.info('Logged in as')##these things could be changed a little bit here
-        l.logger.info(client.user.name+ "#" + client.user.discriminator)
-        botName = client.user.name+ "#" + client.user.discriminator #gets and saves the bots name and discord tag
-        l.logger.info(client.user.id,)
-        clientID = str(client.user.id)
+        l.logger.info(self.user.name+ "#" + self.user.discriminator)
+        botName = self.user.name+ "#" + self.user.discriminator #gets and saves the bots name and discord tag
+        l.logger.info(self.user.id,)
+        self.clientID = str(self.user.id)
         rolesList = {}
         membersList = {}
         discordMembers = {}
         discordRoles = {}
-        for guilds in client.guilds: #this portion gets all the info for all the channels and servers the bot is in
+        for guilds in self.guilds: #this portion gets all the info for all the channels and servers the bot is in
             for members in guilds.members:
                 membersList.update({str(members): members})
             discordMembers.update({str(guilds.name):membersList})
@@ -61,16 +85,16 @@ class Discord:
             for channel in guilds.channels: #get channels and add them to the list to store for later
                 disc = {str(channel.name): channel.id}
                 config.discordServerInfo[str(guilds)].update(disc)
-            discordStarted = True
+            self.discordStarted = True
             l.logger.info("Started")
 
 
-    @client.event
-    async def on_message(message): #waits for the discord message event and pulls it somewhere
-        while discordStarted != True:
+
+    async def on_message(self,message): #waits for the discord message event and pulls it somewhere
+        while self.discordStarted != True:
             await asyncio.sleep(0.2)
         l.logger.debug(message.author.name + message.content)
-        if str(message.author.id) != clientID:
+        if str(message.author.id) != self.clientID:
             l.logger.debug(message.author.name)
             attachments = "" #gets the attachments so we dont loose that
             for i in message.attachments:
@@ -106,11 +130,12 @@ class Discord:
 
             ######maybe use this to remove the annoying end bit of some emojis
 
-            msgEmojis = await Discord.getMsgEmojis(message.content)
-            authorName = await Discord.getAuthor(message.author)
-            messageContents = await Discord.userAtMentionsFix(messageContents, message.mentions)
-            messageContents = await Discord.roleAtMentionsFix(messageContents,message.role_mentions)
-            messageContents = await Discord.channelAtMentionsFix(messageContents,message.channel_mentions)
+            msgEmojis = await self.getMsgEmojis(message.content)
+            l.logger.info("EMOJIS: {0}".format(msgEmojis))
+            authorName = await self.getAuthor(message.author)
+            messageContents = await self.userAtMentionsFix(messageContents, message.mentions)
+            messageContents = await self.roleAtMentionsFix(messageContents,message.role_mentions)
+            messageContents = await self.channelAtMentionsFix(messageContents,message.channel_mentions)
             formatOptions = {"%authorName%": authorName, "%channelFrom%": channelName, "%serverFrom%": serverName, "%serviceFrom%": "Discord","%message%":"message","%roles%":roleList}
             msg = Object.ObjectLayout.message(Author=authorName,User=str(message.author),Contents=messageContents,Server=serverName,Channel=channelName,Service="Discord",Roles=roleList,profilePicture=profilePic, emojis=msgEmojis)
             objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
@@ -123,16 +148,16 @@ class Discord:
             l.logger.debug("Why am i recieving my own messages???")
 
 
-    async def getMsgEmojis(msg):
+    async def getMsgEmojis(self,msg):
         msgEmojis = {}
-        for emoji in client.emojis:
+        for emoji in self.emojis:
             print(emoji)
             if msg.find(str(emoji)) != -1:
                 msgEmojis.update({str(emoji): str(emoji.url)})
 
         return msgEmojis
 
-    async def getAuthor(user):
+    async def getAuthor(self,user):
         try:
             if user.nick == None: #as i have found. sometimes this value isnt set for some reason and is just None. so i check for that to prevent that from causing issues
                 return user.name
@@ -141,64 +166,66 @@ class Discord:
         except AttributeError:
             return user.name
 
-    async def roleAtMentionsFix(message,mentionList):
+    async def roleAtMentionsFix(self,message,mentionList):
         for role in mentionList:
             badMention = "@&" + str(role.id)
             goodMention = "@" + role.name
             message = message.replace(badMention, goodMention)
         return message
 
-    async def channelAtMentionsFix(message,mentionList):
+    async def channelAtMentionsFix(self,message,mentionList):
         for chanMention in mentionList:
             badMention = "#" + str(chanMention.id)
             goodMention = "#" + chanMention.name
             message = message.replace(badMention, goodMention)
         return message
 
-    async def userAtMentionsFix(message,mentionList):
+    async def userAtMentionsFix(self,message,mentionList):
         for mention in mentionList:
             badMention = "@!" + str(mention.id)
             goodMention = "@" + await Discord.getAuthor(mention)
             message = message.replace(badMention, goodMention)
         return message
 
-    async def findMember(username,discrim):
-        while discordStarted != True: #wait until discord has started
+    async def findMember(self,username,discrim):
+        while self.discordStarted != True: #wait until discord has started
             await asyncio.sleep(0.2)
-        p = client.get_all_members()
+        p = self.get_all_members()
         l.logger.info("NAME: {0} DISCRIM: {1}".format(username,discrim))
-        member = discord.utils.get(client.get_all_members(), name=username, discriminator=str(discrim))
+        member = discord.utils.get(self.get_all_members(), name=username, discriminator=str(discrim))
         l.logger.info("USER: {0}".format(member))
         return member
 
-    async def findMemberID(id):
-        while discordStarted != True: #wait until discord has started
+    async def findMemberID(self,id):
+        while self.discordStarted != True: #wait until discord has started
             await asyncio.sleep(0.2)
-        p = client.get_all_members()
+        p = self.get_all_members()
         return discord.utils.get(p,id=int(id))
 
+
+    
     async def discordSendWebhook(self,sndMessage):
         global config
-        while discordStarted != True: #wait until discord has started
+        while self.discordStarted != True: #wait until discord has started
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Webhook": #determines if its the right service and supposed to be here
             #gather required information
-            channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
-            embed = await Discord.parseEmbeds(sndMessage.customArgs)
+            channel = self.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
+            embed = await self.parseEmbeds(sndMessage.customArgs)
             message = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             profilePic = sndMessage.Message.ProfilePicture
             username = sndMessage.Message.Author
             #send the webhook message
-            await Discord.webhookSend(username,message,channel,avatar=profilePic,embeds=embed)
+            await self.webhookSend(username,message,channel,avatar=profilePic,embeds=embed)
 
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
         global config
-        while discordStarted != True:
+        while self.discordStarted != True:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
-            channel = client.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
-            embeds = await Discord.parseEmbeds(sndMessage.customArgs)
+            channel = self.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
+            embeds = await self.parseEmbeds(sndMessage.customArgs)
             if len(embeds) != 0:
                 if sndMessage.Message != None: #print the embed with a message if thats been requested.
                     await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
@@ -213,22 +240,22 @@ class Discord:
 
     async def discordSendPrivMsg(self,sndMessage):
         global config
-        while discordStarted != True:
+        while self.discordStarted != True:
             await asyncio.sleep(0.2)
-        l.logger.info("WHYYY {0}".format(sndMessage.DeliveryDetails.Service))
+        #l.logger.info("WHYYY {0}".format(sndMessage.DeliveryDetails.Service))
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Private" and sndMessage.DeliveryDetails.Server == "PrivateMessage": #determines if its the right service and supposed to be here
             if isinstance(sndMessage.DeliveryDetails.Channel, int):
-                channel = await client.get_id(sndMessage.DeliveryDetails.Channel)
+                channel = await self.get_id(sndMessage.DeliveryDetails.Channel)
             elif not sndMessage.DeliveryDetails.Channel.find("#") == -1:
                 discrim = int(sndMessage.DeliveryDetails.Channel[sndMessage.DeliveryDetails.Channel.rfind("#")+1:])
                 username = sndMessage.DeliveryDetails.Channel[:sndMessage.DeliveryDetails.Channel.rfind("#")]
-                channel = await Discord.findMember(username,discrim)
+                channel = await self.findMember(username,discrim)
             l.logger.info(type(channel))
             if channel.dm_channel == None:
                 await channel.create_dm()
             channel = channel.dm_channel
 
-            embeds = await Discord.parseEmbeds(sndMessage.customArgs)
+            embeds = await self.parseEmbeds(sndMessage.customArgs)
             if len(embeds) != 0:
                 if sndMessage.Message != None: #print the embed with a message if thats been requested.
                     await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType),embed=embeds[0])
@@ -241,16 +268,17 @@ class Discord:
             else:
                 await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
 
-    async def parseEmbeds(customArgs): #cycles through any potential embeds in the message
+    async def parseEmbeds(self,customArgs): #cycles through any potential embeds in the message
         embeds = []
         if customArgs == None: #if never set assume no args
             return None
         for args in customArgs: #cycles through the customArgs for potential embeds
             if args["type"] == "discordEmbed":
-                embeds.append(await Discord.discordEmbed(description=args["description"], author=args["author"], icon=args["icon"],thumbnail=args["thumbnail"],image=args["image"],fields=args["fields"],color=args["color"]))
+                embeds.append(await self.discordEmbed(description=args["description"], author=args["author"], icon=args["icon"],thumbnail=args["thumbnail"],image=args["image"],fields=args["fields"],color=args["color"]))
         return embeds
 
-    async def webhookSend(username,message, channel,avatar=None,embeds=None):
+    #look at this in the future to cleanup
+    async def webhookSend(self,username,message, channel,avatar=None,embeds=None):
         webhooksList = await channel.webhooks()
         webhookUsed = None
         for web in webhooksList: #check if the webhook exists already in this channel
@@ -258,7 +286,7 @@ class Discord:
             correctChannel = web.channel_id == channel.id
             if correctChannel and correctName:
                 webhookUsed = web
-                break 
+                break
         if webhookUsed == None: #if no webhook existing create one
             webhookUsed = await channel.create_webhook(name='discordBotHook')
 
@@ -267,7 +295,7 @@ class Discord:
         else: 
             await webhookUsed.send(message, username=username,avatar_url=avatar,embeds=embeds)
 
-    async def discordEmbedData(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
+    async def discordEmbedData(self,description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
         embedData = {"type":"discordEmbed"}
         embedData.update({"description": description})
         embedData.update({"author":author})
@@ -278,7 +306,7 @@ class Discord:
         embedData.update({"color":color})
         return embedData
 
-    async def discordEmbed(description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
+    async def discordEmbed(self,description=None,author=None,icon=None,thumbnail=None,image=None,fields=None,color=None):
         if color ==None:
             color = discord.Colour.blue()
         if description != None:
@@ -299,28 +327,7 @@ class Discord:
                     embed.add_field(name=field["Name"],value=field["Value"],inline=field["Inline"])
         return embed
 
-    async def start(self,token):
-        if config.c.discordEnabled: #allows discord to not be launched
-            while True:
-                loop = asyncio.get_event_loop()
-                try:
-                    await client.start(token,reconnect=True)
-                except (discord.ConnectionClosed, discord.GatewayNotFound,discord.HTTPException,discord.ClientException) as error:
-                    await client.logout()
-                    l.logger.info("Client Connection Lost")
-                    l.logger.debug("Some error occured: " + error)
-                except Exception as error: #we shall see if this fixes discord not reconnecting
-                    await client.logout()
-                    l.logger.info("Client Connection Lost Due to unknown error...")
-                    l.logger.debug("Some error occured: " + error)
-                finally:
-                    l.logger.info("Client Closed")
-                l.logger.info("Reconnecting in 5 seconds")
-                time.sleep(5)
-                l.logger.info("Attempting to reconnect")
+    
 
 discordP = Discord()
-
-loop = asyncio.get_event_loop()
-loop.create_task(discordP.start(config.c.discordToken))
 

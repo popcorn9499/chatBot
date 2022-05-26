@@ -1,5 +1,5 @@
 import asyncio
-from utils import logger
+from utils import config, logger
 import struct
 import codecs
 import sys
@@ -9,22 +9,21 @@ import traceback
 class tcpServer():
     def __init__(self,port):
         self.port = port
-        self.ipAddress = "localhost"
+        self.ipAddress = "0.0.0.0"
         self.reader = None
         self.writer = None
         self.server = None
-        loop = asyncio.get_event_loop()
-        loop.create_task(self.manager())
+        config.events.onStartup += self.manager
         self.readerCallBack = []
         self.onConnectCallBack = []
+
 
     
     async def manager(self): #manages the async connection server 
         print("Starting tcp server")
         while True: #handles reloads the server
             try:
-                loop = asyncio.get_event_loop()
-                self.server = await asyncio.start_server(self.connectionHandler, self.ipAddress, self.port,loop=loop)
+                self.server = await asyncio.start_server(self.connectionHandler, self.ipAddress, self.port)
                 async with self.server:
                     await self.server.serve_forever()
             except:
@@ -41,12 +40,11 @@ class tcpServer():
     async def connectionHandler(self, reader, writer): #handles connections for a single connection.    
         #this will only allow for one connection for port at this current time. may change in the future
         print("ServerStarted")
-        loop = asyncio.get_event_loop()
         
         self.reader = reader
         self.writer = writer
         for callback in self.onConnectCallBack: #handles creating events for when data comes in to handle the data coming in and out
-            loop.create_task(callback())
+            asyncio.create_task(callback())
         await self.read()
 
     async def write(self,data):#handles writing data to the connection

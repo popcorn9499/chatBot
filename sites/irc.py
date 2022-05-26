@@ -31,15 +31,17 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         self.emoteObjects = [] #this should be just plain emote objects
         self.msgHandlerTasks = {}
         self.hostNicknames = {} #{host: nickname}
+        if config.c.irc["Enabled"] == True:
+            config.events.onStartup += self.irc_bot
 
-    async def irc_bot(self, loop): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.        
+    async def irc_bot(self): #this all works, well, except for when both SweetieBot and SweetieBot_ are used. -- prints will be removed once finished, likely.        
         config.events.subscribeEmoteEngine(self,self.emoteObjects)
         for sKey, sVal in config.c.irc["Servers"].items():
             if sVal["Enabled"] == True:
                 host = sKey
                 print(type(host))
                 self.l.logger.info("{0} - Connecting".format(host)) 
-                loop.create_task(self.ircConnect(loop,host))
+                asyncio.create_task(self.ircConnect(host))
             else:
                 await asyncio.sleep(3)
         try:#stops the crash if no irc settings r set
@@ -47,11 +49,11 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         except UnboundLocalError:
             pass
             
-    async def ircConnect(self,loop,host):#handles the irc connection
+    async def ircConnect(self,host):#handles the irc connection
         while True:
             try:
                 self.serviceStarted.update({host:False})
-                self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config.c.irc["Servers"][host]["Port"], loop=loop)
+                self.readerBasic, self.writerBasic = await asyncio.open_connection(host,config.c.irc["Servers"][host]["Port"])
                 self.reader.update({host: self.readerBasic})
                 self.writer.update({host: self.writerBasic})
                 self.l.logger.debug("{0} - Reader {1} ".format(host,self.reader))
@@ -61,37 +63,62 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 self.hostNicknames.update({host:nickname})
                 await self.register(self.writer[host],password,nickname,host)
                 self.l.logger.info("{0} - Initiating IRC Reader".format(host))
-                self.msgHandlerTasks.update({host: loop.create_task(self.handleMsg(loop,host))})
+                self.msgHandlerTasks.update({host: asyncio.create_task(self.handleMsg(host))})
                 self.serviceStarted.update({host:True})
                 while not self.msgHandlerTasks[host].done():
                     await asyncio.sleep(5)
             except Exception as e:
                 self.l.logger.info(e)
             await asyncio.sleep(10) #retry timeout
+
+    async def ircConnectionClose(self,host):
+        self.l.logger.info("Closing IRC Connection [{0}]".format(host))
+        self.msgHandlerTasks[host].cancel()
+        self.writer[host].close()
+        await self.writer[host].wait_closed()
+        self.l.logger.info("IRC Connection [{0}] closed".format(host))
+        self.writer.pop(host)
+        self.reader.pop(host)
+        
+        
+    async def ircReconnect(self,host):
+        self.ircConnectionClose(host)
+        self.l.logger("Reconnecting {0}".format(host))
+        asyncio.create_task(self.ircConnect(host))
+        
         
     async def register(self,writer,password,nickname,host):
         print("WRiter:" + str(writer))
         if password != "":
             writer.write(b'PASS ' + password.encode('utf-8') + b'\r\n')
+            await writer.drain()
             self.l.logger.info("{0} - Inputing password ".format(host)) #,"Info")
         self.l.logger.info("{0} - Setting user {1}+ ".format(host,nickname))
         writer.write(b'NICK ' + nickname.encode('utf-8') + b'\r\n')
+        await writer.drain()
         self.l.logger.info("{0} - Setting user {1}".format(host, nickname))
         writer.write(b'USER ' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b' B hi :' + config.c.irc["Servers"][host]["Nickname"].encode('utf-8') + b'\r\n')
+        await writer.drain()
 
-    async def keepAlive(self,loop,host):
-        while True:
+    async def keepAlive(self,host):
+        open = True
+        while open:
             try:
-                self.writer[host].write("PING {0} ".format(host).encode("utf-8") + b'\r\n')
+                if (not self.writer[host].is_closing()):
+                    self.writer[host].write("PING {0} ".format(host).encode("utf-8") + b'\r\n')
+                    await self.writer[host].drain()
+                else:
+                    open = False
             except ConnectionResetError:
-                self.msgHandlerTasks[host].cancel() #kills the handler task to recreate the entire connection again
-                await self.ircConnect(loop,host)
-                break
+                await self.ircReconnect(host)
+                open = False
+            except KeyError:
+                open = False
             except asyncio.streams.IncompleteReadError:
                 pass
             await asyncio.sleep(60)
             
-    async def handleMsg(self,loop,host):
+    async def handleMsg(self,host):
         #info_pattern = re.compile(r'00[1234]|37[526]|CAP')
         while True:
             if host in self.reader:
@@ -117,7 +144,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                         if host == "irc.chat.twitch.tv":
                             self.l.logger.info("Applying for twitch tags")
                             self.writer[host].write(b'CAP REQ :twitch.tv/tags' + b'\r\n')
-                        loop.create_task(self.keepAlive(loop,host)) #creates the keep alive task
+                        asyncio.create_task(self.keepAlive(host)) #creates the keep alive task
                     elif data[1] == "433" or data[1] == "436": #handles avoiding nickname conflicts
                         password=config.c.irc["Servers"][host]["Password"]
                         nickname=config.c.irc["Servers"][host]["Nickname"] + "_"
@@ -126,12 +153,13 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                     elif data[0] == 'PING':
                         print(data)
                         self.writer[host].write(b'PONG %s\r\n' % data[1].encode("utf-8"))
+                        await self.writer[host].drain()
                     # elif data[0] == ':user1.irc.popicraft.net' or data[0] ==':irc.popicraft.net' or info_pattern.match(data[1]):
                         # print('[Twitch] ', ' '.join(data))
                         #generally not-as-important info
                     else:
                         print(data)
-                        await self._decoded_send(data, loop,host,allData)
+                        await self._decoded_send(data,host,allData)
                 except ConnectionResetError:
                     #self.ircConnect(loop,host)
                     break
@@ -191,7 +219,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
                 roomID = tempPair[1]
                 return roomID
 
-    async def _decoded_send(self, data, loop,host,allData=None):
+    async def _decoded_send(self, data,host,allData=None):
         """TODO: remove discord only features..."""  
         if data[1] == 'PRIVMSG':
             user = data[0].split('!')[0].lstrip(":")
@@ -226,24 +254,24 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
         elif data[1] == 'KICK':
             self.l.logger.info("{0} - ".format(host) + "I was kicked")
             self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
+            self.writer[host].drain()
             await asyncio.sleep(10)
-            await self.ircConnect(loop,host)
-            loop.stop()
+            await self.ircReconnect(host)
         elif data[1] == 'RECONNECT':
             self.l.logger.info("{0} - ".format(host) + "Reconnecting")
             self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
+            self.writer[host].drain()
             await asyncio.sleep(10)
-            await self.ircConnect(loop,host)
-            loop.stop()
+            await self.ircReconnect(host)
 
         elif data[0] == "ERROR":
             if ' '.join([data[1],data[2]]) == ":Closing link:":
                 self.writer[host].write('QUIT Bye \r\n'.encode("utf-8"))
+                self.writer[host].drain()
                 #print("[Twitch] Lost Connection or disconnected: %s" % ' '.join(data[4:]))
                 self.l.logger.info("{0} - ".format(host) + "Lost connection")
                 await asyncio.sleep(10)
-                await self.ircConnect(loop,host)
-                loop.stop()
+                await self.ircReconnect(host)
                 
                 
     async def sendMSG(self,sndMessage): #sends messages to youtube live chat
@@ -254,37 +282,7 @@ class irc():#alot of this code was given to me from thehiddengamer then i adapte
             msg = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             #print(sndMessage.DeliveryDetails.Server)
             self.writer[sndMessage.DeliveryDetails.Server].write("PRIVMSG {0} :{1}".format(sndMessage.DeliveryDetails.Channel,msg).encode("utf-8") + b'\r\n')
-
-        
-#this starts everything for the irc client 
-##possibly could of put all this in a class and been done with it?
-def ircStart():
-    IRC = irc()
-    if config.c.irc["Enabled"] == True:
-        loop = asyncio.get_event_loop()
-        loop.create_task(IRC.irc_bot(loop))
+            await self.writer[sndMessage.DeliveryDetails.Server].drain()
 
 
-
-# def ircCheck():
-#     global config
-#     ircThread = threading.Thread(target=ircStart) #creates the thread for the irc client
-#     ircThread.start() #starts the irc bot
-#     time.sleep(10)
-    # while True:
-        # time.sleep(1)
-        # state = ircThread.isAlive()
-        # if state == False:
-            # print("damn it")
-            # ircThread = threading.Thread(target=ircStart) #creates the thread for the irc client
-            # ircThread.start() #starts the irc bot   
-        #irc msg handler
-        # j = 0
-        # for msg in variables.processedMSG: #this cycles through the array for messages unsent to irc and sends them
-            # #print(msg["sendTo"])
-            # if msg["sent"] == False and msg["sendTo"]["Bot"] == "IRC":
-                # ircClient.message(msg["sendTo"]["Channel"],msg["msgFormated"])#sends the message to the irc from whatever
-                # variables.processedMSG[j]["sent"] = True#promptly after sets that to the delete code
-            # j = j + 1
-        
-ircStart()
+myIRCObj = irc()

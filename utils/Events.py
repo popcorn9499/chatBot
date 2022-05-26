@@ -16,7 +16,7 @@ class Events(object):
         self.deleteMessage = EventHook()
         self.newLogger = EventHook()
         self.subscribeEmoteEngine = EventHook() 
-
+        self.onStartup = EventHook() #to be called to start anything that needs to start when the async eventloop has started
 
 
 
