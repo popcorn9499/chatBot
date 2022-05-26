@@ -42,10 +42,11 @@ class Youtube:
         self.pageToken = fileIO.loadConf("config{0}auth{0}youtube.json")["pageToken"]
         self.oldMessageList = [] #keeps track of old messages to filter out
         self.messageFrequency = 0
-
+        self.isStreaming = True
         if (self.enabled):
             secretsExist = self.checkFile(self.secretsFilePath,"client_secrets.json",self.l)
             self.msgCheckList = fileIO.loadConf("config{0}auth{0}youtube.json")["selfMsgFilter"]
+            config.events.onStartup += self.start
             if (secretsExist):
                 self.l.logger.info("Starting")
                 self.initAuth()
@@ -53,6 +54,12 @@ class Youtube:
             else:
                 self.l.logger.info("Please make sure the oauth and client secret files exist")
                 #sys.exit()
+
+    async def start(self):
+        if (self.enabled):
+            asyncio.create_task(y.Login())
+            asyncio.create_task(y.youtubeChatControl())
+            asyncio.create_task(y.youtubeStreamChecker())
 
     def checkFile(self,filePath,fileName,logger):
         return (os.path.isfile(filePath))
@@ -213,6 +220,7 @@ class Youtube:
         objDeliveryDetails = Object.ObjectLayout.DeliveryDetails(Module="Site",ModuleTo="Modules",Service="Modules",Server="Modules",Channel="Modules")
         objSendMsg = Object.ObjectLayout.sendMsgDeliveryDetails(Message=message, DeliveryDetails=objDeliveryDetails, FormattingOptions=formatOptions,messageUnchanged="None")
         config.events.onMessage(message=objSendMsg)
+        self.l.logger.info("PROCESSING")
 
 
     async def youtubeRoles(self,authorDetails):
@@ -235,6 +243,7 @@ class Youtube:
                 maxResults=50
             ).execute()
             fileIO.fileSave("youtubeliveStreamsJson.json", x)
+            return x
         except:
             await self.Login()
             self.l.logger.info('Connection Error reconnecting')
@@ -251,32 +260,53 @@ class Youtube:
         except:
             await self.Login()
             self.l.logger.info('Connection Error reconnecting')
+    
+    async def getLiveStatus(self):
+        try:
+            x = self.youtube.liveBroadcasts().list(
+            broadcastStatus="active",
+            part="status",
+            maxResults=50
+          ).execute()
+            return x
+        except:
+            await self.Login()
+            self.l.logger.info('Connection Error reconnecting')
 
         
 
         
     async def sendLiveChat(self,sndMessage): #sends messages to youtube live chat
-        
         while self.serviceStarted != True:
             await asyncio.sleep(0.2)
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Youtube": #determines if its the right service and supposed to be here
             msg = await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)
             time = datetime.datetime.now()
             self.oldMessageList.append({"Time":time, "Message":msg}) #keeps track of old messages so that we can check and not listen to these
-            list_chatmessages_inset = self.youtube.liveChatMessages().insert(
-                part = "snippet",
-                body = dict (
-                    snippet = dict(
-                        liveChatId = self.liveChatId,
-                        type = "textMessageEvent",
-                        textMessageDetails = dict(
-                            messageText = msg
+            retry = 0
+            while retry <= 3: #retry incase of network error. however quota likely is the issue
+                try:
+                    list_chatmessages_inset = self.youtube.liveChatMessages().insert(
+                        part = "snippet",
+                        body = dict (
+                            snippet = dict(
+                                liveChatId = self.liveChatId,
+                                type = "textMessageEvent",
+                                textMessageDetails = dict(
+                                    messageText = msg
+                                )
+                            )
                         )
-                    )
-                )
-            )  
-            list_chatmessages_inset.execute()
-            #print(list_chatmessages_inset.execute()) #debug for sending live chat messages
+                    )  
+                    list_chatmessages_inset.execute()
+                    break
+                    #print(list_chatmessages_inset.execute()) #debug for sending live chat messages
+                except googleapiclient.errors.HttpError:
+                    self.l.logger.info("Http Error Sending Msg (Likely you hit quota however will retry 3 times)")
+                    retry=retry+1
+
+            if retry > 0:
+                self.l.logger.info("Http Error Sending Msg (You Hit Quota Likely")
       
     async def Login(self):
         if "__main__" == "__main__":
@@ -310,17 +340,34 @@ class Youtube:
                 #except googleapiclient.errors.HttpError:
                     #youtube = self.Login()
                     #self.l.logger.info('Connection Error reconnecting')
-            if self.messageFrequency == 0: #this should prevent overuse of the google api quota slowing down the bot during times of low use and speeding it up during times of high use
-                await asyncio.sleep(8)
-            elif self.messageFrequency == 1:
-                await asyncio.sleep(5)
-            elif self.messageFrequency > 1:
-                await asyncio.sleep(1)
+            if self.isStreaming: #check if live and determine which sleep schedule to use
+                if self.messageFrequency == 0: #this should prevent overuse of the google api quota slowing down the bot during times of low use and speeding it up during times of high use
+                    await asyncio.sleep(8)
+                elif self.messageFrequency == 1:
+                    await asyncio.sleep(5)
+                elif self.messageFrequency > 1:
+                    await asyncio.sleep(1)
+            else:
+                for i in range(0,int(20*60/10)): #check every 10 seconds to see if we went live and if so leave this loop hopefully
+                    if not self.isStreaming:
+                        await asyncio.sleep(10)
+                    else:
+                        break
 
+    async def youtubeStreamChecker(self):
+        while True:
+            streamData = await self.getLiveStatus() #this operation seems to cost around 5 quota which compared to getting a message is quite low
+            if len(streamData["items"]) > 0: #assume if the items in the liveStatus is above 0 then we must be streaming
+                self.l.logger.info("They must be streaming now")
+                self.isStreaming = True
+            else:
+                self.isStreaming = False
+            if self.isStreaming: #when streaming check if streaming every 30 minutes
+                await asyncio.sleep(30*60) 
+            elif not self.isStreaming: #when not streaming check every 5 minutes
+                await asyncio.sleep(5*60)
+            
 
 y = Youtube()
 
-if (y.enabled):
-    loop = asyncio.get_event_loop()
-    loop.create_task(y.Login())
-    loop.create_task(y.youtubeChatControl())
+
