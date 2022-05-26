@@ -13,7 +13,6 @@ class messageFilter:
         fileIO.checkFolder("config{0}messageFilter{0}".format(os.sep),"messageFilter",self.l)
         fileIO.checkFile("config-example{0}messageFilter{0}config.json".format(os.sep),"config{0}messageFilter{0}config.json".format(os.sep),"config.json",self.l)
         self.filter = fileIO.loadConf("config{0}messageFilter{0}config.json")["Message Filter"]
-        pass
 
     async def filterMessage(self,message):
         contents = message.Contents
