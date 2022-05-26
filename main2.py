@@ -18,15 +18,8 @@ async def run():
         
 
 
-loop = asyncio.get_event_loop()
-
-loop.create_task(run())
-
-loop.run_forever()
 
 emotes.start()
-async def hello():
-    print("hello")
 
 
-# asyncio.run(run())
+asyncio.run(run())
