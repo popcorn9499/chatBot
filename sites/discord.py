@@ -17,8 +17,8 @@ class Discord(discord.Client):
         self.l = logger.logs("Discord")
         self.l.logger.info("Starting")
         
-        fileIO.checkFolder("config{0}auth{0}".format(os.sep),"auth",l)
-        fileIO.checkFile("config-example{0}auth{0}discord.json".format(os.sep),"config{0}auth{0}discord.json".format(os.sep),"discord.json",l)
+        fileIO.checkFolder("config{0}auth{0}".format(os.sep),"auth",self.l)
+        fileIO.checkFile("config-example{0}auth{0}discord.json".format(os.sep),"config{0}auth{0}discord.json".format(os.sep),"discord.json",self.l)
         self.discordToken = fileIO.loadConf("config{0}auth{0}discord.json")["Token"]
         self.discordEnabled = fileIO.loadConf("config{0}auth{0}discord.json")["Enabled"]
         
