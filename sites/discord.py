@@ -33,7 +33,7 @@ class Discord(discord.Client):
         config.events.deleteMessage += self.delete_message
         config.events.onMessageSend += self.discordSendWebhook
         config.events.onMessageSend += self.discordSendPrivMsg
-        config.events.onStartup += self.processStart #added to manage startup
+
 
     #run handler???? idk look into switching to client.run
     async def processStart(self):
@@ -86,7 +86,7 @@ class Discord(discord.Client):
                 disc = {str(channel.name): channel.id}
                 config.discordServerInfo[str(guilds)].update(disc)
             self.discordStarted = True
-            l.logger.info("Started")
+        l.logger.info("Started")
 
 
 
@@ -183,7 +183,7 @@ class Discord(discord.Client):
     async def userAtMentionsFix(self,message,mentionList):
         for mention in mentionList:
             badMention = "@!" + str(mention.id)
-            goodMention = "@" + await Discord.getAuthor(mention)
+            goodMention = "@" + await self.getAuthor(mention)
             message = message.replace(badMention, goodMention)
         return message
 
@@ -327,7 +327,11 @@ class Discord(discord.Client):
                     embed.add_field(name=field["Name"],value=field["Value"],inline=field["Inline"])
         return embed
 
-    
 
-discordP = Discord()
+#used to start discord object. why i need it idfk. why doesnt python let me run this within the object...
+async def start():
+    discordP = Discord()
+    asyncio.create_task(discordP.processStart())
+  
 
+config.events.onStartup += start

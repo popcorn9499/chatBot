@@ -34,9 +34,11 @@ class Commands:
         self.commandsDir = '.{0}config{0}command'.format(os.sep)
         self.checkCommandFolder()
         self.loadCommands()
-        loop = asyncio.get_event_loop()
-        loop.create_task(self.addBasicCommands())
+        config.events.onStartup += self.start
         self.l.logger.info("Started")
+    
+    async def start(self):
+        asyncio.create_task(self.addBasicCommands())
     
     async def addBasicCommands(self):
         config.events.addCommandType(commandType="Help",commandHandler=self.commandHelp)
