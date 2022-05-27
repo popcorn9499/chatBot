@@ -56,7 +56,9 @@ class Discord(discord.Client):
     async def delete_message(self,message):
         await self.delete(message)
 
-
+    async def waitDiscordStarted(self):
+        while self.discordStarted != True: #hang until the discord service has been started
+            await asyncio.sleep(0.2)
 
 
     async def on_ready(self): #when the discord api has logged in and is ready then this even is fired
@@ -88,8 +90,7 @@ class Discord(discord.Client):
 
 
     async def on_message(self,message): #waits for the discord message event and pulls it somewhere
-        while self.discordStarted != True:
-            await asyncio.sleep(0.2)
+        await self.waitDiscordStarted()
         self.l.logger.debug(message.author.name + message.content)
         if str(message.author.id) != self.clientID:
             self.l.logger.debug(message.author.name)
@@ -185,8 +186,7 @@ class Discord(discord.Client):
         return message
 
     async def findMember(self,username,discrim):
-        while self.discordStarted != True: #wait until discord has started
-            await asyncio.sleep(0.2)
+        await self.waitDiscordStarted()
         p = self.get_all_members()
         self.l.logger.info("NAME: {0} DISCRIM: {1}".format(username,discrim))
         member = discord.utils.get(self.get_all_members(), name=username, discriminator=str(discrim))
@@ -194,8 +194,7 @@ class Discord(discord.Client):
         return member
 
     async def findMemberID(self,id):
-        while self.discordStarted != True: #wait until discord has started
-            await asyncio.sleep(0.2)
+        await self.waitDiscordStarted()
         p = self.get_all_members()
         return discord.utils.get(p,id=int(id))
 
@@ -203,8 +202,7 @@ class Discord(discord.Client):
     
     async def discordSendWebhook(self,sndMessage):
         global config
-        while self.discordStarted != True: #wait until discord has started
-            await asyncio.sleep(0.2)
+        await self.waitDiscordStarted()
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Webhook": #determines if its the right service and supposed to be here
             #gather required information
             channel = self.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
@@ -218,8 +216,7 @@ class Discord(discord.Client):
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
         global config
-        while self.discordStarted != True:
-            await asyncio.sleep(0.2)
+        await self.waitDiscordStarted()
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = self.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
             embeds = await self.parseEmbeds(sndMessage.customArgs)
@@ -239,8 +236,7 @@ class Discord(discord.Client):
     #determines its its designed as a private message then try to send one
     async def discordSendPrivMsg(self,sndMessage):
         global config
-        while self.discordStarted != True:
-            await asyncio.sleep(0.2)
+        await self.waitDiscordStarted()
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Private" and sndMessage.DeliveryDetails.Server == "PrivateMessage": #determines if its the right service and supposed to be here
             if isinstance(sndMessage.DeliveryDetails.Channel, int):
                 channel = await self.get_id(sndMessage.DeliveryDetails.Channel)
