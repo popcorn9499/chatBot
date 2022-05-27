@@ -11,17 +11,14 @@ import os
 import aiohttp
 import re
 
-
-#client = discord.Client() #sets this to just client for reasons cuz y not? (didnt have to be done like this honestly could of been just running discord.Client().)
-
-l = logger.logs("Discord")
-l.logger.info("Starting")
-
 class Discord(discord.Client):
     def __init__(self):
         super().__init__()
-        fileIO.checkFolder("config{0}auth{0}".format(os.sep),"auth",l)
-        fileIO.checkFile("config-example{0}auth{0}discord.json".format(os.sep),"config{0}auth{0}discord.json".format(os.sep),"discord.json",l)
+        self.l = logger.logs("Discord")
+        self.l.logger.info("Starting")
+        
+        fileIO.checkFolder("config{0}auth{0}".format(os.sep),"auth",self.l)
+        fileIO.checkFile("config-example{0}auth{0}discord.json".format(os.sep),"config{0}auth{0}discord.json".format(os.sep),"discord.json",self.l)
         self.discordToken = fileIO.loadConf("config{0}auth{0}discord.json")["Token"]
         self.discordEnabled = fileIO.loadConf("config{0}auth{0}discord.json")["Enabled"]
         
@@ -44,29 +41,31 @@ class Discord(discord.Client):
                     await self.start(self.discordToken,reconnect=True)
                 except (discord.ConnectionClosed, discord.GatewayNotFound,discord.HTTPException,discord.ClientException) as error:
                     await self.close()
-                    l.logger.info("Client Connection Lost")
-                    l.logger.debug("Some error occured: " + error)
+                    self.l.logger.info("Client Connection Lost")
+                    self.l.logger.debug("Some error occured: " + error)
                 except Exception as error: #we shall see if this fixes discord not reconnecting
                     await self.close()
-                    l.logger.info("Client Connection Lost Due to unknown error...")
-                    l.logger.debug("Some error occured: " + error)
+                    self.l.logger.info("Client Connection Lost Due to unknown error...")
+                    self.l.logger.debug("Some error occured: " + error)
                 finally:
-                    l.logger.info("Client Closed")
-                l.logger.info("Reconnecting in 5 seconds")
+                    self.l.logger.info("Client Closed")
+                self.l.logger.info("Reconnecting in 5 seconds")
                 time.sleep(5)
-                l.logger.info("Attempting to reconnect")
+                self.l.logger.info("Attempting to reconnect")
     
     async def delete_message(self,message):
         await self.delete(message)
 
-  
+    async def waitDiscordStarted(self):
+        while self.discordStarted != True: #hang until the discord service has been started
+            await asyncio.sleep(0.2)
 
 
     async def on_ready(self): #when the discord api has logged in and is ready then this even is fired
-        l.logger.info('Logged in as')##these things could be changed a little bit here
-        l.logger.info(self.user.name+ "#" + self.user.discriminator)
+        self.l.logger.info('Logged in as')##these things could be changed a little bit here
+        self.l.logger.info(self.user.name+ "#" + self.user.discriminator)
         botName = self.user.name+ "#" + self.user.discriminator #gets and saves the bots name and discord tag
-        l.logger.info(self.user.id,)
+        self.l.logger.info(self.user.id,)
         self.clientID = str(self.user.id)
         rolesList = {}
         membersList = {}
@@ -76,33 +75,31 @@ class Discord(discord.Client):
             for members in guilds.members:
                 membersList.update({str(members): members})
             discordMembers.update({str(guilds.name):membersList})
-            l.logger.debug(discordMembers)
+            self.l.logger.debug(discordMembers)
             for roles in guilds.roles:
                 rolesList.update({str(roles.name):{"Number":int(roles.position),"Data": roles}})
             discordRoles.update({str(guilds.name):rolesList})
-            l.logger.debug(discordRoles)
+            self.l.logger.debug(discordRoles)
             config.discordServerInfo.update({str(guilds): {"asdasdhskajhdkjashdlk":"channel info"}})#maybe set a check for that channel
             for channel in guilds.channels: #get channels and add them to the list to store for later
                 disc = {str(channel.name): channel.id}
                 config.discordServerInfo[str(guilds)].update(disc)
             self.discordStarted = True
-        l.logger.info("Started")
+        self.l.logger.info("Started")
 
 
 
     async def on_message(self,message): #waits for the discord message event and pulls it somewhere
-        while self.discordStarted != True:
-            await asyncio.sleep(0.2)
-        l.logger.debug(message.author.name + message.content)
+        await self.waitDiscordStarted()
+        self.l.logger.debug(message.author.name + message.content)
         if str(message.author.id) != self.clientID:
-            l.logger.debug(message.author.name)
+            self.l.logger.debug(message.author.name)
             attachments = "" #gets the attachments so we dont loose that
             for i in message.attachments:
                 if attachments == "":
                     attachments += i.url
                 else:
                     attachments += " " + i.url 
-
             
             messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
             roleList={}
@@ -110,8 +107,9 @@ class Discord(discord.Client):
                 for roles in message.author.roles: #gets the authors roles and saves that to a list
                     roleList.update({str(roles.name):int(roles.position)})
             except AttributeError:
-                l.logger.info("{0}: {1} ".format(message.author.name,messageContents))
-            l.logger.info(roleList)
+                self.l.logger.info("{0}: {1} ".format(message.author.name,messageContents))
+                self.l.logger.info("{0}: {1} ".format(message.author.name,messageContents))
+            self.l.logger.info(roleList)
             #await client.delete_message(message)
             channelName = ""
             serverName = ""
@@ -131,7 +129,7 @@ class Discord(discord.Client):
             ######maybe use this to remove the annoying end bit of some emojis
 
             msgEmojis = await self.getMsgEmojis(message.content)
-            l.logger.info("EMOJIS: {0}".format(msgEmojis))
+            self.l.logger.info("EMOJIS: {0}".format(msgEmojis))
             authorName = await self.getAuthor(message.author)
             messageContents = await self.userAtMentionsFix(messageContents, message.mentions)
             messageContents = await self.roleAtMentionsFix(messageContents,message.role_mentions)
@@ -145,7 +143,7 @@ class Discord(discord.Client):
             #     print(message.author.avatar_url)
             #     await Discord.webhookSend(authorName,"aa",message.channel, avatar=message.author.avatar_url)
         else:
-            l.logger.debug("Why am i recieving my own messages???")
+            self.l.logger.debug("Why am i recieving my own messages???")
 
 
     async def getMsgEmojis(self,msg):
@@ -188,17 +186,15 @@ class Discord(discord.Client):
         return message
 
     async def findMember(self,username,discrim):
-        while self.discordStarted != True: #wait until discord has started
-            await asyncio.sleep(0.2)
+        await self.waitDiscordStarted()
         p = self.get_all_members()
-        l.logger.info("NAME: {0} DISCRIM: {1}".format(username,discrim))
+        self.l.logger.info("NAME: {0} DISCRIM: {1}".format(username,discrim))
         member = discord.utils.get(self.get_all_members(), name=username, discriminator=str(discrim))
-        l.logger.info("USER: {0}".format(member))
+        self.l.logger.info("USER: {0}".format(member))
         return member
 
     async def findMemberID(self,id):
-        while self.discordStarted != True: #wait until discord has started
-            await asyncio.sleep(0.2)
+        await self.waitDiscordStarted()
         p = self.get_all_members()
         return discord.utils.get(p,id=int(id))
 
@@ -206,8 +202,7 @@ class Discord(discord.Client):
     
     async def discordSendWebhook(self,sndMessage):
         global config
-        while self.discordStarted != True: #wait until discord has started
-            await asyncio.sleep(0.2)
+        await self.waitDiscordStarted()
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Webhook": #determines if its the right service and supposed to be here
             #gather required information
             channel = self.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
@@ -221,8 +216,7 @@ class Discord(discord.Client):
 
     async def discordSendMsg(self,sndMessage): #this is for sending messages to discord
         global config
-        while self.discordStarted != True:
-            await asyncio.sleep(0.2)
+        await self.waitDiscordStarted()
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord": #determines if its the right service and supposed to be here
             channel = self.get_channel(config.discordServerInfo[sndMessage.DeliveryDetails.Server][sndMessage.DeliveryDetails.Channel])
             embeds = await self.parseEmbeds(sndMessage.customArgs)
@@ -238,11 +232,11 @@ class Discord(discord.Client):
             else:
                 await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
 
+    #handle sending private messages
+    #determines its its designed as a private message then try to send one
     async def discordSendPrivMsg(self,sndMessage):
         global config
-        while self.discordStarted != True:
-            await asyncio.sleep(0.2)
-        #l.logger.info("WHYYY {0}".format(sndMessage.DeliveryDetails.Service))
+        await self.waitDiscordStarted()
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Private" and sndMessage.DeliveryDetails.Server == "PrivateMessage": #determines if its the right service and supposed to be here
             if isinstance(sndMessage.DeliveryDetails.Channel, int):
                 channel = await self.get_id(sndMessage.DeliveryDetails.Channel)
@@ -250,7 +244,7 @@ class Discord(discord.Client):
                 discrim = int(sndMessage.DeliveryDetails.Channel[sndMessage.DeliveryDetails.Channel.rfind("#")+1:])
                 username = sndMessage.DeliveryDetails.Channel[:sndMessage.DeliveryDetails.Channel.rfind("#")]
                 channel = await self.findMember(username,discrim)
-            l.logger.info(type(channel))
+            self.l.logger.info(type(channel))
             if channel.dm_channel == None:
                 await channel.create_dm()
             channel = channel.dm_channel
