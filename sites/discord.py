@@ -109,7 +109,7 @@ class Discord(discord.Client):
             except AttributeError:
                 self.l.logger.info("{0}: {1} ".format(message.author.name,messageContents))
                 self.l.logger.info("{0}: {1} ".format(message.author.name,messageContents))
-            l.logger.info(roleList)
+            self.l.logger.info(roleList)
             #await client.delete_message(message)
             channelName = ""
             serverName = ""
