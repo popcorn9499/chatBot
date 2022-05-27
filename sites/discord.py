@@ -11,11 +11,6 @@ import os
 import aiohttp
 import re
 
-
-#client = discord.Client() #sets this to just client for reasons cuz y not? (didnt have to be done like this honestly could of been just running discord.Client().)
-
-
-
 class Discord(discord.Client):
     def __init__(self):
         super().__init__()
@@ -61,7 +56,7 @@ class Discord(discord.Client):
     async def delete_message(self,message):
         await self.delete(message)
 
-  
+
 
 
     async def on_ready(self): #when the discord api has logged in and is ready then this even is fired
@@ -104,7 +99,6 @@ class Discord(discord.Client):
                     attachments += i.url
                 else:
                     attachments += " " + i.url 
-
             
             messageContents = str(message.content) + str(attachments) #merges the attachments to the message so we dont loose that.
             roleList={}
@@ -241,11 +235,12 @@ class Discord(discord.Client):
             else:
                 await channel.send(await messageFormatter.formatter(sndMessage,formattingOptions=sndMessage.formattingSettings,formatType=sndMessage.formatType)) #sends the message to the channel specified in the beginning
 
+    #handle sending private messages
+    #determines its its designed as a private message then try to send one
     async def discordSendPrivMsg(self,sndMessage):
         global config
         while self.discordStarted != True:
             await asyncio.sleep(0.2)
-        #l.logger.info("WHYYY {0}".format(sndMessage.DeliveryDetails.Service))
         if sndMessage.DeliveryDetails.ModuleTo == "Site" and sndMessage.DeliveryDetails.Service == "Discord-Private" and sndMessage.DeliveryDetails.Server == "PrivateMessage": #determines if its the right service and supposed to be here
             if isinstance(sndMessage.DeliveryDetails.Channel, int):
                 channel = await self.get_id(sndMessage.DeliveryDetails.Channel)
