@@ -183,7 +183,7 @@ class Discord(discord.Client):
     async def userAtMentionsFix(self,message,mentionList):
         for mention in mentionList:
             badMention = "@!" + str(mention.id)
-            goodMention = "@" + await Discord.getAuthor(mention)
+            goodMention = "@" + await self.getAuthor(mention)
             message = message.replace(badMention, goodMention)
         return message
 
