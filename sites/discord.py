@@ -86,7 +86,7 @@ class Discord(discord.Client):
                 disc = {str(channel.name): channel.id}
                 config.discordServerInfo[str(guilds)].update(disc)
             self.discordStarted = True
-            l.logger.info("Started")
+        l.logger.info("Started")
 
 
 
