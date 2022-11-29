@@ -13,7 +13,7 @@ import re
 
 class Discord(discord.Client):
     def __init__(self):
-        super().__init__()
+        super().__init__(intents=discord.Intents.all())
         self.l = logger.logs("Discord")
         self.l.logger.info("Starting")
         
