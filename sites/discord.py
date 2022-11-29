@@ -13,7 +13,7 @@ import re
 
 class Discord(discord.Client):
     def __init__(self):
-        super().__init__()
+        super().__init__(intents=discord.Intents.all())
         self.l = logger.logs("Discord")
         self.l.logger.info("Starting")
         
@@ -113,7 +113,8 @@ class Discord(discord.Client):
             #await client.delete_message(message)
             channelName = ""
             serverName = ""
-            profilePic = message.author.avatar_url
+            profilePic = message.author.avatar
+            #add support for threads they r stupid tho..
             if (isinstance(message.channel, discord.channel.TextChannel)):
                 channelName = message.channel.name
                 serverName = message.guild.name
