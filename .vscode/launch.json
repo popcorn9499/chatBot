@@ -10,10 +10,11 @@
             "request": "launch",
             "program": "/mnt/MyMediaShare/User/Documents/Github/chatbot/main2.py",
             "console": "integratedTerminal"
-        }
+        },
         {
             "name": "Python: Main Windows",
             "type": "python",
+            "justMyCode": true,
             "request": "launch",
             "program": "Z:\\User\\Documents\\Github\\chatBot\\main2.py",
             "console": "integratedTerminal"
